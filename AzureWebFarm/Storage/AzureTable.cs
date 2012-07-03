@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
+using AzureWebFarm.Extensions;
 
 namespace AzureWebFarm.Storage
 {
@@ -40,7 +41,7 @@ namespace AzureWebFarm.Storage
         public bool CreateIfNotExist()
         {
             var cloudTableClient = new CloudTableClient(this.account.TableEndpoint.ToString(), this.account.Credentials);
-            return cloudTableClient.CreateTableIfNotExist(this.tableName);
+            return cloudTableClient.CreateTableIfNotExist<T>(this.tableName);
         }
 
         public bool DeleteIfExist()
