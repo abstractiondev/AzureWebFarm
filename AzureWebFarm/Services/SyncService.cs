@@ -221,7 +221,7 @@ namespace AzureWebFarm.Services
         {
             var allSites = this.sitesRepository.RetrieveWebSitesWithBindings();
 
-            if (!WindowsAzureHelper.IsComputeEmulatorEnvironment)
+            if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
             {
                 var iisManager = new IISManager(this.localSitesPath, this.localTempPath, this.syncStatusRepository);
                 iisManager.UpdateSites(allSites);
