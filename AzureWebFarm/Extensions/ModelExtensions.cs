@@ -1,7 +1,7 @@
 ﻿using System;
 using AzureWebFarm.Entities;
+using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
-using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace AzureWebFarm.Extensions
 {
@@ -82,8 +82,8 @@ namespace AzureWebFarm.Extensions
                 return null;
             }
 
-            var deploymentId = string.IsNullOrWhiteSpace(model.DeploymentId) ? RoleEnvironment.DeploymentId : model.DeploymentId;
-            var roleInstanceId = string.IsNullOrWhiteSpace(model.RoleInstanceId) ? RoleEnvironment.CurrentRoleInstance.Id : model.RoleInstanceId;
+            var deploymentId = string.IsNullOrWhiteSpace(model.DeploymentId) ? AzureRoleEnvironment.DeploymentId() : model.DeploymentId;
+            var roleInstanceId = string.IsNullOrWhiteSpace(model.RoleInstanceId) ? AzureRoleEnvironment.CurrentRoleInstanceId() : model.RoleInstanceId;
 
             return new SyncStatusRow(deploymentId, roleInstanceId, model.SiteName)
             {
