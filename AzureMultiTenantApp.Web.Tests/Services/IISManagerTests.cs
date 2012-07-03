@@ -55,7 +55,7 @@
             var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
             var sites = new List<WebSite> { contosoWebSite, fabrikamWebSite };
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             // Asserts
             Assert.AreEqual<int>(sites.Count, RetrieveWebSites().Count());
@@ -108,7 +108,7 @@
             var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
             var sites = new List<WebSite> { contosoWebSite };
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             var contoso = RetrieveWebSite(contosoWebSiteName);
 
@@ -121,7 +121,7 @@
             contosoBindings.Add(new Binding { Protocol = "https", IpAddress = "10.0.0.1", Port = 8443, CertificateThumbprint = "12345" });
             contosoWebSite.Bindings = contosoBindings;
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             // Asserts
             Assert.AreEqual<int>(sites.Count, RetrieveWebSites().Count());
@@ -162,7 +162,7 @@
             var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
             var sites = new List<WebSite> { fabrikamWebSite };
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             var fabrikam = RetrieveWebSite(fabrikamWebSiteName);
 
@@ -174,7 +174,7 @@
             fabrikamBindings.RemoveAt(1);
             fabrikamWebSite.Bindings = fabrikamBindings;
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             // Asserts
             Assert.AreEqual<int>(sites.Count(), RetrieveWebSites().Count());
@@ -217,12 +217,12 @@
             var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
             var sites = new List<WebSite> { contosoWebSite, fabrikamWebSite };
 
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             Assert.AreEqual<int>(2, RetrieveWebSites().Count());
 
             sites.RemoveAt(0);
-            iisManager.UpdateSites(sites);
+            iisManager.UpdateSites(sites, false);
 
             // Asserts
             Assert.AreEqual<int>(1, RetrieveWebSites().Count());

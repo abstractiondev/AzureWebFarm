@@ -31,65 +31,68 @@
             this.tempSitesPath = tempSitesPath;
         }
 
-        public void UpdateSites(IEnumerable<WebSite> sites)
+        public void UpdateSites(IEnumerable<WebSite> sites, bool removeOtherSites = true)
         {
             Trace.TraceInformation("IISManager.Sites list from table: {0}", string.Join(",", sites.Select(s => s.Name)));
 
-            using (var serverManager = new ServerManager())
+            if (removeOtherSites)
             {
-                var iisSites = serverManager.Sites;
-
-                Trace.TraceInformation("IISManager.Sites list from IIS: {0}", string.Join(",", iisSites.Select(s => s.Name)));
-
-                // Find sites that need to be removed
-                foreach (var iisSite in iisSites.ToArray())
+                using (var serverManager = new ServerManager())
                 {
-                    var name = iisSite.Name.ToLowerInvariant();
+                    var iisSites = serverManager.Sites;
 
-                    // Never delete "webRoleSiteName", which is the website for this web role
-                    if (!name.Equals(roleWebSiteName, StringComparison.OrdinalIgnoreCase) &&
-                        !sites.Select(s => s.Name.ToLowerInvariant()).Contains(name))
+                    Trace.TraceInformation("IISManager.Sites list from IIS: {0}", string.Join(",", iisSites.Select(s => s.Name)));
+
+                    // Find sites that need to be removed
+                    foreach (var iisSite in iisSites.ToArray())
                     {
-                        // Remove site
-                        Trace.TraceInformation("IISManager.Removing site '{0}'", iisSite.Name);
+                        var name = iisSite.Name.ToLowerInvariant();
 
-                        serverManager.Sites.Remove(iisSite);
-
-                        // Remove TEST and CDN applications
-                        RemoveApplications(iisSites, name);
-
-                        // Remove site path
-                        try
+                        // Never delete "webRoleSiteName", which is the website for this web role
+                        if (!name.Equals(roleWebSiteName, StringComparison.OrdinalIgnoreCase) &&
+                            !sites.Select(s => s.Name.ToLowerInvariant()).Contains(name))
                         {
-                            var sitePath = Path.Combine(this.localSitesPath, iisSite.Name);
-                            var tempSitePath = Path.Combine(this.tempSitesPath, iisSite.Name);
+                            // Remove site
+                            Trace.TraceInformation("IISManager.Removing site '{0}'", iisSite.Name);
 
-                            FilesHelper.RemoveFolder(sitePath);
-                            FilesHelper.RemoveFolder(tempSitePath);
-                        }
-                        catch (Exception e)
-                        {
-                            Trace.TraceWarning("IISManager.Remove Site Path Error{0}{1}", Environment.NewLine, e.TraceInformation());
-                        }
+                            serverManager.Sites.Remove(iisSite);
 
-                        // Remove appPool
-                        var appPool = serverManager.ApplicationPools.SingleOrDefault(ap => ap.Name.Equals(iisSite.Name, StringComparison.OrdinalIgnoreCase));
-                        if (appPool != null)
-                        {
-                            Trace.TraceInformation("IISManager.Removing appPool '{0}'", appPool.Name);
+                            // Remove TEST and CDN applications
+                            RemoveApplications(iisSites, name);
 
-                            serverManager.ApplicationPools.Remove(appPool);
+                            // Remove site path
+                            try
+                            {
+                                var sitePath = Path.Combine(this.localSitesPath, iisSite.Name);
+                                var tempSitePath = Path.Combine(this.tempSitesPath, iisSite.Name);
+
+                                FilesHelper.RemoveFolder(sitePath);
+                                FilesHelper.RemoveFolder(tempSitePath);
+                            }
+                            catch (Exception e)
+                            {
+                                Trace.TraceWarning("IISManager.Remove Site Path Error{0}{1}", Environment.NewLine, e.TraceInformation());
+                            }
+
+                            // Remove appPool
+                            var appPool = serverManager.ApplicationPools.SingleOrDefault(ap => ap.Name.Equals(iisSite.Name, StringComparison.OrdinalIgnoreCase));
+                            if (appPool != null)
+                            {
+                                Trace.TraceInformation("IISManager.Removing appPool '{0}'", appPool.Name);
+
+                                serverManager.ApplicationPools.Remove(appPool);
+                            }
                         }
                     }
-                }
 
-                try
-                {
-                    serverManager.CommitChanges();
-                }
-                catch (Exception e)
-                {
-                    Trace.TraceError("IISManager.CommitChanges (Cleanup IIS){0}{1}", Environment.NewLine, e.TraceInformation());
+                    try
+                    {
+                        serverManager.CommitChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.TraceError("IISManager.CommitChanges (Cleanup IIS){0}{1}", Environment.NewLine, e.TraceInformation());
+                    }
                 }
             }
 
