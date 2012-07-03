@@ -22,7 +22,7 @@ namespace AzureWebFarm.Services
         private readonly string localSitesPath;
         private readonly string tempSitesPath;
 
-        private static string roleWebSiteName = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web" : "Default Web Site";
+        public static string RoleWebSiteName = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web" : "Default Web Site";
 
         public IISManager(string localSitesPath, string tempSitesPath, SyncStatusRepository syncStatusRepository)
         {
@@ -49,7 +49,7 @@ namespace AzureWebFarm.Services
                         var name = iisSite.Name.ToLowerInvariant();
 
                         // Never delete "webRoleSiteName", which is the website for this web role
-                        if (!name.Equals(roleWebSiteName, StringComparison.OrdinalIgnoreCase) &&
+                        if (!name.Equals(RoleWebSiteName, StringComparison.OrdinalIgnoreCase) &&
                             !sites.Select(s => s.Name.ToLowerInvariant()).Contains(name))
                         {
                             // Remove site
@@ -268,7 +268,7 @@ namespace AzureWebFarm.Services
         private static void UpdateApplications(WebSite site, ServerManager serverManager, string siteName, string sitePath, ApplicationPool appPool)
         {
             var iisSites = serverManager.Sites;
-            var adminSite = iisSites[roleWebSiteName];
+            var adminSite = iisSites[RoleWebSiteName];
 
             var testApplication = adminSite.Applications.FirstOrDefault(
                 app => app.Path.EndsWith("/test/" + siteName, StringComparison.OrdinalIgnoreCase));
@@ -325,7 +325,7 @@ namespace AzureWebFarm.Services
 
         private static void RemoveApplications(SiteCollection iisSites, string siteName)
         {
-            var adminSite = iisSites[roleWebSiteName];
+            var adminSite = iisSites[RoleWebSiteName];
 
             var applicationsToRemove = from app in adminSite.Applications
                                        where app.Path.EndsWith("/test/" + siteName, StringComparison.OrdinalIgnoreCase) ||
