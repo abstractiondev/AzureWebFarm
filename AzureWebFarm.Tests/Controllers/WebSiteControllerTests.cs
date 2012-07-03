@@ -19,7 +19,7 @@ namespace AzureWebFarm.Tests.Controllers
         {
             _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
             _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
-            _certificateRepository = new CertificateRepository("");
+            _certificateRepository = new CertificateRepository();
             _webSiteTable.CreateIfNotExist();
             _bindingTable.CreateIfNotExist();
             _webSiteRepository = new WebSiteRepository(_webSiteTable, _bindingTable);

@@ -48,10 +48,6 @@ namespace AzureWebFarm.Example.Web
             Environment.SetEnvironmentVariable("TMP", localTempPath);
             Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
-            // Populate the certificate repository.
-            var certRepo = new CertificateRepository();
-            certRepo.PopulateRepository();
-
             // Create the sync service and update the sites status
             _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
             _syncService.Start();
