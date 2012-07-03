@@ -21,3 +21,4 @@ DeployConfiguration.xml
 csx/
 *.Development.cscfg
 Development.azurePubxml
+_ReSharper.*
