@@ -20,6 +20,10 @@ namespace AzureWebFarm.Tests.Services
         public void MyTestInitialize()
         {
             Cleanup();
+            using (var manager = new ServerManager())
+            {
+                _excludedSitesCount = manager.Sites.Count - 1; // The 1 is for the default site
+            }
             Setup();
         }
 
@@ -29,12 +33,12 @@ namespace AzureWebFarm.Tests.Services
             Cleanup();
         }
 
-        #endregion
 
         private const string ContosoWebSiteName = "contosotest";
         private const string FabrikamWebSiteName = "fabrikamtest";
         private static readonly string LocalSitesPath = Path.Combine(Environment.CurrentDirectory, "testLocalSites");
         private static readonly string TempSitesPath = Path.Combine(Environment.CurrentDirectory, "testTempSites");
+        private int _excludedSitesCount;
 
         private static void Setup()
         {
@@ -101,6 +105,8 @@ namespace AzureWebFarm.Tests.Services
             }
         }
 
+        #endregion
+
         [Test]
         public void Update_sites_adding_bindings()
         {
@@ -145,7 +151,7 @@ namespace AzureWebFarm.Tests.Services
             iisManager.UpdateSites(sites, false);
 
             // Asserts
-            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
+            Assert.AreEqual(sites.Count, RetrieveWebSites().Count() - _excludedSitesCount);
 
             contoso = RetrieveWebSite(ContosoWebSiteName);
 
@@ -269,7 +275,7 @@ namespace AzureWebFarm.Tests.Services
             iisManager.UpdateSites(sites, false);
 
             // Asserts
-            Assert.AreEqual(1, RetrieveWebSites().Count());
+            Assert.AreEqual(1, RetrieveWebSites().Count() - _excludedSitesCount);
 
             Site contoso = RetrieveWebSite(ContosoWebSiteName);
             Site fabrikam = RetrieveWebSite(FabrikamWebSiteName);
@@ -323,7 +329,7 @@ namespace AzureWebFarm.Tests.Services
             iisManager.UpdateSites(sites, false);
 
             // Asserts
-            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
+            Assert.AreEqual(sites.Count, RetrieveWebSites().Count() - _excludedSitesCount);
 
             var contoso = RetrieveWebSite(ContosoWebSiteName);
 
