@@ -5,17 +5,16 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Services;
+using Microsoft.Web.Administration;
 using NUnit.Framework;
+using Binding = AzureWebFarm.Entities.Binding;
 
 namespace AzureWebFarm.Tests.Services
 {
     [TestFixture]
-    public class IISManagerTests
+    public class IISManagerShould
     {
-        private static string contosoWebSiteName = "contosotest";
-        private static string fabrikamWebSiteName = "fabrikamtest";
-        private static string localSitesPath = Path.Combine(Environment.CurrentDirectory, "testLocalSites");
-        private static string tempSitesPath = Path.Combine(Environment.CurrentDirectory, "testTempSites");
+        #region Setup/Teardown
 
         [SetUp]
         public void MyTestInitialize()
@@ -30,236 +29,39 @@ namespace AzureWebFarm.Tests.Services
             Cleanup();
         }
 
-        [Test]
-        public void UpdateSitesWithInitialBindings()
-        {
-            var contosoWebSite = new WebSite
-            {
-                Name = contosoWebSiteName,
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "http", IpAddress = "*", Port = 8081, HostName = "contoso.com" }
-                }
-            };
-            
-            var fabrikamWebSite = new WebSite
-            {
-                Name = fabrikamWebSiteName, 
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "https", IpAddress = "*", Port = 8443, CertificateThumbprint = "12354" },
-                    new Binding { Protocol = "http", IpAddress = "127.0.0.1", Port = 8082 }
-                }
-            };
+        #endregion
 
-            var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
-            var sites = new List<WebSite> { contosoWebSite, fabrikamWebSite };
-
-            iisManager.UpdateSites(sites, false);
-
-            // Asserts
-            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
-            
-            var contoso = RetrieveWebSite(contosoWebSiteName);
-
-            Assert.IsNotNull(contoso);
-            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
-            Assert.AreEqual(contosoWebSite.Bindings.Count(), contoso.Bindings.Count);
-
-            Assert.AreEqual(contosoWebSite.Bindings.First().HostName, contoso.Bindings.First().Host);
-            Assert.AreEqual(contosoWebSite.Bindings.First().Protocol, contoso.Bindings.First().Protocol);
-            Assert.AreEqual("0.0.0.0", contoso.Bindings.First().EndPoint.Address.ToString());
-            Assert.AreEqual(contosoWebSite.Bindings.First().Port, contoso.Bindings.First().EndPoint.Port);
-            Assert.IsNull(contoso.Bindings.First().CertificateHash);
-
-            var fabrikam = RetrieveWebSite(fabrikamWebSiteName);
-
-            Assert.IsNotNull(fabrikam);
-            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
-            Assert.AreEqual(fabrikamWebSite.Bindings.Count(), fabrikam.Bindings.Count);
-
-            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.First().Host));
-            Assert.AreEqual(fabrikamWebSite.Bindings.First().Protocol, fabrikam.Bindings.First().Protocol);
-            Assert.AreEqual(string.Empty, fabrikam.Bindings.First().Host);
-            Assert.AreEqual("0.0.0.0", fabrikam.Bindings.First().EndPoint.Address.ToString());
-            Assert.AreEqual(fabrikamWebSite.Bindings.First().Port, fabrikam.Bindings.First().EndPoint.Port);
-            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), fabrikam.Bindings.First().CertificateStoreName.ToUpperInvariant());
-            Assert.IsNotNull(fabrikam.Bindings.First().CertificateHash);
-
-            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.Last().Host));
-            Assert.AreEqual(fabrikamWebSite.Bindings.Last().Protocol, fabrikam.Bindings.Last().Protocol);
-            Assert.AreEqual(fabrikamWebSite.Bindings.Last().IpAddress, fabrikam.Bindings.Last().EndPoint.Address.ToString());
-            Assert.AreEqual(fabrikamWebSite.Bindings.Last().Port, fabrikam.Bindings.Last().EndPoint.Port);
-            Assert.IsNull(fabrikam.Bindings.Last().CertificateHash);
-        }
-
-        [Test]
-        public void UpdateSitesAddingBindings()
-        {
-            var contosoWebSite = new WebSite
-            {
-                Name = contosoWebSiteName,
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "http", IpAddress = "10.0.0.1", Port = 8081, HostName = "contoso.com" }
-                }
-            };
-
-            var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
-            var sites = new List<WebSite> { contosoWebSite };
-
-            iisManager.UpdateSites(sites, false);
-
-            var contoso = RetrieveWebSite(contosoWebSiteName);
-
-            Assert.IsNotNull(contoso);
-            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
-            Assert.AreEqual(contosoWebSite.Bindings.Count(), contoso.Bindings.Count);
-
-            // Add a new binding (https)
-            var contosoBindings = contosoWebSite.Bindings.ToList();
-            contosoBindings.Add(new Binding { Protocol = "https", IpAddress = "10.0.0.1", Port = 8443, CertificateThumbprint = "12345" });
-            contosoWebSite.Bindings = contosoBindings;
-
-            iisManager.UpdateSites(sites, false);
-
-            // Asserts
-            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
-
-            contoso = RetrieveWebSite(contosoWebSiteName);
-
-            Assert.IsNotNull(contoso);
-            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
-            Assert.AreEqual(2, contoso.Bindings.Count);
-            
-            Assert.AreEqual(contosoWebSite.Bindings.First().HostName, contoso.Bindings.First().Host);
-            Assert.AreEqual(contosoWebSite.Bindings.First().Protocol, contoso.Bindings.First().Protocol);
-            Assert.AreEqual(contosoWebSite.Bindings.First().IpAddress, contoso.Bindings.First().EndPoint.Address.ToString());
-            Assert.AreEqual(contosoWebSite.Bindings.First().Port, contoso.Bindings.First().EndPoint.Port);
-            Assert.IsNull(contoso.Bindings.First().CertificateHash);
-
-            Assert.IsTrue(string.IsNullOrEmpty(contoso.Bindings.Last().Host));
-            Assert.AreEqual(contosoWebSite.Bindings.Last().Protocol, contoso.Bindings.Last().Protocol);
-            Assert.AreEqual(contosoWebSite.Bindings.Last().IpAddress, contoso.Bindings.Last().EndPoint.Address.ToString());
-            Assert.AreEqual(contosoWebSite.Bindings.Last().Port, contoso.Bindings.Last().EndPoint.Port);
-            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), contoso.Bindings.Last().CertificateStoreName.ToUpperInvariant());
-            Assert.IsNotNull(contoso.Bindings.Last().CertificateHash);
-        }
-
-        [Test]
-        public void UpdateSitesRemovingBindings()
-        {
-            var fabrikamWebSite = new WebSite
-            {
-                Name = fabrikamWebSiteName,
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "https", IpAddress = "127.0.0.1", Port = 8443, CertificateThumbprint = "12345" },
-                    new Binding { Protocol = "http", IpAddress = "127.0.0.1", Port = 8082 }
-                }
-            };
-
-            var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
-            var sites = new List<WebSite> { fabrikamWebSite };
-
-            iisManager.UpdateSites(sites, false);
-
-            var fabrikam = RetrieveWebSite(fabrikamWebSiteName);
-
-            Assert.IsNotNull(fabrikam);
-            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
-            Assert.AreEqual(2, fabrikam.Bindings.Count);
-
-            var fabrikamBindings = fabrikamWebSite.Bindings.ToList();
-            fabrikamBindings.RemoveAt(1);
-            fabrikamWebSite.Bindings = fabrikamBindings;
-
-            iisManager.UpdateSites(sites, false);
-
-            // Asserts
-            Assert.AreEqual(sites.Count(), RetrieveWebSites().Count());
-
-            fabrikam = RetrieveWebSite(fabrikamWebSiteName);
-
-            Assert.IsNotNull(fabrikam);
-            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
-            Assert.AreEqual(1, fabrikam.Bindings.Count);
-
-            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.First().Host));
-            Assert.AreEqual(fabrikamWebSite.Bindings.First().Protocol, fabrikam.Bindings.First().Protocol);
-            Assert.AreEqual(fabrikamWebSite.Bindings.First().IpAddress, fabrikam.Bindings.First().EndPoint.Address.ToString());
-            Assert.AreEqual(fabrikamWebSite.Bindings.First().Port, fabrikam.Bindings.First().EndPoint.Port);
-            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), fabrikam.Bindings.First().CertificateStoreName.ToUpperInvariant());
-            Assert.IsNotNull(fabrikam.Bindings.First().CertificateHash);
-        }
-
-        [Test]
-        public void UpdateSitesRemovingSite()
-        {
-            var contosoWebSite = new WebSite
-            {
-                Name = contosoWebSiteName,
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "http", IpAddress = "127.0.0.1", Port = 8081, HostName = "contoso.com" }
-                }
-            };
-
-            var fabrikamWebSite = new WebSite
-            {
-                Name = fabrikamWebSiteName,
-                Bindings = new List<Binding>
-                {
-                    new Binding { Protocol = "https", IpAddress = "127.0.0.1", Port = 8443, CertificateThumbprint = "12345" }
-                }
-            };
-
-            var iisManager = new IISManager(localSitesPath, tempSitesPath, null);
-            var sites = new List<WebSite> { contosoWebSite, fabrikamWebSite };
-
-            iisManager.UpdateSites(sites, false);
-
-            Assert.AreEqual(2, RetrieveWebSites().Count());
-
-            sites.RemoveAt(0);
-            iisManager.UpdateSites(sites, false);
-
-            // Asserts
-            Assert.AreEqual(1, RetrieveWebSites().Count());
-
-            var contoso = RetrieveWebSite(contosoWebSiteName);
-            var fabrikam = RetrieveWebSite(fabrikamWebSiteName);
-
-            Assert.IsNull(contoso);
-            Assert.IsNotNull(fabrikam);
-        }
+        private const string ContosoWebSiteName = "contosotest";
+        private const string FabrikamWebSiteName = "fabrikamtest";
+        private static readonly string LocalSitesPath = Path.Combine(Environment.CurrentDirectory, "testLocalSites");
+        private static readonly string TempSitesPath = Path.Combine(Environment.CurrentDirectory, "testTempSites");
 
         private static void Setup()
         {
-            Directory.CreateDirectory(localSitesPath);
-            Directory.CreateDirectory(tempSitesPath);
+            Directory.CreateDirectory(LocalSitesPath);
+            Directory.CreateDirectory(TempSitesPath);
         }
 
         private static void Cleanup()
         {
-            RemoveWebSite(contosoWebSiteName);
-            RemoveWebSite(fabrikamWebSiteName);
+            RemoveWebSite(ContosoWebSiteName);
+            RemoveWebSite(FabrikamWebSiteName);
 
-            RemoveDirectory(localSitesPath);
-            RemoveDirectory(tempSitesPath);
+            RemoveDirectory(LocalSitesPath);
+            RemoveDirectory(TempSitesPath);
         }
 
-        private static IEnumerable<Microsoft.Web.Administration.Site> RetrieveWebSites()
+        private static IEnumerable<Site> RetrieveWebSites()
         {
-            using (var serverManager = new Microsoft.Web.Administration.ServerManager())
+            using (var serverManager = new ServerManager())
             {
                 return serverManager.Sites.Where(s => s.Name != "Default Web Site").ToList();
             }
         }
 
-        private static Microsoft.Web.Administration.Site RetrieveWebSite(string siteName)
+        private static Site RetrieveWebSite(string siteName)
         {
-            using (var serverManager = new Microsoft.Web.Administration.ServerManager())
+            using (var serverManager = new ServerManager())
             {
                 return serverManager.Sites.SingleOrDefault(s => s.Name == siteName);
             }
@@ -267,7 +69,7 @@ namespace AzureWebFarm.Tests.Services
 
         private static void RemoveWebSite(string siteName)
         {
-            using (var serverManager = new Microsoft.Web.Administration.ServerManager())
+            using (var serverManager = new ServerManager())
             {
                 var testSite = serverManager.Sites.SingleOrDefault(s => s.Name == siteName);
                 if (testSite != null)
@@ -291,12 +93,269 @@ namespace AzureWebFarm.Tests.Services
             {
                 try
                 {
-                    Directory.Delete(tempSitesPath);
+                    Directory.Delete(TempSitesPath);
                 }
                 catch (DirectoryNotFoundException)
-                { 
+                {
                 }
             }
+        }
+
+        [Test]
+        public void Update_sites_adding_bindings()
+        {
+            var contosoWebSite = new WebSite
+            {
+                Name = ContosoWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "http",
+                        IpAddress = "10.0.0.1",
+                        Port = 8081,
+                        HostName = "contoso.com"
+                    }
+                }
+            };
+
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var sites = new List<WebSite> {contosoWebSite};
+
+            iisManager.UpdateSites(sites, false);
+
+            var contoso = RetrieveWebSite(ContosoWebSiteName);
+
+            Assert.IsNotNull(contoso);
+            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
+            Assert.AreEqual(contosoWebSite.Bindings.Count(), contoso.Bindings.Count);
+
+            // Add a new binding (https)
+            var contosoBindings = contosoWebSite.Bindings.ToList();
+            contosoBindings.Add(new Binding
+                {
+                    Protocol = "https",
+                    IpAddress = "10.0.0.1",
+                    Port = 8443,
+                    CertificateThumbprint = "12345"
+                }
+            );
+            contosoWebSite.Bindings = contosoBindings;
+
+            iisManager.UpdateSites(sites, false);
+
+            // Asserts
+            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
+
+            contoso = RetrieveWebSite(ContosoWebSiteName);
+
+            Assert.IsNotNull(contoso);
+            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
+            Assert.AreEqual(2, contoso.Bindings.Count);
+
+            Assert.AreEqual(contosoWebSite.Bindings.First().HostName, contoso.Bindings.First().Host);
+            Assert.AreEqual(contosoWebSite.Bindings.First().Protocol, contoso.Bindings.First().Protocol);
+            Assert.AreEqual(contosoWebSite.Bindings.First().IpAddress, contoso.Bindings.First().EndPoint.Address.ToString());
+            Assert.AreEqual(contosoWebSite.Bindings.First().Port, contoso.Bindings.First().EndPoint.Port);
+            Assert.IsNull(contoso.Bindings.First().CertificateHash);
+
+            Assert.IsTrue(string.IsNullOrEmpty(contoso.Bindings.Last().Host));
+            Assert.AreEqual(contosoWebSite.Bindings.Last().Protocol, contoso.Bindings.Last().Protocol);
+            Assert.AreEqual(contosoWebSite.Bindings.Last().IpAddress, contoso.Bindings.Last().EndPoint.Address.ToString());
+            Assert.AreEqual(contosoWebSite.Bindings.Last().Port, contoso.Bindings.Last().EndPoint.Port);
+            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), contoso.Bindings.Last().CertificateStoreName.ToUpperInvariant());
+            Assert.IsNotNull(contoso.Bindings.Last().CertificateHash);
+        }
+
+        [Test]
+        public void Update_sites_removing_bindings()
+        {
+            var fabrikamWebSite = new WebSite
+            {
+                Name = FabrikamWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "https",
+                        IpAddress = "127.0.0.1",
+                        Port = 8443,
+                        CertificateThumbprint = "12345"
+                    },
+                    new Binding
+                    {
+                        Protocol = "http",
+                        IpAddress = "127.0.0.1",
+                        Port = 8082
+                    }
+                }
+            };
+
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var sites = new List<WebSite> {fabrikamWebSite};
+
+            iisManager.UpdateSites(sites, false);
+
+            var fabrikam = RetrieveWebSite(FabrikamWebSiteName);
+
+            Assert.IsNotNull(fabrikam);
+            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
+            Assert.AreEqual(2, fabrikam.Bindings.Count);
+
+            var fabrikamBindings = fabrikamWebSite.Bindings.ToList();
+            fabrikamBindings.RemoveAt(1);
+            fabrikamWebSite.Bindings = fabrikamBindings;
+
+            iisManager.UpdateSites(sites, false);
+
+            // Asserts
+            Assert.AreEqual(sites.Count(), RetrieveWebSites().Count());
+
+            fabrikam = RetrieveWebSite(FabrikamWebSiteName);
+
+            Assert.IsNotNull(fabrikam);
+            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
+            Assert.AreEqual(1, fabrikam.Bindings.Count);
+
+            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.First().Host));
+            Assert.AreEqual(fabrikamWebSite.Bindings.First().Protocol, fabrikam.Bindings.First().Protocol);
+            Assert.AreEqual(fabrikamWebSite.Bindings.First().IpAddress, fabrikam.Bindings.First().EndPoint.Address.ToString());
+            Assert.AreEqual(fabrikamWebSite.Bindings.First().Port, fabrikam.Bindings.First().EndPoint.Port);
+            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), fabrikam.Bindings.First().CertificateStoreName.ToUpperInvariant());
+            Assert.IsNotNull(fabrikam.Bindings.First().CertificateHash);
+        }
+
+        [Test]
+        public void Update_sites_removing_site()
+        {
+            var contosoWebSite = new WebSite
+            {
+                Name = ContosoWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "http",
+                        IpAddress = "127.0.0.1",
+                        Port = 8081,
+                        HostName = "contoso.com"
+                    }
+                }
+            };
+
+            var fabrikamWebSite = new WebSite
+            {
+                Name = FabrikamWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "https",
+                        IpAddress = "127.0.0.1",
+                        Port = 8443,
+                        CertificateThumbprint = "12345"
+                    }
+                }
+            };
+
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
+
+            iisManager.UpdateSites(sites, false);
+
+            Assert.AreEqual(2, RetrieveWebSites().Count());
+
+            sites.RemoveAt(0);
+            iisManager.UpdateSites(sites, false);
+
+            // Asserts
+            Assert.AreEqual(1, RetrieveWebSites().Count());
+
+            Site contoso = RetrieveWebSite(ContosoWebSiteName);
+            Site fabrikam = RetrieveWebSite(FabrikamWebSiteName);
+
+            Assert.IsNull(contoso);
+            Assert.IsNotNull(fabrikam);
+        }
+
+        [Test]
+        public void Update_sites_with_initial_bindings()
+        {
+            var contosoWebSite = new WebSite
+            {
+                Name = ContosoWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "http",
+                        IpAddress = "*",
+                        Port = 8081,
+                        HostName = "contoso.com"
+                    }
+                }
+            };
+
+            var fabrikamWebSite = new WebSite
+            {
+                Name = FabrikamWebSiteName,
+                Bindings = new List<Binding>
+                {
+                    new Binding
+                    {
+                        Protocol = "https",
+                        IpAddress = "*",
+                        Port = 8443,
+                        CertificateThumbprint = "12354"
+                    },
+                    new Binding
+                    {
+                        Protocol = "http",
+                        IpAddress = "127.0.0.1",
+                        Port = 8082
+                    }
+                }
+            };
+
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
+
+            iisManager.UpdateSites(sites, false);
+
+            // Asserts
+            Assert.AreEqual(sites.Count, RetrieveWebSites().Count());
+
+            var contoso = RetrieveWebSite(ContosoWebSiteName);
+
+            Assert.IsNotNull(contoso);
+            Assert.AreEqual(contosoWebSite.Name, contoso.Name);
+            Assert.AreEqual(contosoWebSite.Bindings.Count(), contoso.Bindings.Count);
+
+            Assert.AreEqual(contosoWebSite.Bindings.First().HostName, contoso.Bindings.First().Host);
+            Assert.AreEqual(contosoWebSite.Bindings.First().Protocol, contoso.Bindings.First().Protocol);
+            Assert.AreEqual("0.0.0.0", contoso.Bindings.First().EndPoint.Address.ToString());
+            Assert.AreEqual(contosoWebSite.Bindings.First().Port, contoso.Bindings.First().EndPoint.Port);
+            Assert.IsNull(contoso.Bindings.First().CertificateHash);
+
+            var fabrikam = RetrieveWebSite(FabrikamWebSiteName);
+
+            Assert.IsNotNull(fabrikam);
+            Assert.AreEqual(fabrikamWebSite.Name, fabrikam.Name);
+            Assert.AreEqual(fabrikamWebSite.Bindings.Count(), fabrikam.Bindings.Count);
+
+            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.First().Host));
+            Assert.AreEqual(fabrikamWebSite.Bindings.First().Protocol, fabrikam.Bindings.First().Protocol);
+            Assert.AreEqual(string.Empty, fabrikam.Bindings.First().Host);
+            Assert.AreEqual("0.0.0.0", fabrikam.Bindings.First().EndPoint.Address.ToString());
+            Assert.AreEqual(fabrikamWebSite.Bindings.First().Port, fabrikam.Bindings.First().EndPoint.Port);
+            Assert.AreEqual(StoreName.My.ToString().ToUpperInvariant(), fabrikam.Bindings.First().CertificateStoreName.ToUpperInvariant());
+            Assert.IsNotNull(fabrikam.Bindings.First().CertificateHash);
+
+            Assert.IsTrue(string.IsNullOrEmpty(fabrikam.Bindings.Last().Host));
+            Assert.AreEqual(fabrikamWebSite.Bindings.Last().Protocol, fabrikam.Bindings.Last().Protocol);
+            Assert.AreEqual(fabrikamWebSite.Bindings.Last().IpAddress, fabrikam.Bindings.Last().EndPoint.Address.ToString());
+            Assert.AreEqual(fabrikamWebSite.Bindings.Last().Port, fabrikam.Bindings.Last().EndPoint.Port);
+            Assert.IsNull(fabrikam.Bindings.Last().CertificateHash);
         }
     }
 }

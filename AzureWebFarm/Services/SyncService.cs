@@ -20,58 +20,55 @@ namespace AzureWebFarm.Services
     {
         private const string BlobStopName = "stop";
 
-        private readonly WebSiteRepository sitesRepository;
-        private readonly CertificateRepository certificateRepository;
-        private readonly SyncStatusRepository syncStatusRepository;
+        private readonly WebSiteRepository _sitesRepository;
+        private readonly CertificateRepository _certificateRepository;
+        private readonly SyncStatusRepository _syncStatusRepository;
 
-        private readonly string localSitesPath;
-        private readonly string localTempPath;
-        private readonly IEnumerable<string> directoriesToExclude;
+        private readonly string _localSitesPath;
+        private readonly string _localTempPath;
+        private readonly IEnumerable<string> _directoriesToExclude;
 
-        private readonly CloudBlobContainer container;
+        private readonly CloudBlobContainer _container;
 
-        private readonly IDictionary<string, FileEntry> entries;
-        private readonly Dictionary<string, DateTime> siteDeployTimes;
+        private readonly IDictionary<string, FileEntry> _entries;
+        private readonly Dictionary<string, DateTime> _siteDeployTimes;
 
-        private static string roleWebSiteName = RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web";
+        private static readonly string RoleWebSiteName = RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web";
 
         public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
-            : this(
-                    new WebSiteRepository(storageSettingName),
-                    new CertificateRepository(),
-                    new SyncStatusRepository(storageSettingName),
-                    CloudStorageAccount.FromConfigurationSetting(storageSettingName),
-                    localSitesPath,
-                    localTempPath,
-                    directoriesToExclude)
-        {
-        }
+            : this (
+                new WebSiteRepository(storageSettingName),
+                new CertificateRepository(),
+                new SyncStatusRepository(storageSettingName),
+                CloudStorageAccount.FromConfigurationSetting(storageSettingName),
+                localSitesPath,
+                localTempPath,
+                directoriesToExclude
+            )
+        {}
 
         public SyncService(WebSiteRepository sitesRepository, CertificateRepository certificateRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude)
         {
-            this.sitesRepository = sitesRepository;
-            this.certificateRepository = certificateRepository;
-            this.syncStatusRepository = syncStatusRepository;
+            _sitesRepository = sitesRepository;
+            _certificateRepository = certificateRepository;
+            _syncStatusRepository = syncStatusRepository;
 
-            this.localSitesPath = localSitesPath;
-            this.localTempPath = localTempPath;
-            this.directoriesToExclude = directoriesToExclude;
-            this.entries = new Dictionary<string, FileEntry>();
-            this.siteDeployTimes = new Dictionary<string, DateTime>();
+            _localSitesPath = localSitesPath;
+            _localTempPath = localTempPath;
+            _directoriesToExclude = directoriesToExclude;
+            _entries = new Dictionary<string, FileEntry>();
+            _siteDeployTimes = new Dictionary<string, DateTime>();
 
             var sitesContainerName = RoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
-            this.container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
-            this.container.CreateIfNotExist();
+            _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
+            _container.CreateIfNotExist();
         }
 
         public void UpdateAllSitesSyncStatus(string roleInstanceId, bool isOnline)
         {
-            
-            SyncStatus newSyncStatus;
-
-            foreach (var syncStatus in this.syncStatusRepository.RetrieveSyncStatusByInstanceId(roleInstanceId))
+            foreach (var syncStatus in _syncStatusRepository.RetrieveSyncStatusByInstanceId(roleInstanceId))
             {
-                newSyncStatus = new SyncStatus
+                var newSyncStatus = new SyncStatus
                 {
                     SiteName = syncStatus.SiteName,
                     RoleInstanceId = roleInstanceId,
@@ -79,7 +76,7 @@ namespace AzureWebFarm.Services
                     IsOnline = isOnline
                 };
 
-                this.syncStatusRepository.UpdateStatus(newSyncStatus);
+                _syncStatusRepository.UpdateStatus(newSyncStatus);
             }
         }
 
@@ -89,14 +86,15 @@ namespace AzureWebFarm.Services
             SyncOnce();
         }
 
+        // ReSharper disable FunctionNeverReturns
         public void SyncForever(TimeSpan interval)
         {
-            var blobStop = this.container.GetBlobReference(BlobStopName);
+            var blobStop = _container.GetBlobReference(BlobStopName);
             var lastHeartbeat = DateTime.MinValue;
 
             while (true)
             {
-                bool isPaused = blobStop.Exists();
+                var isPaused = blobStop.Exists();
  
                 var currentTime = DateTime.Now;
                 if ((currentTime - lastHeartbeat).Minutes > 15)
@@ -113,6 +111,7 @@ namespace AzureWebFarm.Services
                 Thread.Sleep(interval);
             }
         }
+        // ReSharper restore FunctionNeverReturns
 
         private void SyncOnce()
         {
@@ -120,7 +119,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                this.UpdateIISSitesFromTableStorage();
+                UpdateIISSitesFromTableStorage();
             }
             catch (Exception e)
             {
@@ -129,7 +128,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                this.SyncBlobToLocal();
+                SyncBlobToLocal();
             }
             catch (Exception e)
             {
@@ -138,7 +137,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                this.DeploySitesFromLocal();
+                DeploySitesFromLocal();
             }
             catch (Exception e)
             {
@@ -147,7 +146,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                this.PackageSitesToLocal();
+                PackageSitesToLocal();
             }
             catch (Exception e)
             {
@@ -219,36 +218,36 @@ namespace AzureWebFarm.Services
 
         private void UpdateIISSitesFromTableStorage()
         {
-            var allSites = this.sitesRepository.RetrieveWebSitesWithBindings();
+            var allSites = _sitesRepository.RetrieveWebSitesWithBindings();
 
             if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
             {
-                var iisManager = new IISManager(this.localSitesPath, this.localTempPath, this.syncStatusRepository);
+                var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
                 iisManager.UpdateSites(allSites);
             }
 
             // Cleanup
-            for (int i = this.siteDeployTimes.Count - 1; i >= 0; i--)
+            for (int i = _siteDeployTimes.Count - 1; i >= 0; i--)
             {
-                var siteName = this.siteDeployTimes.ElementAt(i).Key;
+                var siteName = _siteDeployTimes.ElementAt(i).Key;
                 if (!allSites.Any(s => s.Name.Equals(siteName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    this.siteDeployTimes.Remove(siteName);
-                    this.syncStatusRepository.RemoveWebSiteStatus(siteName);
+                    _siteDeployTimes.Remove(siteName);
+                    _syncStatusRepository.RemoveWebSiteStatus(siteName);
 
-                    var sitePath = Path.Combine(this.localSitesPath, siteName);
-                    var tempSitePath = Path.Combine(this.localTempPath, siteName);
+                    var sitePath = Path.Combine(_localSitesPath, siteName);
+                    var tempSitePath = Path.Combine(_localTempPath, siteName);
 
                     FilesHelper.RemoveFolder(sitePath);
                     FilesHelper.RemoveFolder(tempSitePath);
 
-                    if (this.entries.ContainsKey(siteName))
+                    if (_entries.ContainsKey(siteName))
                     {
                         // Remove blob
-                        this.container.GetBlobReference(siteName).DeleteIfExists();
-                        this.container.GetBlobReference(siteName + "/" + siteName + ".zip").DeleteIfExists();
+                        _container.GetBlobReference(siteName).DeleteIfExists();
+                        _container.GetBlobReference(siteName + "/" + siteName + ".zip").DeleteIfExists();
                         
-                        this.entries.Remove(siteName);
+                        _entries.Remove(siteName);
                     }
                 }
             }
@@ -258,16 +257,16 @@ namespace AzureWebFarm.Services
         {
             var seen = new HashSet<string>();
 
-            foreach (var thing in this.EnumerateLocalEntries())
+            foreach (var thing in EnumerateLocalEntries())
             {
                 var path = thing.Item1;
                 var entry = thing.Item2;
 
                 seen.Add(path);
 
-                if (!this.entries.ContainsKey(path) || this.entries[path].LocalLastModified < entry.LocalLastModified)
+                if (!_entries.ContainsKey(path) || _entries[path].LocalLastModified < entry.LocalLastModified)
                 {
-                    var newBlob = this.container.GetBlobReference(path);
+                    var newBlob = _container.GetBlobReference(path);
                     if (entry.IsDirectory)
                     {
                         newBlob.Metadata["IsDirectory"] = bool.TrueString;
@@ -275,7 +274,7 @@ namespace AzureWebFarm.Services
                     }
                     else
                     {
-                        using (var stream = File.Open(Path.Combine(this.localTempPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                        using (var stream = File.Open(Path.Combine(_localTempPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                         {
                             newBlob.Metadata["IsDirectory"] = bool.FalseString;
                             newBlob.UploadFromStream(stream);
@@ -283,16 +282,16 @@ namespace AzureWebFarm.Services
                     }
 
                     entry.CloudLastModified = newBlob.Properties.LastModifiedUtc;
-                    this.entries[path] = entry;
+                    _entries[path] = entry;
                 }
             }
 
-            foreach (var path in this.entries.Keys.Where(k => !seen.Contains(k)).ToArray())
+            foreach (var path in _entries.Keys.Where(k => !seen.Contains(k)).ToArray())
             {
                 // Try deleting all the unused files and directories
                 try
                 {
-                    if (this.entries[path].IsDirectory)
+                    if (_entries[path].IsDirectory)
                     {
                         Directory.Delete(path);
                     }
@@ -301,25 +300,24 @@ namespace AzureWebFarm.Services
                         File.Delete(path);
                     }
                 }
-                catch
-                {
-                }
+                catch (Exception) {}
 
-                this.entries.Remove(path);
+                _entries.Remove(path);
             }
 
             seen = new HashSet<string>();
 
-            var blobs = this.container.ListBlobs(
+            var blobs = _container.ListBlobs(
                 new BlobRequestOptions 
                 { 
                     UseFlatBlobListing = true, 
                     BlobListingDetails = BlobListingDetails.Metadata
-                }).OfType<CloudBlob>();
+                }
+            ).OfType<CloudBlob>();
 
             foreach (var blob in blobs)
             {
-                var path = blob.Uri.ToString().Substring(this.container.Uri.ToString().Length + 1);
+                var path = blob.Uri.ToString().Substring(_container.Uri.ToString().Length + 1);
                 var entry = new FileEntry
                 {
                     CloudLastModified = blob.Properties.LastModifiedUtc,
@@ -329,9 +327,9 @@ namespace AzureWebFarm.Services
 
                 seen.Add(path);
 
-                if (!this.entries.ContainsKey(path) || this.entries[path].CloudLastModified < entry.CloudLastModified)
+                if (!_entries.ContainsKey(path) || _entries[path].CloudLastModified < entry.CloudLastModified)
                 {
-                    var tempPath = Path.Combine(this.localTempPath, path);
+                    var tempPath = Path.Combine(_localTempPath, path);
                     
                     if (entry.IsDirectory)
                     {
@@ -339,7 +337,7 @@ namespace AzureWebFarm.Services
                     }
                     else
                     {
-                        Directory.CreateDirectory(Path.Combine(this.localTempPath, Path.GetDirectoryName(path)));
+                        Directory.CreateDirectory(Path.Combine(_localTempPath, Path.GetDirectoryName(path)));
                         Trace.TraceInformation("SyncService [Blob => Local Storage] - Downloading file: '{0}'", path);
 
                         using (var stream = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
@@ -349,39 +347,37 @@ namespace AzureWebFarm.Services
                     }
 
                     entry.LocalLastModified = new FileInfo(tempPath).LastWriteTimeUtc;
-                    this.entries[path] = entry;
+                    _entries[path] = entry;
                 }
             }
 
-            foreach (var path in this.entries.Keys.Where(k => !seen.Contains(k)).ToArray())
+            foreach (var path in _entries.Keys.Where(k => !seen.Contains(k)).ToArray())
             {
-                if (this.entries[path].IsDirectory)
+                if (_entries[path].IsDirectory)
                 {
-                    Directory.Delete(Path.Combine(this.localTempPath, path), true);
+                    Directory.Delete(Path.Combine(_localTempPath, path), true);
                 }
                 else
                 {
                     try
                     {
-                        File.Delete(Path.Combine(this.localTempPath, path));
+                        File.Delete(Path.Combine(_localTempPath, path));
                     }
-                    catch
-                    {
-                    }
+                    catch (Exception) {}
                 }
 
-                this.entries.Remove(path);
+                _entries.Remove(path);
             }
         }
 
         private void DeploySitesFromLocal()
         {
-            Trace.TraceInformation("SyncService [Local Storage => IIS] - Site deploy times: {0}", string.Join(",", this.siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
+            Trace.TraceInformation("SyncService [Local Storage => IIS] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
-            foreach (var site in Directory.EnumerateDirectories(this.localTempPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
+            foreach (var site in Directory.EnumerateDirectories(_localTempPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
             {
-                var sitePath = Path.Combine(this.localSitesPath, site);
-                var tempSitePath = Path.Combine(this.localTempPath, site);
+                var sitePath = Path.Combine(_localSitesPath, site);
+                var tempSitePath = Path.Combine(_localTempPath, site);
 
                 if (Directory.Exists(tempSitePath))
                 {
@@ -403,15 +399,15 @@ namespace AzureWebFarm.Services
 
                     if (packageFile != null)
                     {
-                        if (!this.siteDeployTimes.ContainsKey(site))
+                        if (!_siteDeployTimes.ContainsKey(site))
                         {
-                            this.siteDeployTimes.Add(site, DateTime.MinValue);
+                            _siteDeployTimes.Add(site, DateTime.MinValue);
                         }
 
                         var packageLastModifiedTime = Directory.GetLastWriteTimeUtc(packageFile);
                         Trace.TraceInformation("SyncService [Local Storage => IIS] - Package last modified time: '{0}'", packageLastModifiedTime);
 
-                        if (this.siteDeployTimes[site] < packageLastModifiedTime)
+                        if (_siteDeployTimes[site] < packageLastModifiedTime)
                         {
                             Trace.TraceInformation("SyncService [Local Storage => IIS] - Deploying the package '{0}' to '{1}' with MSDeploy", packageFile, sitePath);
 
@@ -422,12 +418,12 @@ namespace AzureWebFarm.Services
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.DirPath, sitePath, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }
 
-                                this.UpdateSyncStatus(site, SyncInstanceStatus.Deployed);
-                                this.siteDeployTimes[site] = DateTime.UtcNow;
+                                UpdateSyncStatus(site, SyncInstanceStatus.Deployed);
+                                _siteDeployTimes[site] = DateTime.UtcNow;
                             }
                             catch (Exception)
                             {
-                                this.UpdateSyncStatus(site, SyncInstanceStatus.Error);
+                                UpdateSyncStatus(site, SyncInstanceStatus.Error);
                                 throw;
                             }
                         }
@@ -442,7 +438,7 @@ namespace AzureWebFarm.Services
         /// </summary>
         private void PackageSitesToLocal()
         {
-            Trace.TraceInformation("SyncService [IIS => Local Storage] - Site deploy times: {0}", string.Join(",", this.siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
+            Trace.TraceInformation("SyncService [IIS => Local Storage] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
             using (var serverManager = new ServerManager())
             {
@@ -450,23 +446,23 @@ namespace AzureWebFarm.Services
                 {
                     var siteName = site.Name.Replace("-", ".").ToLowerInvariant();
                     
-                    if (!site.Name.Equals(roleWebSiteName, StringComparison.OrdinalIgnoreCase))
+                    if (!site.Name.Equals(RoleWebSiteName, StringComparison.OrdinalIgnoreCase))
                     {                        
-                        var sitePath = Path.Combine(this.localSitesPath, siteName);
+                        var sitePath = Path.Combine(_localSitesPath, siteName);
                         var siteLastModifiedTime = GetFolderLastModifiedTimeUtc(sitePath);
 
-                        if (!this.siteDeployTimes.ContainsKey(siteName))
+                        if (!_siteDeployTimes.ContainsKey(siteName))
                         {
-                            this.siteDeployTimes.Add(siteName, siteLastModifiedTime);
+                            _siteDeployTimes.Add(siteName, siteLastModifiedTime);
                         }
 
                         Trace.TraceInformation("SyncService [IIS => Local Storage] - Site last modified time: '{0}'", siteLastModifiedTime);
 
-                        if (this.siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime.AddSeconds(30) < DateTime.UtcNow)
+                        if (_siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime.AddSeconds(30) < DateTime.UtcNow)
                         {
-                            this.UpdateSyncStatus(siteName, SyncInstanceStatus.Deployed);
+                            UpdateSyncStatus(siteName, SyncInstanceStatus.Deployed);
 
-                            var tempSitePath = Path.Combine(this.localTempPath, siteName);
+                            var tempSitePath = Path.Combine(_localTempPath, siteName);
                             if (!Directory.Exists(tempSitePath))
                             {
                                 Directory.CreateDirectory(tempSitePath);
@@ -484,11 +480,11 @@ namespace AzureWebFarm.Services
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.Package, packageFile, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }
 
-                                this.siteDeployTimes[siteName] = DateTime.UtcNow;
+                                _siteDeployTimes[siteName] = DateTime.UtcNow;
                             }
                             catch (Exception)
                             {
-                                this.UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
+                                UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
                                 throw;
                             }
                         }
@@ -499,9 +495,9 @@ namespace AzureWebFarm.Services
 
         private IEnumerable<Tuple<string, FileEntry>> EnumerateLocalEntries()
         {
-            foreach (var filePath in Directory.EnumerateFileSystemEntries(this.localTempPath, "*", SearchOption.AllDirectories))
+            foreach (var filePath in Directory.EnumerateFileSystemEntries(_localTempPath, "*", SearchOption.AllDirectories))
             {
-                var relativePath = filePath.Substring(this.localTempPath.Length + 1).Replace('\\', '/');
+                var relativePath = filePath.Substring(_localTempPath.Length + 1).Replace('\\', '/');
                 var info = new FileInfo(filePath);
                 var entry = new FileEntry
                 {
@@ -509,7 +505,7 @@ namespace AzureWebFarm.Services
                     IsDirectory = info.Attributes.HasFlag(FileAttributes.Directory)
                 };
 
-                if (this.IsExcluded(relativePath))
+                if (IsExcluded(relativePath))
                 {
                     continue;
                 }
@@ -520,7 +516,7 @@ namespace AzureWebFarm.Services
 
         private bool IsExcluded(string topPath)
         {
-            int position = topPath.IndexOf('/');
+            var position = topPath.IndexOf('/');
 
             if (position <= 0)
             {
@@ -530,12 +526,12 @@ namespace AzureWebFarm.Services
             // Remove Site name
             string path = topPath.Substring(position + 1);
 
-            if (this.directoriesToExclude.Contains(path, StringComparer.OrdinalIgnoreCase))
+            if (_directoriesToExclude.Contains(path, StringComparer.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            foreach (string toExclude in this.directoriesToExclude)
+            foreach (var toExclude in _directoriesToExclude)
             {
                 if (path.StartsWith(toExclude + "/"))
                 {
@@ -556,7 +552,7 @@ namespace AzureWebFarm.Services
                 IsOnline = true
             };
 
-            this.syncStatusRepository.UpdateStatus(syncStatus);
+            _syncStatusRepository.UpdateStatus(syncStatus);
         }
     }
 }

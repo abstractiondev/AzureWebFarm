@@ -1,5 +1,5 @@
-﻿@using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Extensions
-@model Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.BindingModel
+﻿@using AzureWebFarm.Example.Web.Extensions
+@model AzureWebFarm.Example.Web.Models.BindingModel
 @{
     ViewBag.Title = "EditBinding";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -22,14 +22,13 @@
             @Html.LabelFor(model => model.WebSiteName)
         </div>
         <div class="editor-field">
-            @this.Model.WebSiteName
+            @Model.WebSiteName
         </div>
         <div class="editor-label">
             @Html.LabelFor(model => model.Protocol)
         </div>
         <div class="editor-field">
-            @Html.DropDownListFor(model => model.Protocol, new SelectList(
-                            new string[] { "http", "https" }))
+            @Html.DropDownListFor(model => model.Protocol, new SelectList(new[] { "http", "https" }))
             @*new string[] { "http", "https", "net.tcp", "net.pipe", "net.msmq", "msmq.formatname" }))*@
             @Html.ValidationMessageFor(model => model.Protocol)
         </div>
@@ -59,7 +58,7 @@
             @Html.LabelFor(model => model.CertificateThumbprint)
         </div>
         <div class="editor-field">
-            @Html.DropDownListFor(model => model.CertificateThumbprint, this.Model.Certificates, "Not Selected")
+            @Html.DropDownListFor(model => model.CertificateThumbprint, Model.Certificates, "Not Selected")
             @Html.DisplayHelpFor(model => model.CertificateThumbprint, "HelpMessage")
             @Html.ValidationMessageFor(model => model.CertificateThumbprint)
         </div>

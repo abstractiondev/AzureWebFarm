@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.WebSiteModel>
+﻿@model IEnumerable<AzureWebFarm.Example.Web.Models.WebSiteModel>
 @{
     ViewBag.Title = "Web Sites";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -8,7 +8,7 @@
 <p>
     @Html.ActionLink("new web site", "Create") | @Html.ActionLink((ViewBag.IsSyncEnabled ? "disable sync" : "enable sync"), "SyncChange", "Sync", new { enable = !ViewBag.IsSyncEnabled }, new { })
 </p>
-@if (this.Model != null && this.Model.Count() > 0)
+@if (Model != null && Model.Any())
 {
     <table>
         <tr>
@@ -25,9 +25,9 @@
             </th>
         </tr>
         @{
-    var i = 0;
+            var i = 0;
         }
-        @foreach (var item in this.Model)
+        @foreach (var item in Model)
         {
             i++;
     

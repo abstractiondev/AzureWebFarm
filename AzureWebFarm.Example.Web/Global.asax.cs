@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using Microsoft.WindowsAzure;
@@ -6,7 +7,7 @@ using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace AzureWebFarm.Example.Web
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class MvcApplication : HttpApplication
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {

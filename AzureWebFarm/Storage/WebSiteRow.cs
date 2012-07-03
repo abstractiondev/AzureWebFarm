@@ -7,7 +7,7 @@ namespace AzureWebFarm.Storage
     {
         public WebSiteRow()
             : this(Guid.NewGuid())
-        { 
+        {
         }
 
         public WebSiteRow(Guid id)

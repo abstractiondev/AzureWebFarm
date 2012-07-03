@@ -10,7 +10,7 @@ namespace AzureWebFarm.Example.Web.Controllers
     [Authorize]
     public class SyncController : Controller
     {
-        private readonly SyncStatusRepository syncStatusRepository;
+        private readonly SyncStatusRepository _syncStatusRepository;
 
         public SyncController()
             : this(new SyncStatusRepository())
@@ -19,7 +19,7 @@ namespace AzureWebFarm.Example.Web.Controllers
 
         public SyncController(SyncStatusRepository syncStatusRepository)
         {
-            this.syncStatusRepository = syncStatusRepository;
+            _syncStatusRepository = syncStatusRepository;
         }
 
         public ActionResult Index(string webSiteName)
@@ -29,7 +29,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                 throw new ArgumentNullException("webSiteName");
             }
 
-            var webSiteStatus = this.syncStatusRepository.RetrieveSyncStatus(webSiteName);
+            var webSiteStatus = _syncStatusRepository.RetrieveSyncStatus(webSiteName);
             var model = webSiteStatus
                 .Where(s => s.IsOnline)
                 .Select(s => new SyncStatusModel
@@ -37,9 +37,10 @@ namespace AzureWebFarm.Example.Web.Controllers
                     RoleInstanceId = s.RoleInstanceId,
                     Status = s.Status.ToString(),
                     SyncTimestamp = s.SyncTimestamp
-                });
+                }
+            );
 
-            this.ViewBag.WebSiteName = webSiteName;
+            ViewBag.WebSiteName = webSiteName;
 
             return View(model);
         }

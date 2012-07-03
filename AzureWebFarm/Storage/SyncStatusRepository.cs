@@ -29,7 +29,7 @@ namespace AzureWebFarm.Storage
 
         public SyncStatusRepository(CloudStorageAccount account, string tableName)
             : this(new AzureTable<SyncStatusRow>(account, tableName))
-        { 
+        {
         }
 
         public SyncStatusRepository(IAzureTable<SyncStatusRow> table)
@@ -40,36 +40,36 @@ namespace AzureWebFarm.Storage
 
         public void RemoveWebSiteStatus(string webSiteName)
         {
-            var webSiteStatus = this.RetrieveSyncStatus(webSiteName);
+            var webSiteStatus = RetrieveSyncStatus(webSiteName);
             if (webSiteStatus != null && webSiteStatus.Count() > 0)
             {
-                this.table.DeleteEntity(webSiteStatus.Select(s => s.ToRow()));
+                table.DeleteEntity(webSiteStatus.Select(s => s.ToRow()));
             }
         }
 
         public void UpdateStatus(SyncStatus syncStatus)
         {
-            this.table.AddOrUpdateEntity(syncStatus.ToRow());
+            table.AddOrUpdateEntity(syncStatus.ToRow());
         }
 
         public IEnumerable<SyncStatus> RetrieveSyncStatus(string webSiteName)
         {
-            return this.table.Query
+            return table.Query
                 .Where(
-                    s => 
-                        s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
-                        s.SiteName.Equals(webSiteName, StringComparison.OrdinalIgnoreCase))
+                    s =>
+                    s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
+                    s.SiteName.Equals(webSiteName, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .Select(s => s.ToModel());
         }
 
         public IEnumerable<SyncStatus> RetrieveSyncStatusByInstanceId(string roleInstanceId)
         {
-            return this.table.Query
+            return table.Query
                 .Where(
                     s =>
-                        s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
-                        s.RoleInstanceId.Equals(roleInstanceId, StringComparison.OrdinalIgnoreCase))
+                    s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
+                    s.RoleInstanceId.Equals(roleInstanceId, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .Select(s => s.ToModel());
         }

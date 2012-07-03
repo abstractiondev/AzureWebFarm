@@ -7,12 +7,12 @@ namespace AzureWebFarm.Entities
     {
         public WebSite()
             : this(Guid.NewGuid())
-        { 
+        {
         }
 
         public WebSite(Guid id)
         {
-            this.Id = id;
+            Id = id;
         }
 
         public Guid Id { get; private set; }
@@ -22,7 +22,7 @@ namespace AzureWebFarm.Entities
         public string Description { get; set; }
 
         public bool EnableCDNChildApplication { get; set; }
- 
+
         public bool EnableTestChildApplication { get; set; }
 
         public IEnumerable<Binding> Bindings { get; set; }

@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Globalization;
 
 namespace AzureWebFarm.Entities
 {
     public class Binding
     {
+        private string _ipAddress;
+
         public Binding()
             : this(Guid.NewGuid())
         {
@@ -12,7 +13,7 @@ namespace AzureWebFarm.Entities
 
         public Binding(Guid id)
         {
-            this.Id = id;
+            Id = id;
         }
 
         public Guid Id { get; private set; }
@@ -23,19 +24,12 @@ namespace AzureWebFarm.Entities
 
         public string Protocol { get; set; }
 
-        public string IpAddress 
+        public string IpAddress
         {
-            get
-            {
-                return String.IsNullOrWhiteSpace(this._ipAddress) ? "*" : this._ipAddress;
-            }
+            get { return String.IsNullOrWhiteSpace(_ipAddress) ? "*" : _ipAddress; }
 
-            set
-            {
-                this._ipAddress = value;
-            }
+            set { _ipAddress = value; }
         }
-        private string _ipAddress;
 
         public int Port { get; set; }
 
@@ -43,6 +37,9 @@ namespace AzureWebFarm.Entities
 
         public string CertificateThumbprint { get; set; }
 
-        public string BindingInformation { get { return string.Format("{0}:{1}:{2}", IpAddress, Port, HostName); } }
+        public string BindingInformation
+        {
+            get { return string.Format("{0}:{1}:{2}", IpAddress, Port, HostName); }
+        }
     }
 }

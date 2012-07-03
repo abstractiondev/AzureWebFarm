@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Web.Helpers;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
@@ -12,7 +12,7 @@ namespace AzureWebFarm.Storage
 {
     public class CertificateRepository
     {
-        private string certsFilePath;
+        private readonly string certsFilePath;
 
         public CertificateRepository(string certsFilePath)
         {
@@ -21,7 +21,7 @@ namespace AzureWebFarm.Storage
 
         public CertificateRepository()
         {
-            this.certsFilePath = Path.Combine(RoleEnvironment.GetLocalResource("Config").RootPath, "certs.json");
+            certsFilePath = Path.Combine(RoleEnvironment.GetLocalResource("Config").RootPath, "certs.json");
         }
 
         public void PopulateRepository()
@@ -30,7 +30,7 @@ namespace AzureWebFarm.Storage
             store.Open(OpenFlags.ReadWrite);
 
             var certificates = new List<Certificate>();
-            foreach (var cert in store.Certificates)
+            foreach (X509Certificate2 cert in store.Certificates)
             {
                     certificates.Add(new Certificate
                     {
@@ -57,6 +57,5 @@ namespace AzureWebFarm.Storage
                 return new List<Certificate>();
             }
         }
-
     }
 }

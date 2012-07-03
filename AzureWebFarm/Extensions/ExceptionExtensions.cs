@@ -34,16 +34,16 @@ namespace AzureWebFarm.Extensions
         private static string BuildMessage(Exception exception)
         {
             return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "{0}{1}{2}:{3}{4}{5}{6}{7}",
-                    Line,
-                    Environment.NewLine,
-                    exception.GetType().Name,
-                    exception.Message,
-                    Environment.NewLine,
-                    exception.StackTrace,
-                    Environment.NewLine,
-                    Line);
+                CultureInfo.InvariantCulture,
+                "{0}{1}{2}:{3}{4}{5}{6}{7}",
+                Line,
+                Environment.NewLine,
+                exception.GetType().Name,
+                exception.Message,
+                Environment.NewLine,
+                exception.StackTrace,
+                Environment.NewLine,
+                Line);
         }
     }
 }

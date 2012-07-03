@@ -2,16 +2,16 @@
 using System.Data.Services.Client;
 using System.Globalization;
 using System.Linq;
+using AzureWebFarm.Extensions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
-using AzureWebFarm.Extensions;
 
 namespace AzureWebFarm.Storage
 {
     public class AzureTable<T> : IAzureTable<T> where T : TableServiceEntity, new()
     {
-        private readonly string tableName;
         private readonly CloudStorageAccount account;
+        private readonly string tableName;
 
         public AzureTable()
             : this(CloudStorageAccount.DevelopmentStorageAccount)
@@ -19,7 +19,7 @@ namespace AzureWebFarm.Storage
         }
 
         public AzureTable(CloudStorageAccount account)
-            : this(account, typeof(T).Name)
+            : this(account, typeof (T).Name)
         {
         }
 
@@ -29,39 +29,41 @@ namespace AzureWebFarm.Storage
             this.account = account;
         }
 
+        #region IAzureTable<T> Members
+
         public IQueryable<T> Query
         {
             get
             {
-                TableServiceContext context = this.CreateContext();
-                return context.CreateQuery<T>(this.tableName).AsTableServiceQuery();
+                TableServiceContext context = CreateContext();
+                return context.CreateQuery<T>(tableName).AsTableServiceQuery();
             }
         }
 
         public bool CreateIfNotExist()
         {
-            var cloudTableClient = new CloudTableClient(this.account.TableEndpoint.ToString(), this.account.Credentials);
-            return cloudTableClient.CreateTableIfNotExist<T>(this.tableName);
+            var cloudTableClient = new CloudTableClient(account.TableEndpoint.ToString(), account.Credentials);
+            return cloudTableClient.CreateTableIfNotExist<T>(tableName);
         }
 
         public bool DeleteIfExist()
         {
-            var cloudTableClient = new CloudTableClient(this.account.TableEndpoint.ToString(), this.account.Credentials);
-            return cloudTableClient.DeleteTableIfExist(this.tableName);
+            var cloudTableClient = new CloudTableClient(account.TableEndpoint.ToString(), account.Credentials);
+            return cloudTableClient.DeleteTableIfExist(tableName);
         }
 
         public void AddEntity(T obj)
         {
-            this.AddEntity(new[] { obj });
+            AddEntity(new[] {obj});
         }
 
         public void AddEntity(IEnumerable<T> objs)
         {
-            TableServiceContext context = this.CreateContext();
+            TableServiceContext context = CreateContext();
 
             foreach (var obj in objs)
             {
-                context.AddObject(this.tableName, obj);
+                context.AddObject(tableName, obj);
             }
 
             var saveChangesOptions = SaveChangesOptions.None;
@@ -75,7 +77,7 @@ namespace AzureWebFarm.Storage
 
         public void AddOrUpdateEntity(T obj)
         {
-            this.AddOrUpdateEntity(new[] { obj });
+            AddOrUpdateEntity(new[] {obj});
         }
 
         public void AddOrUpdateEntity(IEnumerable<T> objs)
@@ -88,7 +90,7 @@ namespace AzureWebFarm.Storage
 
                 try
                 {
-                    existingObj = (from o in this.Query
+                    existingObj = (from o in Query
                                    where o.PartitionKey == pk && o.RowKey == rk
                                    select o).SingleOrDefault();
                 }
@@ -98,12 +100,12 @@ namespace AzureWebFarm.Storage
 
                 if (existingObj == null)
                 {
-                    this.AddEntity(obj);
+                    AddEntity(obj);
                 }
                 else
                 {
-                    TableServiceContext context = this.CreateContext();
-                    context.AttachTo(this.tableName, obj, "*");
+                    TableServiceContext context = CreateContext();
+                    context.AttachTo(tableName, obj, "*");
                     context.UpdateObject(obj);
                     context.SaveChanges(SaveChangesOptions.ReplaceOnUpdate);
                 }
@@ -112,15 +114,15 @@ namespace AzureWebFarm.Storage
 
         public void DeleteEntity(T obj)
         {
-            this.DeleteEntity(new[] { obj });
+            DeleteEntity(new[] {obj});
         }
 
         public void DeleteEntity(IEnumerable<T> objs)
         {
-            TableServiceContext context = this.CreateContext();
+            TableServiceContext context = CreateContext();
             foreach (var obj in objs)
             {
-                context.AttachTo(this.tableName, obj, "*");
+                context.AttachTo(tableName, obj, "*");
                 context.DeleteObject(obj);
             }
 
@@ -143,9 +145,11 @@ namespace AzureWebFarm.Storage
             }
         }
 
+        #endregion
+
         private TableServiceContext CreateContext()
         {
-            var context = new TableServiceContext(this.account.TableEndpoint.ToString(), this.account.Credentials)
+            var context = new TableServiceContext(account.TableEndpoint.ToString(), this.account.Credentials)
             {
                 ResolveType = t => typeof(T),
                 RetryPolicy = RetryPolicies.RetryExponential(RetryPolicies.DefaultClientRetryCount, RetryPolicies.DefaultClientBackoff)
@@ -154,8 +158,12 @@ namespace AzureWebFarm.Storage
             return context;
         }
 
+        #region Nested type: PartitionKeyComparer
+
         private class PartitionKeyComparer : IEqualityComparer<TableServiceEntity>
         {
+            #region IEqualityComparer<TableServiceEntity> Members
+
             public bool Equals(TableServiceEntity x, TableServiceEntity y)
             {
                 return string.Compare(x.PartitionKey, y.PartitionKey, true, CultureInfo.InvariantCulture) == 0;
@@ -165,6 +173,10 @@ namespace AzureWebFarm.Storage
             {
                 return obj.PartitionKey.GetHashCode();
             }
+
+            #endregion
         }
+
+        #endregion
     }
 }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.SyncStatusModel>
+﻿@model IEnumerable<AzureWebFarm.Example.Web.Models.SyncStatusModel>
 @{
     ViewBag.Title = "Sync Status";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -15,7 +15,7 @@
     @{
         var i = 0;
     }
-    @foreach (var item in this.Model)
+    @foreach (var item in Model)
     {
         i++;
     

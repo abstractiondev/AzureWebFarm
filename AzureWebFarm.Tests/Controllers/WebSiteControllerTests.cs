@@ -10,32 +10,36 @@ using NUnit.Framework;
 namespace AzureWebFarm.Tests.Controllers
 {
     [TestFixture]
-    public class WebSiteControllerTests
+    public class WebSiteControllerShould
     {
-        private WebSiteRepository webSiteRepository;
-        private CertificateRepository certificateRepository;
-        private AzureTable<WebSiteRow> webSiteTable;
-        private AzureTable<BindingRow> bindingTable;
-        private WebSiteController controller;
+        #region Setup/Teardown
 
         [SetUp]
         public void Setup()
         {
-            this.webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
-            this.bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
-            this.certificateRepository = new CertificateRepository("");
-            this.webSiteTable.CreateIfNotExist();
-            this.bindingTable.CreateIfNotExist();
-            this.webSiteRepository = new WebSiteRepository(this.webSiteTable, this.bindingTable);
-            this.controller = new WebSiteController(this.webSiteRepository, this.certificateRepository);
+            _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
+            _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
+            _certificateRepository = new CertificateRepository("");
+            _webSiteTable.CreateIfNotExist();
+            _bindingTable.CreateIfNotExist();
+            _webSiteRepository = new WebSiteRepository(_webSiteTable, _bindingTable);
+            _controller = new WebSiteController(_webSiteRepository, _certificateRepository);
         }
 
-        [Test]
-        public void CreateWebSiteWithBindings()
-        {
-            Guid id = Guid.NewGuid();
+        #endregion
 
-            var model = new WebSiteCreateModel()
+        private WebSiteRepository _webSiteRepository;
+        private CertificateRepository _certificateRepository;
+        private AzureTable<WebSiteRow> _webSiteTable;
+        private AzureTable<BindingRow> _bindingTable;
+        private WebSiteController _controller;
+
+        [Test]
+        public void Create_web_site_with_bindings()
+        {
+            var id = Guid.NewGuid();
+
+            var model = new WebSiteCreateModel
             {
                 Name = "testsite" + id.ToString().ToLowerInvariant(),
                 Description = "Test Description",
@@ -45,9 +49,9 @@ namespace AzureWebFarm.Tests.Controllers
                 Protocol = "http"
             };
 
-            this.controller.Create(model);
+            _controller.Create(model);
 
-            WebSite newsite = this.webSiteRepository.RetrieveWebSites().Where(ws => ws.Name == model.Name).FirstOrDefault();
+            var newsite = _webSiteRepository.RetrieveWebSites().FirstOrDefault(ws => ws.Name == model.Name);
 
             try
             {
@@ -55,7 +59,7 @@ namespace AzureWebFarm.Tests.Controllers
                 Assert.AreEqual(model.Name, newsite.Name);
                 Assert.AreEqual(model.Description, newsite.Description);
 
-                WebSite site = this.webSiteRepository.RetrieveWebSiteWithBindings(newsite.Id);
+                WebSite site = _webSiteRepository.RetrieveWebSiteWithBindings(newsite.Id);
 
                 Assert.IsNotNull(site);
                 Assert.IsNotNull(site.Bindings);
@@ -71,9 +75,9 @@ namespace AzureWebFarm.Tests.Controllers
             }
             finally
             {
-                string key = newsite.Id.ToString();
-                this.bindingTable.DeleteEntity(this.bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
-                this.webSiteTable.DeleteEntity(this.webSiteTable.Query.Where(b => b.RowKey == key));
+                var key = newsite.Id.ToString();
+                _bindingTable.DeleteEntity(_bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
+                _webSiteTable.DeleteEntity(_webSiteTable.Query.Where(b => b.RowKey == key));
             }
         }
     }

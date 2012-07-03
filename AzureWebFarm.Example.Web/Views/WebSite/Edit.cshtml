@@ -1,5 +1,5 @@
-﻿@using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Extensions
-@model Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.WebSiteModel
+﻿@using AzureWebFarm.Example.Web.Extensions
+@model AzureWebFarm.Example.Web.Models.WebSiteModel
 @{
     ViewBag.Title = "Edit";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -22,7 +22,7 @@
         </div>
         <div class="display-field">
             <span>
-                @this.Model.Name
+                @Model.Name
             </span>
         </div>
         <div class="display-label">
@@ -84,8 +84,8 @@
     <tbody>
         @{
             int k = 0;
-            int nbindings = this.Model.Bindings.Count();
-            foreach (var binding in this.Model.Bindings)
+            int nbindings = Model.Bindings.Count();
+            foreach (var binding in Model.Bindings)
             {
                 k++;
             <tr class="d@(k % 2)">
@@ -116,7 +116,7 @@
                     }
                     else
                     { 
-                        @binding.CertificateThumbprint;
+                        @binding.CertificateThumbprint
                     }
                 </td>
                 <td>

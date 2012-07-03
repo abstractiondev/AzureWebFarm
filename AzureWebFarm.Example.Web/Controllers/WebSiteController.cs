@@ -13,8 +13,8 @@ namespace AzureWebFarm.Example.Web.Controllers
     [Authorize]
     public class WebSiteController : Controller
     {
-        private readonly WebSiteRepository webSiteRepository;
-        private readonly CertificateRepository certificateRepository;
+        private readonly WebSiteRepository _webSiteRepository;
+        private readonly CertificateRepository _certificateRepository;
 
         public WebSiteController()
             : this(new WebSiteRepository(), new CertificateRepository())
@@ -23,31 +23,32 @@ namespace AzureWebFarm.Example.Web.Controllers
 
         public WebSiteController(WebSiteRepository webSiteRepository, CertificateRepository certificateRepository)
         {
-            this.webSiteRepository = webSiteRepository;
-            this.certificateRepository = certificateRepository;
+            _webSiteRepository = webSiteRepository;
+            _certificateRepository = certificateRepository;
         }
 
         public ActionResult Index()
         {
-            var webSites = this.webSiteRepository.RetrieveWebSitesWithBindings();
+            var webSites = _webSiteRepository.RetrieveWebSitesWithBindings();
             var model = webSites.Select(
                 s => new WebSiteModel
                 {
                     Id = s.Id,
                     Name = s.Name,
                     Description = s.Description,
-                    Url = this.GetDefaultBindingUrl(s),
-                    TestUrl = this.GetDefaultBindingTestUrl(s)
-                });
+                    Url = GetDefaultBindingUrl(s),
+                    TestUrl = GetDefaultBindingTestUrl(s)
+                }
+            );
 
             ViewBag.IsSyncEnabled = SyncService.IsSyncEnabled();
-            
+
             return View("List", model);
         }
 
         public ActionResult Edit(Guid id)
         {
-            var website = this.webSiteRepository.RetrieveWebSiteWithBindings(id);
+            WebSite website = _webSiteRepository.RetrieveWebSiteWithBindings(id);
             var model = new WebSiteModel
             {
                 Id = website.Id,
@@ -64,7 +65,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                     Port = b.Port,
                     Protocol = b.Protocol,
                     WebSiteId = b.WebSiteId,
-                    Url = this.GetBindingUrl(b)
+                    Url = GetBindingUrl(b)
                 })
             };
 
@@ -84,7 +85,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                     EnableCDNChildApplication = model.EnableCDNChildApplication,
                 };
 
-                this.webSiteRepository.UpdateWebSite(site);
+                _webSiteRepository.UpdateWebSite(site);
 
                 return RedirectToAction("Index");
             }
@@ -96,12 +97,12 @@ namespace AzureWebFarm.Example.Web.Controllers
 
         public ActionResult Create()
         {
-            var model = new WebSiteCreateModel()
+            var model = new WebSiteCreateModel
             {
                 Protocol = "http",
                 Port = 80,
                 IpAddress = "*",
-                Certificates = this.GetCertificatesList(),
+                Certificates = GetCertificatesList(),
                 EnableTestChildApplication = true,
                 EnableCDNChildApplication = true
             };
@@ -114,21 +115,21 @@ namespace AzureWebFarm.Example.Web.Controllers
         {
             try
             {
-                if (!this.ValidateDuplicatedSites(model.Name))
+                if (!ValidateDuplicatedSites(model.Name))
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
 
-                if (!this.ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
+                if (!ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
 
-                if (this.ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
+                if (ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
                 {
-                    var webSite = new WebSite()
+                    var webSite = new WebSite
                     {
                         Name = model.Name.Replace(" ", string.Empty).ToLowerInvariant(),
                         Description = model.Description,
@@ -136,7 +137,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                         EnableTestChildApplication = model.EnableTestChildApplication
                     };
 
-                    var binding = new Binding()
+                    var binding = new Binding
                     {
                         Port = model.Port,
                         Protocol = model.Protocol,
@@ -145,35 +146,35 @@ namespace AzureWebFarm.Example.Web.Controllers
                         CertificateThumbprint = model.CertificateThumbprint
                     };
 
-                    this.webSiteRepository.CreateWebSiteWithBinding(webSite, binding);
+                    _webSiteRepository.CreateWebSiteWithBinding(webSite, binding);
 
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
             }
             catch
             {
-                model.Certificates = this.GetCertificatesList();
+                model.Certificates = GetCertificatesList();
                 return View(model);
             }
         }
 
         public ActionResult Delete(Guid id)
         {
-            this.webSiteRepository.RemoveWebSite(id);
+            _webSiteRepository.RemoveWebSite(id);
 
             return RedirectToAction("Index");
         }
 
         public ActionResult CreateBinding(Guid webSiteId)
         {
-            var site = this.webSiteRepository.RetrieveWebSite(webSiteId);
+            var site = _webSiteRepository.RetrieveWebSite(webSiteId);
 
-            var model = new BindingModel()
+            var model = new BindingModel
             {
                 WebSiteId = webSiteId,
                 WebSiteName = site.Name,
@@ -181,7 +182,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                 Port = 80,
                 IpAddress = "*",
                 CertificateThumbprint = null,
-                Certificates = this.GetCertificatesList()
+                Certificates = GetCertificatesList()
             };
 
             return View(model);
@@ -192,15 +193,15 @@ namespace AzureWebFarm.Example.Web.Controllers
         {
             try
             {
-                if (!this.ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
+                if (!ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
 
-                if (this.ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
+                if (ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
                 {
-                    var binding = new Binding()
+                    var binding = new Binding
                     {
                         Port = model.Port,
                         Protocol = model.Protocol,
@@ -209,29 +210,29 @@ namespace AzureWebFarm.Example.Web.Controllers
                         CertificateThumbprint = model.CertificateThumbprint
                     };
 
-                    this.webSiteRepository.AddBindingToWebSite(webSiteId, binding);
+                    _webSiteRepository.AddBindingToWebSite(webSiteId, binding);
 
-                    return RedirectToAction("Edit", new { id = webSiteId });
+                    return RedirectToAction("Edit", new {id = webSiteId});
                 }
                 else
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
             }
             catch
             {
-                model.Certificates = this.GetCertificatesList();
+                model.Certificates = GetCertificatesList();
                 return View(model);
             }
         }
 
         public ActionResult EditBinding(Guid id)
         {
-            var binding = this.webSiteRepository.RetrieveBinding(id);
-            var site = this.webSiteRepository.RetrieveWebSite(binding.WebSiteId);
+            var binding = _webSiteRepository.RetrieveBinding(id);
+            var site = _webSiteRepository.RetrieveWebSite(binding.WebSiteId);
 
-            var model = new BindingModel()
+            var model = new BindingModel
             {
                 WebSiteId = id,
                 WebSiteName = site.Name,
@@ -240,7 +241,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                 Port = binding.Port,
                 HostName = binding.HostName,
                 CertificateThumbprint = binding.CertificateThumbprint,
-                Certificates = this.GetCertificatesList()
+                Certificates = GetCertificatesList()
             };
 
             return View(model);
@@ -251,49 +252,49 @@ namespace AzureWebFarm.Example.Web.Controllers
         {
             try
             {
-                if (!this.ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
+                if (!ValidateDuplicatedBinding(model.HostName, model.Protocol, model.Port))
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
 
-                if (this.ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
+                if (ValidateCertificateAndPort(model.CertificateThumbprint, model.Port, model.Protocol))
                 {
-                    Binding binding = this.webSiteRepository.RetrieveBinding(id);
+                    var binding = _webSiteRepository.RetrieveBinding(id);
                     binding.Port = model.Port;
                     binding.Protocol = model.Protocol;
                     binding.HostName = model.HostName;
                     binding.IpAddress = model.IpAddress;
                     binding.CertificateThumbprint = model.CertificateThumbprint;
 
-                    this.webSiteRepository.UpdateBinding(binding);
+                    _webSiteRepository.UpdateBinding(binding);
 
-                    return RedirectToAction("Edit", new { id = binding.WebSiteId });
+                    return RedirectToAction("Edit", new {id = binding.WebSiteId});
                 }
                 else
                 {
-                    model.Certificates = this.GetCertificatesList();
+                    model.Certificates = GetCertificatesList();
                     return View(model);
                 }
             }
             catch
             {
-                model.Certificates = this.GetCertificatesList();
+                model.Certificates = GetCertificatesList();
                 return View(model);
             }
         }
 
         public ActionResult DeleteBinding(Guid id)
         {
-            Binding binding = this.webSiteRepository.RetrieveBinding(id);
-            this.webSiteRepository.RemoveBinding(id);
+            var binding = _webSiteRepository.RetrieveBinding(id);
+            _webSiteRepository.RemoveBinding(id);
 
-            return RedirectToAction("Edit", new { id = binding.WebSiteId });
+            return RedirectToAction("Edit", new {id = binding.WebSiteId});
         }
 
         private IEnumerable<SelectListItem> GetCertificatesList()
         {
-            return this.certificateRepository.RetrieveCertificates()
+            return _certificateRepository.RetrieveCertificates()
                 .Select(
                     c => new SelectListItem
                     {
@@ -314,7 +315,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                 }
                 else
                 {
-                    foreach (var bind in this.webSiteRepository.RetrieveBindingsForPort(port))
+                    foreach (var bind in _webSiteRepository.RetrieveBindingsForPort(port))
                     {
                         if (bind.CertificateThumbprint != certificateHash)
                         {
@@ -336,7 +337,7 @@ namespace AzureWebFarm.Example.Web.Controllers
                 return null;
             }
 
-            return this.GetUrl(defaultBinding.Protocol, defaultBinding.HostName, defaultBinding.Port);
+            return GetUrl(defaultBinding.Protocol, defaultBinding.HostName, defaultBinding.Port);
         }
 
         private string GetDefaultBindingTestUrl(WebSite webSite)
@@ -352,21 +353,17 @@ namespace AzureWebFarm.Example.Web.Controllers
                 return null;
             }
 
-            return this.GetTestUrl(Request.Url.Scheme + "://" + Request.Url.Authority, webSite.Name);
+            return GetTestUrl(Request.Url.Scheme + "://" + Request.Url.Authority, webSite.Name);
         }
 
         private string GetBindingUrl(Binding b)
         {
-            return this.GetUrl(b.Protocol, b.HostName, b.Port);
+            return GetUrl(b.Protocol, b.HostName, b.Port);
         }
 
         private string GetUrl(string protocol, string hostName, int port)
         {
-            return string.Format(
-                "{0}://{1}{2}",
-                protocol,
-                hostName,
-                (port <= 0 | port == 80 ? string.Empty : ":" + port.ToString(CultureInfo.InvariantCulture)));
+            return string.Format("{0}://{1}{2}", protocol, hostName, (port <= 0 | port == 80 ? string.Empty : ":" + port.ToString(CultureInfo.InvariantCulture)));
         }
 
         private string GetTestUrl(string adminSiteUrl, string siteName)
@@ -376,7 +373,7 @@ namespace AzureWebFarm.Example.Web.Controllers
 
         private bool ValidateDuplicatedBinding(string hostname, string protocol, int port)
         {
-            foreach (var bind in this.webSiteRepository.RetrieveBindingsForPort(port))
+            foreach (var bind in _webSiteRepository.RetrieveBindingsForPort(port))
             {
                 if (bind.HostName == hostname && bind.Protocol == protocol)
                 {
@@ -390,7 +387,7 @@ namespace AzureWebFarm.Example.Web.Controllers
 
         private bool ValidateDuplicatedSites(string siteName)
         {
-            foreach (var sites in this.webSiteRepository.RetrieveWebSites())
+            foreach (var sites in _webSiteRepository.RetrieveWebSites())
             {
                 if (sites.Name == siteName)
                 {
@@ -399,7 +396,6 @@ namespace AzureWebFarm.Example.Web.Controllers
                 }
             }
             return true;
-
         }
     }
 }

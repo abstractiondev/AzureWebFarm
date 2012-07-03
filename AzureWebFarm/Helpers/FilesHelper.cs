@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using AzureWebFarm.Extensions;
 
 namespace AzureWebFarm.Helpers

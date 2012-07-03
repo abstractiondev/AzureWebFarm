@@ -16,7 +16,7 @@ namespace AzureWebFarm.Example.Web
 {
     public class WebRole : RoleEntryPoint
     {
-        private SyncService syncService;
+        private SyncService _syncService;
 
         public override bool OnStart()
         {
@@ -53,22 +53,24 @@ namespace AzureWebFarm.Example.Web
             certRepo.PopulateRepository();
 
             // Create the sync service and update the sites status
-            this.syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
-            this.syncService.Start();
+            _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
+            _syncService.Start();
 
             return base.OnStart();
         }
 
+        // ReSharper disable FunctionNeverReturns
         public override void Run()
         {
             Trace.TraceInformation("WebRole.Run");
             var syncInterval = int.Parse(RoleEnvironment.GetConfigurationSettingValue("SyncIntervalInSeconds"), CultureInfo.InvariantCulture);
-            this.syncService.SyncForever(TimeSpan.FromSeconds(syncInterval));
+            _syncService.SyncForever(TimeSpan.FromSeconds(syncInterval));
             while (true)
             {
                 System.Threading.Thread.Sleep(10000);
             }
         }
+        // ReSharper restore FunctionNeverReturns
 
         public override void OnStop()
         {
@@ -76,7 +78,7 @@ namespace AzureWebFarm.Example.Web
 
             // Set the sites as not synced for this instance
             var roleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName;
-            this.syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
+            _syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
 
             base.OnStop();
         }
@@ -84,10 +86,10 @@ namespace AzureWebFarm.Example.Web
         private static void ConfigureDiagnosticMonitor()
         {
             var transferPeriod = TimeSpan.FromMinutes(5);
-            var bufferQuotaInMB = 100;
+            const int bufferQuotaInMB = 100;
 
             // Add Windows Azure Trace Listener
-            System.Diagnostics.Trace.Listeners.Add(new Microsoft.WindowsAzure.Diagnostics.DiagnosticMonitorTraceListener());
+            Trace.Listeners.Add(new DiagnosticMonitorTraceListener());
 
             // Enable Collection of Crash Dumps
             CrashDumps.EnableCollection(true);
@@ -124,12 +126,7 @@ namespace AzureWebFarm.Example.Web
                 @"\ASP.NET\Requests Queued",
             };
 
-            counters.ForEach(
-                counter =>
-                {
-                    config.PerformanceCounters.DataSources.Add(
-                        new PerformanceCounterConfiguration { CounterSpecifier = counter, SampleRate = TimeSpan.FromSeconds(60) });
-                });
+            counters.ForEach(counter => config.PerformanceCounters.DataSources.Add(new PerformanceCounterConfiguration { CounterSpecifier = counter, SampleRate = TimeSpan.FromSeconds(60) }));
             config.PerformanceCounters.ScheduledTransferPeriod = transferPeriod;
             config.PerformanceCounters.BufferQuotaInMB = bufferQuotaInMB;
 

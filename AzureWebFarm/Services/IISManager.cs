@@ -18,17 +18,17 @@ namespace AzureWebFarm.Services
 {
     public class IISManager
     {
-        private readonly SyncStatusRepository syncStatusRepository;
-        private readonly string localSitesPath;
-        private readonly string tempSitesPath;
+        private readonly SyncStatusRepository _syncStatusRepository;
+        private readonly string _localSitesPath;
+        private readonly string _tempSitesPath;
 
         public static string RoleWebSiteName = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web" : "Default Web Site";
 
         public IISManager(string localSitesPath, string tempSitesPath, SyncStatusRepository syncStatusRepository)
         {
-            this.syncStatusRepository = syncStatusRepository;
-            this.localSitesPath = localSitesPath;
-            this.tempSitesPath = tempSitesPath;
+            _syncStatusRepository = syncStatusRepository;
+            _localSitesPath = localSitesPath;
+            _tempSitesPath = tempSitesPath;
         }
 
         public void UpdateSites(IEnumerable<WebSite> sites, bool removeOtherSites = true)
@@ -63,8 +63,8 @@ namespace AzureWebFarm.Services
                             // Remove site path
                             try
                             {
-                                var sitePath = Path.Combine(this.localSitesPath, iisSite.Name);
-                                var tempSitePath = Path.Combine(this.tempSitesPath, iisSite.Name);
+                                var sitePath = Path.Combine(_localSitesPath, iisSite.Name);
+                                var tempSitePath = Path.Combine(_tempSitesPath, iisSite.Name);
 
                                 FilesHelper.RemoveFolder(sitePath);
                                 FilesHelper.RemoveFolder(tempSitePath);
@@ -102,13 +102,13 @@ namespace AzureWebFarm.Services
                 {
                     var siteName = site.Name.ToLowerInvariant().Replace(" ", string.Empty);
                     var iisSite = serverManager.Sites.SingleOrDefault(ap => ap.Name.Equals(siteName, StringComparison.OrdinalIgnoreCase));
-                    var sitePath = Path.Combine(this.localSitesPath, siteName);
+                    var sitePath = Path.Combine(_localSitesPath, siteName);
 
                     // Add new sites
                     if (iisSite == null)
                     {
                         // Update Status
-                        this.UpdateSyncStatus(siteName, SyncInstanceStatus.NotCreated);
+                        UpdateSyncStatus(siteName, SyncInstanceStatus.NotCreated);
 
                         // Create physical path
                         if (!Directory.Exists(sitePath))
@@ -190,7 +190,7 @@ namespace AzureWebFarm.Services
                         UpdateApplications(site, serverManager, siteName, sitePath, appPool);
 
                         // Update Sync Status
-                        this.UpdateSyncStatus(siteName, SyncInstanceStatus.Created);
+                        UpdateSyncStatus(siteName, SyncInstanceStatus.Created);
                     }
                     else
                     {
@@ -242,7 +242,7 @@ namespace AzureWebFarm.Services
                     }
                     catch (Exception e)
                     {
-                        this.UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
+                        UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
                         Trace.TraceError("IISManager.CommitChanges for site '{0}'{1}{2}", site.Name, Environment.NewLine, e.TraceInformation());
                     }
                 }
@@ -342,7 +342,7 @@ namespace AzureWebFarm.Services
 
         private void UpdateSyncStatus(string webSiteName, SyncInstanceStatus status)
         {
-            if (this.syncStatusRepository != null)
+            if (_syncStatusRepository != null)
             {
                 var syncStatus = new SyncStatus
                 {
@@ -353,7 +353,7 @@ namespace AzureWebFarm.Services
                     IsOnline = true
                 };
 
-                this.syncStatusRepository.UpdateStatus(syncStatus);
+                _syncStatusRepository.UpdateStatus(syncStatus);
             }
         }
     }

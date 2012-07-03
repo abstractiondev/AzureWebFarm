@@ -7,7 +7,7 @@ namespace AzureWebFarm.Storage
     {
         public BindingRow()
             : this(Guid.NewGuid())
-        { 
+        {
         }
 
         public BindingRow(Guid id)

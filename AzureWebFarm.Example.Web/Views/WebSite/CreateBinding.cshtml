@@ -1,5 +1,5 @@
-﻿@using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Extensions
-@model Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.BindingModel
+﻿@using AzureWebFarm.Example.Web.Extensions
+@model AzureWebFarm.Example.Web.Models.BindingModel
 @{
     ViewBag.Title = "Add Binding to Web Site";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -7,7 +7,7 @@
 <h2>
     Add Binding to Web Site</h2>
 <p>
-    @Html.ActionLink("back to edit web site", "Edit", new { id = this.Model.WebSiteId })
+    @Html.ActionLink("back to edit web site", "Edit", new { id = Model.WebSiteId })
 </p>
 <script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
@@ -27,14 +27,13 @@
             @Html.LabelFor(model => model.WebSiteName)
         </div>
         <div class="editor-field">
-            <span>@this.Model.WebSiteName</span>
+            <span>@Model.WebSiteName</span>
         </div>
         <div class="editor-label">
             @Html.LabelFor(model => model.Protocol)
         </div>
         <div class="editor-field">
-            @Html.DropDownListFor(model => model.Protocol, new SelectList(
-                            new string[] { "http", "https" }))
+            @Html.DropDownListFor(model => model.Protocol, new SelectList(new[] { "http", "https" }))
             @*new string[] { "http", "https", "net.tcp", "net.pipe", "net.msmq", "msmq.formatname" }))*@
             @Html.DisplayHelpFor(model => model.Protocol, "HelpMessage")
             @Html.ValidationMessageFor(model => model.Protocol)
@@ -68,7 +67,7 @@
             @Html.LabelFor(model => model.CertificateThumbprint)
         </div>
         <div class="editor-field">
-            @Html.DropDownListFor(model => model.CertificateThumbprint, this.Model.Certificates, "Not Selected")
+            @Html.DropDownListFor(model => model.CertificateThumbprint, Model.Certificates, "Not Selected")
             @Html.DisplayHelpFor(model => model.CertificateThumbprint, "HelpMessage")
             @Html.ValidationMessageFor(model => model.CertificateThumbprint)
         </div>

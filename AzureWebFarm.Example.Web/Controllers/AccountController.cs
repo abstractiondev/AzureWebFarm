@@ -16,7 +16,7 @@ namespace AzureWebFarm.Example.Web.Controllers
         [HttpPost]
         public ActionResult LogOn(LogOnModel model, string returnUrl)
         {
-            if (this.ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 if (ValidateUser(model.UserName, model.Password))
                 {

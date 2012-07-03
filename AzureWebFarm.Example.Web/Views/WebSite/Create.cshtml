@@ -1,6 +1,5 @@
-﻿@using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Extensions
-
-@model Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models.WebSiteCreateModel
+﻿@using AzureWebFarm.Example.Web.Extensions
+@model AzureWebFarm.Example.Web.Models.WebSiteCreateModel
 
 @{
 	ViewBag.Title = "New Web Site";
@@ -48,8 +47,7 @@
 		</div>
 		<div class="editor-field">
 		   @* @Html.EditorFor(model => model.Protocol)*@
-			@Html.DropDownListFor(model => model.Protocol, new SelectList(
-							new string[] { "http", "https" }))
+			@Html.DropDownListFor(model => model.Protocol, new SelectList(new[] { "http", "https" }))
 			@Html.DisplayHelpFor(model => model.Protocol, "HelpMessage")
 			@Html.ValidationMessageFor(model => model.Protocol)
 		</div>
@@ -85,7 +83,7 @@
 			@Html.LabelFor(model => model.CertificateThumbprint)
 		</div>
 		<div class="editor-field">
-			@Html.DropDownListFor(model => model.CertificateThumbprint, this.Model.Certificates, "Not Selected")
+			@Html.DropDownListFor(model => model.CertificateThumbprint, Model.Certificates, "Not Selected")
 			@Html.DisplayHelpFor(model => model.CertificateThumbprint, "HelpMessage")
 			@Html.ValidationMessageFor(model => model.CertificateThumbprint)
 		</div>

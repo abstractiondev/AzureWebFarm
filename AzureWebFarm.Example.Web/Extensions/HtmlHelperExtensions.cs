@@ -15,7 +15,7 @@ namespace AzureWebFarm.Example.Web.Extensions
 
             if (expressionBody is MemberExpression)
             {
-                MemberExpression memberExpression = (MemberExpression)expressionBody;
+                var memberExpression = (MemberExpression)expressionBody;
                 string propertyName = memberExpression.Member.Name;
                 
                 return html.DisplayFor(expression, templateName, new { Message = html.ViewData.ModelMetadata.Properties.Single(p => p.PropertyName == propertyName).Description });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
 
 namespace AzureWebFarm.Example.Web.Models
 {
@@ -68,7 +69,7 @@ namespace AzureWebFarm.Example.Web.Models
         [Display(Description = "Maps the contents of the CDN folder of your site to the administration site's CDN folder to enable publishing through the Content Delivery Network (CDN).")]
         public bool EnableCDNChildApplication { get; set; }
 
-        public IEnumerable<System.Web.Mvc.SelectListItem> Certificates { get; set; }
+        public IEnumerable<SelectListItem> Certificates { get; set; }
     }
 
     public class BindingModel
@@ -103,6 +104,6 @@ namespace AzureWebFarm.Example.Web.Models
 
         public string Url { get; set; }
 
-        public IEnumerable<System.Web.Mvc.SelectListItem> Certificates { get; set; }
+        public IEnumerable<SelectListItem> Certificates { get; set; }
     }
 }

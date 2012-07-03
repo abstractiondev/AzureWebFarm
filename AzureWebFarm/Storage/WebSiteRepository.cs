@@ -9,8 +9,8 @@ namespace AzureWebFarm.Storage
 {
     public class WebSiteRepository
     {
-        private readonly AzureTable<WebSiteRow> webSiteTable;
         private readonly AzureTable<BindingRow> bindingTable;
+        private readonly AzureTable<WebSiteRow> webSiteTable;
 
         public WebSiteRepository()
             : this("DataConnectionString")
@@ -43,86 +43,86 @@ namespace AzureWebFarm.Storage
 
         public void CreateWebSite(WebSite webSite)
         {
-            this.webSiteTable.AddEntity(webSite.ToRow());
+            webSiteTable.AddEntity(webSite.ToRow());
         }
 
         public void CreateWebSiteWithBinding(WebSite webSite, Binding binding)
         {
             binding.WebSiteId = webSite.Id;
 
-            this.webSiteTable.AddEntity(webSite.ToRow());
-            this.bindingTable.AddEntity(binding.ToRow());
+            webSiteTable.AddEntity(webSite.ToRow());
+            bindingTable.AddEntity(binding.ToRow());
         }
 
         public void AddBindingToWebSite(Guid webSiteId, Binding binding)
         {
             binding.WebSiteId = webSiteId;
-            this.bindingTable.AddEntity(binding.ToRow());
+            bindingTable.AddEntity(binding.ToRow());
         }
 
         public void RemoveBinding(Guid bindingId)
         {
             string key = bindingId.ToString();
-            this.bindingTable.DeleteEntity(this.bindingTable.Query.Where(b => b.RowKey == key));
+            bindingTable.DeleteEntity(bindingTable.Query.Where(b => b.RowKey == key));
         }
 
         public void EditBinding(Binding binding)
         {
-            this.bindingTable.AddOrUpdateEntity(binding.ToRow());
+            bindingTable.AddOrUpdateEntity(binding.ToRow());
         }
 
         public void UpdateWebSite(WebSite webSite)
         {
-            this.webSiteTable.AddOrUpdateEntity(webSite.ToRow());
+            webSiteTable.AddOrUpdateEntity(webSite.ToRow());
         }
 
         public void UpdateBinding(Binding binding)
         {
-            this.bindingTable.AddOrUpdateEntity(binding.ToRow());
+            bindingTable.AddOrUpdateEntity(binding.ToRow());
         }
 
         public void RemoveWebSite(Guid webSiteId)
         {
             string key = webSiteId.ToString();
 
-            var websites = this.webSiteTable.Query.Where(ws => ws.RowKey == key);
-            var bindings = this.bindingTable.Query.Where(b => b.WebSiteId == webSiteId);
+            var websites = webSiteTable.Query.Where(ws => ws.RowKey == key);
+            var bindings = bindingTable.Query.Where(b => b.WebSiteId == webSiteId);
 
-            this.webSiteTable.DeleteEntity(websites);
-            this.bindingTable.DeleteEntity(bindings);
+            webSiteTable.DeleteEntity(websites);
+            bindingTable.DeleteEntity(bindings);
         }
 
         public WebSite RetrieveWebSite(Guid webSiteId)
         {
             string key = webSiteId.ToString();
 
-            return this.webSiteTable.Query.Where(ws => ws.RowKey == key).FirstOrDefault().ToModel();
+            return webSiteTable.Query.Where(ws => ws.RowKey == key).FirstOrDefault().ToModel();
         }
 
         public Binding RetrieveBinding(Guid bindingId)
         {
             string key = bindingId.ToString();
 
-            return this.bindingTable.Query.Where(b => b.RowKey == key).FirstOrDefault().ToModel();
+            return bindingTable.Query.Where(b => b.RowKey == key).FirstOrDefault().ToModel();
         }
 
         public WebSite RetrieveWebSiteWithBindings(Guid webSiteId)
         {
-            WebSite website = this.RetrieveWebSite(webSiteId);
+            WebSite website = RetrieveWebSite(webSiteId);
 
-            website.Bindings = this.RetrieveWebSiteBindings(webSiteId);
+            website.Bindings = RetrieveWebSiteBindings(webSiteId);
 
             return website;
         }
 
         public IEnumerable<Binding> RetrieveWebSiteBindings(Guid webSiteId)
         {
-            return this.bindingTable.Query.Where(b => b.WebSiteId == webSiteId).ToList().Select(b => b.ToModel()).ToList();
+            return bindingTable.Query.Where(b => b.WebSiteId == webSiteId).ToList().Select(b => b.ToModel()).ToList();
         }
 
         public IEnumerable<Binding> RetrieveCertificateBindings(string certificateHash)
         {
-            var bindings = this.bindingTable.Query.Where(b => b.CertificateThumbprint == certificateHash).ToList().Select(b => b.ToModel()).ToList();
+            var bindings = bindingTable.Query.Where(b => b.CertificateThumbprint == certificateHash).ToList().Select(b => b.ToModel()).ToList();
 
             var sites = new Dictionary<Guid, WebSite>();
 
@@ -130,7 +130,7 @@ namespace AzureWebFarm.Storage
             {
                 if (!sites.ContainsKey(binding.WebSiteId))
                 {
-                    sites[binding.WebSiteId] = this.RetrieveWebSite(binding.WebSiteId);
+                    sites[binding.WebSiteId] = RetrieveWebSite(binding.WebSiteId);
                 }
 
                 binding.WebSite = sites[binding.WebSiteId];
@@ -141,27 +141,27 @@ namespace AzureWebFarm.Storage
 
         public IEnumerable<Binding> RetrieveBindingsForPort(int port)
         {
-            return this.bindingTable.Query.Where(b => b.Port == port).ToList().Select(b => b.ToModel()).ToList();
+            return bindingTable.Query.Where(b => b.Port == port).ToList().Select(b => b.ToModel()).ToList();
         }
 
         public void AddBindingToWebSite(WebSite webSite, Binding binding)
         {
             binding.WebSiteId = webSite.Id;
-            this.bindingTable.AddEntity(binding.ToRow());
+            bindingTable.AddEntity(binding.ToRow());
         }
 
         public IEnumerable<WebSite> RetrieveWebSites()
         {
-            return this.webSiteTable.Query.ToList().OrderBy(t => t.Name).Select(ws => ws.ToModel()).ToList();
+            return webSiteTable.Query.ToList().OrderBy(t => t.Name).Select(ws => ws.ToModel()).ToList();
         }
 
         public IEnumerable<WebSite> RetrieveWebSitesWithBindings()
         {
-            var sites = this.RetrieveWebSites();
+            var sites = RetrieveWebSites();
 
             foreach (var site in sites)
             {
-                site.Bindings = this.RetrieveWebSiteBindings(site.Id);
+                site.Bindings = RetrieveWebSiteBindings(site.Id);
             }
 
             return sites;
