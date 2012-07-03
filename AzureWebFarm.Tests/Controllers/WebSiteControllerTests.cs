@@ -65,7 +65,7 @@ namespace AzureWebFarm.Tests.Controllers
 
                 Assert.AreEqual(model.Port, binding.Port);
                 Assert.AreEqual(site.Id, binding.WebSiteId);
-                Assert.AreEqual(model.IpAddress, binding.IpAddress);
+                Assert.AreEqual("*", binding.IpAddress);
                 Assert.AreEqual(model.HostName, binding.HostName);
                 Assert.AreEqual(model.Protocol, binding.Protocol);
             }
