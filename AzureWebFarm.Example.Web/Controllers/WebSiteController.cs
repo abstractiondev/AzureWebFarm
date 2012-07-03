@@ -295,13 +295,12 @@ namespace AzureWebFarm.Example.Web.Controllers
         private IEnumerable<SelectListItem> GetCertificatesList()
         {
             return _certificateRepository.RetrieveCertificates()
-                .Select(
-                    c => new SelectListItem
+                .Select(c => new SelectListItem
                     {
                         Value = c.Thumbprint,
                         Text = c.Thumbprint
-                    })
-                .ToList();
+                    }
+                ).ToList();
         }
 
         private bool ValidateCertificateAndPort(string certificateHash, int port, string protocol)
