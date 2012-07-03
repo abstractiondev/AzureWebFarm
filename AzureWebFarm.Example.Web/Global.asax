@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="Microsoft.Samples.DPE.AzureMultiTenantApp.Web.MvcApplication" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="AzureWebFarm.Example.Web.MvcApplication" Language="C#" %>
