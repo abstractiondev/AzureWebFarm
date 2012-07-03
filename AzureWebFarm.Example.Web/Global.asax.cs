@@ -18,9 +18,7 @@ namespace AzureWebFarm.Example.Web
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.MapRoute(
-                "Default",
-                "{controller}/{action}/{id}",
+            routes.MapRoute("Default", "{controller}/{action}/{id}",
                 new { controller = "WebSite", action = "Index", id = UrlParameter.Optional });
         }
 
