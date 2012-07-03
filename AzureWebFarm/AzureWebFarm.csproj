@@ -75,6 +75,18 @@
     <Compile Include="Storage\WebSiteRepository.cs" />
     <Compile Include="Storage\WebSiteRow.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LandingPage.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LandingStyle.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\PublishImage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SolutionImage.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
