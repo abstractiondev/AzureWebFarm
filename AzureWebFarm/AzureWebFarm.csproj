@@ -61,7 +61,6 @@
     <Compile Include="Extensions\TableStorageExtensionMethods.cs" />
     <Compile Include="Helpers\AzureRoleEnvironment.cs" />
     <Compile Include="Helpers\FilesHelper.cs" />
-    <Compile Include="Helpers\WindowsAzureHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IISManager.cs" />
     <Compile Include="Services\SyncService.cs" />
