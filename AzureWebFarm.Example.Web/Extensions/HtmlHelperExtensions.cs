@@ -1,12 +1,12 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Extensions
-{
-    using System;
-    using System.Globalization;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Web.Mvc;
-    using System.Web.Mvc.Html;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Web.Mvc;
+using System.Web.Mvc.Html;
 
+namespace AzureWebFarm.Example.Web.Extensions
+{
     public static class HtmlHelperExtensions
     {
         public static MvcHtmlString DisplayHelpFor<TModel, TValue>(this HtmlHelper<TModel> html, Expression<Func<TModel, TValue>> expression, string templateName)

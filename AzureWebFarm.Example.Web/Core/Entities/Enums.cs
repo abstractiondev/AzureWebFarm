@@ -1,7 +1,5 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities
+﻿namespace AzureWebFarm.Example.Web.Core.Entities
 {
-    using System;
-
     public enum SyncInstanceStatus
     {
         NotCreated,

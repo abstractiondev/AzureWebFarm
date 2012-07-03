@@ -1,12 +1,12 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using System.IO;
-    using System.Web.Script.Serialization;
-    using System.Xml.Serialization;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using System;
+using System.IO;
+using System.Web.Script.Serialization;
+using System.Xml.Serialization;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class AzureBlobContainer<T> : IAzureBlobContainer<T>
     {
         private readonly CloudStorageAccount account;

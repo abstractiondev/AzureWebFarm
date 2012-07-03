@@ -1,7 +1,7 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models
-{
-    using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace AzureWebFarm.Example.Web.Models
+{
     public class LogOnModel
     {
         [Required]

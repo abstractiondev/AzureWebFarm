@@ -1,17 +1,15 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.WindowsAzure;
-    using System.Diagnostics;
-    using System.Web.Helpers;
-    using System.IO;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using System.Diagnostics;
+using System.Web.Helpers;
+using System.IO;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class CertificateRepository
     {
 

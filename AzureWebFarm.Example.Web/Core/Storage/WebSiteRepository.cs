@@ -1,12 +1,12 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.WindowsAzure;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using Microsoft.WindowsAzure;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class WebSiteRepository
     {
         private readonly AzureTable<WebSiteRow> webSiteTable;

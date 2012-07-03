@@ -1,13 +1,13 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class SyncStatusRepository
     {
         private readonly IAzureTable<SyncStatusRow> table;

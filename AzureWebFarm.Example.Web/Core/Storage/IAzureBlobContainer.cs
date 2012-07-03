@@ -1,8 +1,8 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using System.IO;
+﻿using System;
+using System.IO;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public interface IAzureBlobContainer<T>
     {
         void EnsureExist();

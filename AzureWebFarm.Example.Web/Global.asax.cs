@@ -1,11 +1,11 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web
-{
-    using System.Configuration;
-    using System.Web.Mvc;
-    using System.Web.Routing;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System.Configuration;
+using System.Web.Mvc;
+using System.Web.Routing;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web
+{
     public class MvcApplication : System.Web.HttpApplication
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)

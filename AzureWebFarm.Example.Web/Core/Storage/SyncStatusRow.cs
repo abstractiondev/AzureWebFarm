@@ -1,8 +1,7 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class SyncStatusRow : TableServiceEntity
     {
         public SyncStatusRow()

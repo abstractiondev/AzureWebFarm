@@ -1,8 +1,8 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models
-{
-    using System;
-    using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
+namespace AzureWebFarm.Example.Web.Models
+{
     public class LogMessageModel
     {
         [Display(Name = "LogTimestamp")]

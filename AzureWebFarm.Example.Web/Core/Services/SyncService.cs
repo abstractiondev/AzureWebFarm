@@ -1,21 +1,21 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Helpers;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.Web.Administration;
-    using Microsoft.Web.Deployment;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.ServiceRuntime;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using AzureWebFarm.Example.Web.Core.Helpers;
+using AzureWebFarm.Example.Web.Core.Storage;
+using Microsoft.Web.Administration;
+using Microsoft.Web.Deployment;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Services
+{
     public class SyncService
     {
         private const string BlobStopName = "stop";

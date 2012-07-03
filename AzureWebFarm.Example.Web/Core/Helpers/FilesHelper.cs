@@ -1,10 +1,10 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Helpers
-{
-    using System;
-    using System.IO;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using System.Diagnostics;
+﻿using System;
+using System.IO;
+using System.Diagnostics;
+using AzureWebFarm.Example.Web.Core.Extensions;
 
+namespace AzureWebFarm.Example.Web.Core.Helpers
+{
     public static class FilesHelper
     {
         public static void RemoveFolder(string folderPath)

@@ -1,13 +1,12 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Controllers
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Web.Mvc;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services;
+﻿using System;
+using System.Linq;
+using System.Web.Mvc;
+using AzureWebFarm.Example.Web.Core.Services;
+using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Example.Web.Models;
 
+namespace AzureWebFarm.Example.Web.Controllers
+{
     [Authorize]
     public class SyncController : Controller
     {

@@ -1,23 +1,19 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Configuration;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Net;
-    using System.Security.AccessControl;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.Diagnostics;
-    using Microsoft.WindowsAzure.Diagnostics.Management;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Net;
+using System.Security.AccessControl;
+using AzureWebFarm.Example.Web.Core.Services;
+using AzureWebFarm.Example.Web.Core.Storage;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Diagnostics;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web
+{
     public class WebRole : RoleEntryPoint
     {
         private SyncService syncService;

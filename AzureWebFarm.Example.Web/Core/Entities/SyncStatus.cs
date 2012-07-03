@@ -1,7 +1,7 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities
-{
-    using System;
+﻿using System;
 
+namespace AzureWebFarm.Example.Web.Core.Entities
+{
     public class SyncStatus
     {
         public DateTime SyncTimestamp { get; set; }

@@ -1,9 +1,9 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions
-{
-    using System;
-    using System.Reflection;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using System;
+using System.Reflection;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Extensions
+{
     public static class TableStorageExtensionMethods
     {
         public static bool CreateTableIfNotExist<T>(this CloudTableClient tableStorage, string entityName)

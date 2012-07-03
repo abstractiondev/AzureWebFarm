@@ -1,9 +1,9 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions
-{
-    using System;
-    using System.Globalization;
-    using System.Text;
+﻿using System;
+using System.Globalization;
+using System.Text;
 
+namespace AzureWebFarm.Example.Web.Core.Extensions
+{
     public static class ExceptionExtensions
     {
         private const string Line = "==============================================================================";

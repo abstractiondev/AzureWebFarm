@@ -1,21 +1,22 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Security.Cryptography.X509Certificates;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Helpers;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.Web.Administration;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using AzureWebFarm.Example.Web.Core.Helpers;
+using AzureWebFarm.Example.Web.Core.Storage;
+using Microsoft.Web.Administration;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Binding = AzureWebFarm.Example.Web.Core.Entities.Binding;
 
+namespace AzureWebFarm.Example.Web.Core.Services
+{
     public class IISManager
     {
         private readonly SyncStatusRepository syncStatusRepository;
@@ -320,7 +321,7 @@
             return address + ":" + port.ToString(CultureInfo.InvariantCulture) + ":" + hostName;
         }
 
-        private static bool AreEqualsBindings(Microsoft.Web.Administration.Binding iisBinding, Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities.Binding binding)
+        private static bool AreEqualsBindings(Microsoft.Web.Administration.Binding iisBinding, Binding binding)
         {
             var bindingAdress = binding.IpAddress == "*" ? "0.0.0.0" : binding.IpAddress;
 

@@ -1,14 +1,14 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Tests.Controllers
-{
-    using System;
-    using System.Linq;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Controllers;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure;
+﻿using System;
+using System.Linq;
+using AzureWebFarm.Example.Web.Controllers;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Example.Web.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.WindowsAzure;
 
+namespace AzureWebFarm.Tests.Controllers
+{
     [TestClass]
     public class WebSiteControllerTests
     {

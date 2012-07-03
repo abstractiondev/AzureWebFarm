@@ -1,13 +1,13 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System.Collections.Generic;
-    using System.Data.Services.Client;
-    using System.Globalization;
-    using System.Linq;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using System.Collections.Generic;
+using System.Data.Services.Client;
+using System.Globalization;
+using System.Linq;
+using AzureWebFarm.Example.Web.Core.Extensions;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public class AzureTable<T> : IAzureTable<T> where T : TableServiceEntity, new()
     {
         private readonly string tableName;

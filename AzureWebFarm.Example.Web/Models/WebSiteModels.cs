@@ -1,10 +1,9 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Web.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
+namespace AzureWebFarm.Example.Web.Models
+{
     public class WebSiteModel
     {
         public Guid Id { get; set; }

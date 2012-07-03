@@ -1,14 +1,14 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Tests.Services
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Services;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+namespace AzureWebFarm.Tests.Services
+{
     [TestClass]
     public class IISManagerTests
     {

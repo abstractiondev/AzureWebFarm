@@ -1,7 +1,7 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions
-{
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Extensions
+{
     public static class BlobExtensions
     {
         public static bool Exists(this CloudBlob blob)

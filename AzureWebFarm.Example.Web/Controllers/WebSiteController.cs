@@ -1,15 +1,15 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Controllers
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Web.Mvc;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Services;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Web.Mvc;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Services;
+using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Example.Web.Models;
 
+namespace AzureWebFarm.Example.Web.Controllers
+{
     [Authorize]
     public class WebSiteController : Controller
     {

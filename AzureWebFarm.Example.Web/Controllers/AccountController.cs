@@ -1,11 +1,11 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Controllers
-{
-    using System;
-    using System.Web.Mvc;
-    using System.Web.Security;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Models;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using System.Web.Mvc;
+using System.Web.Security;
+using AzureWebFarm.Example.Web.Models;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web.Controllers
+{
     public class AccountController : Controller
     {
         public ActionResult LogOn()

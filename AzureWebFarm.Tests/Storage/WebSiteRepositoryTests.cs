@@ -1,13 +1,13 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Tests.Storage
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Storage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.WindowsAzure;
 
+namespace AzureWebFarm.Tests.Storage
+{
     [TestClass]
     public class WebSiteRepositoryTests
     {

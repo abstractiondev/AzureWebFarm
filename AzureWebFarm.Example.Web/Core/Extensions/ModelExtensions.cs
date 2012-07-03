@@ -1,10 +1,10 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Extensions
-{
-    using System;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities;
-    using Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage;
-    using Microsoft.WindowsAzure.ServiceRuntime;
+﻿using System;
+using AzureWebFarm.Example.Web.Core.Entities;
+using AzureWebFarm.Example.Web.Core.Storage;
+using Microsoft.WindowsAzure.ServiceRuntime;
 
+namespace AzureWebFarm.Example.Web.Core.Extensions
+{
     public static class ModelExtensions
     {
         public static WebSite ToModel(this WebSiteRow row)

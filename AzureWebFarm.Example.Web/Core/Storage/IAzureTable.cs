@@ -1,9 +1,9 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Storage
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.WindowsAzure.StorageClient;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.WindowsAzure.StorageClient;
 
+namespace AzureWebFarm.Example.Web.Core.Storage
+{
     public interface IAzureTable<TEntity> where TEntity : TableServiceEntity
     {
         IQueryable<TEntity> Query { get; }

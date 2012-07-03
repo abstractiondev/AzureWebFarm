@@ -1,8 +1,8 @@
-﻿namespace Microsoft.Samples.DPE.AzureMultiTenantApp.Web.Core.Entities
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace AzureWebFarm.Example.Web.Core.Entities
+{
     public class WebSite
     {
         public WebSite()
