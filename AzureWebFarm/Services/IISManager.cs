@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -145,7 +144,6 @@ namespace AzureWebFarm.Services
                         Trace.TraceInformation("IISManager.Adding site '{0}'", siteName);
 
                         var defaultBinding = site.Bindings.First();
-                        var bindingInformation = GetBindingInformation(defaultBinding.IpAddress, defaultBinding.Port, defaultBinding.HostName);
 
                         X509Certificate2 cert = null;
 
@@ -156,22 +154,22 @@ namespace AzureWebFarm.Services
 
                         if (cert != null)
                         {
-                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}' and Certificate '{2}'", site.Name, bindingInformation, cert.Thumbprint);
+                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}' and Certificate '{2}'", site.Name, defaultBinding.BindingInformation, cert.Thumbprint);
 
                             iisSite = serverManager.Sites.Add(
                                 siteName,
-                                bindingInformation,
+                                defaultBinding.BindingInformation,
                                 sitePath,
                                 cert.GetCertHash());
                         }
                         else
                         {
-                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}'", site.Name, bindingInformation);
+                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}'", site.Name, defaultBinding.BindingInformation);
 
                             iisSite = serverManager.Sites.Add(
                                 siteName,
                                 defaultBinding.Protocol,
-                                bindingInformation,
+                                defaultBinding.BindingInformation,
                                 sitePath);
                         }
 
@@ -217,8 +215,6 @@ namespace AzureWebFarm.Services
                         var iisBinding = iisSite.Bindings.SingleOrDefault(b => AreEqualsBindings(b, binding));
                         if (iisBinding == null)
                         {
-                            var bindingInformation = GetBindingInformation(binding.IpAddress, binding.Port, binding.HostName);
-
                             X509Certificate2 cert = null;
 
                             if (!String.IsNullOrEmpty(binding.CertificateThumbprint))
@@ -228,13 +224,13 @@ namespace AzureWebFarm.Services
 
                             if (cert != null)
                             {
-                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}' and Certificate '{3}'", binding.Id, site.Name, bindingInformation, cert.Thumbprint);
-                                iisSite.Bindings.Add(bindingInformation, cert.GetCertHash(), StoreName.My.ToString());
+                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}' and Certificate '{3}'", binding.Id, site.Name, binding.BindingInformation, cert.Thumbprint);
+                                iisSite.Bindings.Add(binding.BindingInformation, cert.GetCertHash(), StoreName.My.ToString());
                             }
                             else
                             {
-                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}'", binding.Id, site.Name, bindingInformation);
-                                iisSite.Bindings.Add(bindingInformation, binding.Protocol);
+                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}'", binding.Id, site.Name, binding.BindingInformation);
+                                iisSite.Bindings.Add(binding.BindingInformation, binding.Protocol);
                             }
                         }
                     }
@@ -314,11 +310,6 @@ namespace AzureWebFarm.Services
                     adminSite.Applications.Remove(cdnApplication);
                 }
             }
-        }
-
-        private static string GetBindingInformation(string address, int port, string hostName)
-        {
-            return address + ":" + port.ToString(CultureInfo.InvariantCulture) + ":" + hostName;
         }
 
         private static bool AreEqualsBindings(Microsoft.Web.Administration.Binding iisBinding, Binding binding)
