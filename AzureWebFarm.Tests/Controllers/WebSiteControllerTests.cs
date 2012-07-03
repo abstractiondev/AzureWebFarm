@@ -4,12 +4,12 @@ using AzureWebFarm.Example.Web.Controllers;
 using AzureWebFarm.Example.Web.Core.Entities;
 using AzureWebFarm.Example.Web.Core.Storage;
 using AzureWebFarm.Example.Web.Models;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure;
+using NUnit.Framework;
 
 namespace AzureWebFarm.Tests.Controllers
 {
-    [TestClass]
+    [TestFixture]
     public class WebSiteControllerTests
     {
         private WebSiteRepository webSiteRepository;
@@ -18,7 +18,7 @@ namespace AzureWebFarm.Tests.Controllers
         private AzureTable<BindingRow> bindingTable;
         private WebSiteController controller;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             this.webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
@@ -30,7 +30,7 @@ namespace AzureWebFarm.Tests.Controllers
             this.controller = new WebSiteController(this.webSiteRepository, this.certificateRepository);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateWebSiteWithBindings()
         {
             Guid id = Guid.NewGuid();

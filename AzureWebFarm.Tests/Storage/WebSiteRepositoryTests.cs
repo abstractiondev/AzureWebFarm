@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureWebFarm.Example.Web.Core.Entities;
 using AzureWebFarm.Example.Web.Core.Storage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure;
+using NUnit.Framework;
 
 namespace AzureWebFarm.Tests.Storage
 {
-    [TestClass]
+    [TestFixture]
     public class WebSiteRepositoryTests
     {
         private WebSiteRepository repository;
         private AzureTable<WebSiteRow> webSiteTable;
         private AzureTable<BindingRow> bindingTable;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             this.webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
@@ -25,7 +25,7 @@ namespace AzureWebFarm.Tests.Storage
             this.repository = new WebSiteRepository(this.webSiteTable, this.bindingTable);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateNewWebSite()
         {
             var site = new WebSite()
@@ -44,7 +44,7 @@ namespace AzureWebFarm.Tests.Storage
             this.webSiteTable.DeleteEntity(newsite);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateNewWebSiteWithInitialBinding()
         {
             WebSiteRow newsite = null;
@@ -92,7 +92,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CreateNewWebSiteWithManyBindings()
         {
             WebSiteRow newsite = null;
@@ -135,7 +135,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveWebSite()
         {
             WebSiteRow newsite = null;
@@ -173,7 +173,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void CreateAndRemoveWebSiteWithInitialBinding()
         {
             WebSiteRow newsite = null;
@@ -216,7 +216,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void UpdateWebSite()
         {
             WebSiteRow newsite = null;
@@ -256,7 +256,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void UpdateBinding()
         {
             WebSiteRow newsite = null;
@@ -300,7 +300,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void RemoveBinding()
         {
             WebSiteRow newsite = null;
@@ -336,7 +336,7 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
 
-        [TestMethod]
+        [Test]
         public void RetrieveWebSites()
         {
             IEnumerable<WebSiteRow> siteInfos = CreateAndSaveWebSiteRows(this.webSiteTable, 10);
