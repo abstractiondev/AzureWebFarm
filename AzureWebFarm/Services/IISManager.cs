@@ -356,7 +356,8 @@ namespace AzureWebFarm.Services
                 var syncStatus = new SyncStatus
                 {
                     SiteName = webSiteName,
-                    RoleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName,
+                    RoleInstanceId = AzureRoleEnvironment.CurrentRoleInstanceId(),
+                    DeploymentId = AzureRoleEnvironment.DeploymentId(),
                     Status = status,
                     IsOnline = true
                 };
