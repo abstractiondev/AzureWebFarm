@@ -21,7 +21,6 @@ namespace AzureWebFarm.Services
         private const string BlobStopName = "stop";
 
         private readonly WebSiteRepository _sitesRepository;
-        private readonly CertificateRepository _certificateRepository;
         private readonly SyncStatusRepository _syncStatusRepository;
 
         private readonly string _localSitesPath;
@@ -38,7 +37,6 @@ namespace AzureWebFarm.Services
         public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
             : this (
                 new WebSiteRepository(storageSettingName),
-                new CertificateRepository(),
                 new SyncStatusRepository(storageSettingName),
                 CloudStorageAccount.FromConfigurationSetting(storageSettingName),
                 localSitesPath,
@@ -47,10 +45,9 @@ namespace AzureWebFarm.Services
             )
         {}
 
-        public SyncService(WebSiteRepository sitesRepository, CertificateRepository certificateRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude)
+        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude)
         {
             _sitesRepository = sitesRepository;
-            _certificateRepository = certificateRepository;
             _syncStatusRepository = syncStatusRepository;
 
             _localSitesPath = localSitesPath;
