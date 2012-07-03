@@ -43,6 +43,6 @@ namespace AzureWebFarm.Entities
 
         public string CertificateThumbprint { get; set; }
 
-        public string BindingInformation { get { return IpAddress + ":" + Port.ToString(CultureInfo.InvariantCulture) + ":" + HostName; } }
+        public string BindingInformation { get { return string.Format("{0}:{1}:{2}", IpAddress, Port, HostName); } }
     }
 }
