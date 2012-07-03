@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace AzureWebFarm.Entities
 {
@@ -41,5 +42,7 @@ namespace AzureWebFarm.Entities
         public string HostName { get; set; }
 
         public string CertificateThumbprint { get; set; }
+
+        public string BindingInformation { get { return IpAddress + ":" + Port.ToString(CultureInfo.InvariantCulture) + ":" + HostName; } }
     }
 }
