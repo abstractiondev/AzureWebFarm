@@ -12,8 +12,12 @@ namespace AzureWebFarm.Storage
 {
     public class CertificateRepository
     {
-
         private string certsFilePath;
+
+        public CertificateRepository(string certsFilePath)
+        {
+            this.certsFilePath = certsFilePath;
+        }
 
         public CertificateRepository()
         {
