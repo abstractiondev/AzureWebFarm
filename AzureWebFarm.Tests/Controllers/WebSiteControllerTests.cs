@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+using AzureWebFarm.Entities;
 using AzureWebFarm.Example.Web.Controllers;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Storage;
 using AzureWebFarm.Example.Web.Models;
+using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure;
 using NUnit.Framework;
 

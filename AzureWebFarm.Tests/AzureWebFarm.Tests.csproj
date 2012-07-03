@@ -86,6 +86,10 @@
       <Project>{AB0C275A-7C67-4D5A-BFC8-52B490FF6516}</Project>
       <Name>AzureWebFarm.Example.Web</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AzureWebFarm\AzureWebFarm.csproj">
+      <Project>{188242B5-074E-4F06-A5E7-145F1D9BA8B3}</Project>
+      <Name>AzureWebFarm</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

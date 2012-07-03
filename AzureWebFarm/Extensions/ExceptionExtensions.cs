@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace AzureWebFarm.Example.Web.Core.Extensions
+namespace AzureWebFarm.Extensions
 {
     public static class ExceptionExtensions
     {

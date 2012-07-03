@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Services;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Services;
 using NUnit.Framework;
 
 namespace AzureWebFarm.Tests.Services

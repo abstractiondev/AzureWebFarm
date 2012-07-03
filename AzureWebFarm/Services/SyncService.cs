@@ -4,17 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Extensions;
-using AzureWebFarm.Example.Web.Core.Helpers;
-using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Extensions;
+using AzureWebFarm.Helpers;
+using AzureWebFarm.Storage;
 using Microsoft.Web.Administration;
 using Microsoft.Web.Deployment;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 
-namespace AzureWebFarm.Example.Web.Core.Services
+namespace AzureWebFarm.Services
 {
     public class SyncService
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure;
 using NUnit.Framework;
 

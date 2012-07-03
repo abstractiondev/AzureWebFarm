@@ -1,9 +1,9 @@
 ﻿using System;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
-namespace AzureWebFarm.Example.Web.Core.Extensions
+namespace AzureWebFarm.Extensions
 {
     public static class ModelExtensions
     {

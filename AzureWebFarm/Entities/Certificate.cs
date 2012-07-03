@@ -1,4 +1,4 @@
-﻿namespace AzureWebFarm.Example.Web.Core.Entities
+﻿namespace AzureWebFarm.Entities
 {
     public class Certificate
     {

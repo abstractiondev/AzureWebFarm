@@ -7,15 +7,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Extensions;
-using AzureWebFarm.Example.Web.Core.Helpers;
-using AzureWebFarm.Example.Web.Core.Storage;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Extensions;
+using AzureWebFarm.Helpers;
+using AzureWebFarm.Storage;
 using Microsoft.Web.Administration;
 using Microsoft.WindowsAzure.ServiceRuntime;
-using Binding = AzureWebFarm.Example.Web.Core.Entities.Binding;
+using Binding = AzureWebFarm.Entities.Binding;
 
-namespace AzureWebFarm.Example.Web.Core.Services
+namespace AzureWebFarm.Services
 {
     public class IISManager
     {

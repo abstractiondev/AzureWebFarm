@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AzureWebFarm.Example.Web.Core.Entities;
-using AzureWebFarm.Example.Web.Core.Extensions;
+using AzureWebFarm.Entities;
+using AzureWebFarm.Extensions;
 using Microsoft.WindowsAzure;
 
-namespace AzureWebFarm.Example.Web.Core.Storage
+namespace AzureWebFarm.Storage
 {
     public class WebSiteRepository
     {

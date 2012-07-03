@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
-using AzureWebFarm.Example.Web.Core.Extensions;
+using AzureWebFarm.Extensions;
 
-namespace AzureWebFarm.Example.Web.Core.Helpers
+namespace AzureWebFarm.Helpers
 {
     public static class FilesHelper
     {

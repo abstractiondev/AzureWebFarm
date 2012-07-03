@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AzureWebFarm.Example.Web.Core.Entities
+namespace AzureWebFarm.Entities
 {
     public class WebSite
     {

@@ -94,31 +94,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\SyncController.cs" />
     <Compile Include="Controllers\WebSiteController.cs" />
-    <Compile Include="Core\Entities\Binding.cs" />
-    <Compile Include="Core\Entities\Certificate.cs" />
-    <Compile Include="Core\Entities\Enums.cs" />
-    <Compile Include="Core\Entities\FileEntry.cs" />
-    <Compile Include="Core\Entities\LogMessage.cs" />
-    <Compile Include="Core\Entities\SyncStatus.cs" />
-    <Compile Include="Core\Entities\WebSite.cs" />
-    <Compile Include="Core\Extensions\BlobExtensions.cs" />
-    <Compile Include="Core\Extensions\ExceptionExtensions.cs" />
-    <Compile Include="Core\Extensions\ModelExtensions.cs" />
-    <Compile Include="Core\Extensions\TableStorageExtensionMethods.cs" />
-    <Compile Include="Core\Helpers\FilesHelper.cs" />
-    <Compile Include="Core\Services\IISManager.cs" />
-    <Compile Include="Core\Services\SyncService.cs" />
-    <Compile Include="Core\Storage\AzureBlobContainer.cs" />
-    <Compile Include="Core\Storage\AzureTable.cs" />
-    <Compile Include="Core\Storage\BindingRow.cs" />
-    <Compile Include="Core\Storage\CertificateRepository.cs" />
-    <Compile Include="Core\Storage\IAzureBlobContainer.cs" />
-    <Compile Include="Core\Storage\IAzureTable.cs" />
-    <Compile Include="Core\Storage\SyncStatusRepository.cs" />
-    <Compile Include="Core\Storage\SyncStatusRow.cs" />
-    <Compile Include="Core\Storage\WebSiteRow.cs" />
-    <Compile Include="Core\Storage\WebSiteRepository.cs" />
-    <Compile Include="Core\Helpers\WindowsAzureHelper.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -193,6 +168,12 @@
     <Content Include="Views\WebSite\CreateBinding.cshtml" />
     <Content Include="Views\Sync\Index.cshtml" />
     <None Include="Startup\license.rtf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AzureWebFarm\AzureWebFarm.csproj">
+      <Project>{188242B5-074E-4F06-A5E7-145F1D9BA8B3}</Project>
+      <Name>AzureWebFarm</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AzureWebFarm.Example.Web.Core.Entities
+namespace AzureWebFarm.Entities
 {
     public class FileEntry
     {

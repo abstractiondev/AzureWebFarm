@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
-using AzureWebFarm.Example.Web.Core.Services;
-using AzureWebFarm.Example.Web.Core.Storage;
 using AzureWebFarm.Example.Web.Models;
+using AzureWebFarm.Services;
+using AzureWebFarm.Storage;
 
 namespace AzureWebFarm.Example.Web.Controllers
 {
