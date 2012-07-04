@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Example.Web.Controllers;
 using AzureWebFarm.Example.Web.Models;
@@ -20,8 +21,8 @@ namespace AzureWebFarm.Tests.Controllers
             _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
             _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
             _certificateRepository = new CertificateRepository();
-            _webSiteTable.CreateIfNotExist();
-            _bindingTable.CreateIfNotExist();
+            _webSiteTable.Initialize();
+            _bindingTable.Initialize();
             _webSiteRepository = new WebSiteRepository(_webSiteTable, _bindingTable);
             _controller = new WebSiteController(_webSiteRepository, _certificateRepository);
         }
@@ -76,8 +77,8 @@ namespace AzureWebFarm.Tests.Controllers
             finally
             {
                 var key = newsite.Id.ToString();
-                _bindingTable.DeleteEntity(_bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
-                _webSiteTable.DeleteEntity(_webSiteTable.Query.Where(b => b.RowKey == key));
+                _bindingTable.Delete(_bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
+                _webSiteTable.Delete(_webSiteTable.Query.Where(b => b.RowKey == key));
             }
         }
     }

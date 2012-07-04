@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
 using Microsoft.WindowsAzure;
@@ -9,8 +10,8 @@ namespace AzureWebFarm.Storage
 {
     public class WebSiteRepository
     {
-        private readonly AzureTable<BindingRow> bindingTable;
-        private readonly AzureTable<WebSiteRow> webSiteTable;
+        private readonly AzureTable<BindingRow> _bindingTable;
+        private readonly AzureTable<WebSiteRow> _webSiteTable;
 
         public WebSiteRepository()
             : this("DataConnectionString")
@@ -34,76 +35,76 @@ namespace AzureWebFarm.Storage
 
         public WebSiteRepository(AzureTable<WebSiteRow> webSiteTable, AzureTable<BindingRow> bindingTable)
         {
-            this.webSiteTable = webSiteTable;
-            this.bindingTable = bindingTable;
+            _webSiteTable = webSiteTable;
+            _bindingTable = bindingTable;
 
-            this.webSiteTable.CreateIfNotExist();
-            this.bindingTable.CreateIfNotExist();
+            _webSiteTable.Initialize();
+            _bindingTable.Initialize();
         }
 
         public void CreateWebSite(WebSite webSite)
         {
-            webSiteTable.AddEntity(webSite.ToRow());
+            _webSiteTable.Add(webSite.ToRow());
         }
 
         public void CreateWebSiteWithBinding(WebSite webSite, Binding binding)
         {
             binding.WebSiteId = webSite.Id;
 
-            webSiteTable.AddEntity(webSite.ToRow());
-            bindingTable.AddEntity(binding.ToRow());
+            _webSiteTable.Add(webSite.ToRow());
+            _bindingTable.Add(binding.ToRow());
         }
 
         public void AddBindingToWebSite(Guid webSiteId, Binding binding)
         {
             binding.WebSiteId = webSiteId;
-            bindingTable.AddEntity(binding.ToRow());
+            _bindingTable.Add(binding.ToRow());
         }
 
         public void RemoveBinding(Guid bindingId)
         {
             string key = bindingId.ToString();
-            bindingTable.DeleteEntity(bindingTable.Query.Where(b => b.RowKey == key));
+            _bindingTable.Delete(_bindingTable.Query.Where(b => b.RowKey == key));
         }
 
         public void EditBinding(Binding binding)
         {
-            bindingTable.AddOrUpdateEntity(binding.ToRow());
+            _bindingTable.AddOrUpdate(binding.ToRow());
         }
 
         public void UpdateWebSite(WebSite webSite)
         {
-            webSiteTable.AddOrUpdateEntity(webSite.ToRow());
+            _webSiteTable.AddOrUpdate(webSite.ToRow());
         }
 
         public void UpdateBinding(Binding binding)
         {
-            bindingTable.AddOrUpdateEntity(binding.ToRow());
+            _bindingTable.AddOrUpdate(binding.ToRow());
         }
 
         public void RemoveWebSite(Guid webSiteId)
         {
             string key = webSiteId.ToString();
 
-            var websites = webSiteTable.Query.Where(ws => ws.RowKey == key);
-            var bindings = bindingTable.Query.Where(b => b.WebSiteId == webSiteId);
+            var websites = _webSiteTable.Query.Where(ws => ws.RowKey == key);
+            var bindings = _bindingTable.Query.Where(b => b.WebSiteId == webSiteId);
 
-            webSiteTable.DeleteEntity(websites);
-            bindingTable.DeleteEntity(bindings);
+            _webSiteTable.Delete(websites);
+            _bindingTable.Delete(bindings);
         }
 
         public WebSite RetrieveWebSite(Guid webSiteId)
         {
             string key = webSiteId.ToString();
 
-            return webSiteTable.Query.Where(ws => ws.RowKey == key).FirstOrDefault().ToModel();
+            return _webSiteTable.Query.Where(ws => ws.RowKey == key).FirstOrDefault().ToModel();
         }
 
         public Binding RetrieveBinding(Guid bindingId)
         {
             string key = bindingId.ToString();
 
-            return bindingTable.Query.Where(b => b.RowKey == key).FirstOrDefault().ToModel();
+            return _bindingTable.Query.Where(b => b.RowKey == key).FirstOrDefault().ToModel();
         }
 
         public WebSite RetrieveWebSiteWithBindings(Guid webSiteId)
@@ -117,12 +118,12 @@ namespace AzureWebFarm.Storage
 
         public IEnumerable<Binding> RetrieveWebSiteBindings(Guid webSiteId)
         {
-            return bindingTable.Query.Where(b => b.WebSiteId == webSiteId).ToList().Select(b => b.ToModel()).ToList();
+            return _bindingTable.Query.Where(b => b.WebSiteId == webSiteId).ToList().Select(b => b.ToModel()).ToList();
         }
 
         public IEnumerable<Binding> RetrieveCertificateBindings(string certificateHash)
         {
-            var bindings = bindingTable.Query.Where(b => b.CertificateThumbprint == certificateHash).ToList().Select(b => b.ToModel()).ToList();
+            var bindings = _bindingTable.Query.Where(b => b.CertificateThumbprint == certificateHash).ToList().Select(b => b.ToModel()).ToList();
 
             var sites = new Dictionary<Guid, WebSite>();
 
@@ -141,18 +142,18 @@ namespace AzureWebFarm.Storage
 
         public IEnumerable<Binding> RetrieveBindingsForPort(int port)
         {
-            return bindingTable.Query.Where(b => b.Port == port).ToList().Select(b => b.ToModel()).ToList();
+            return _bindingTable.Query.Where(b => b.Port == port).ToList().Select(b => b.ToModel()).ToList();
         }
 
         public void AddBindingToWebSite(WebSite webSite, Binding binding)
         {
             binding.WebSiteId = webSite.Id;
-            bindingTable.AddEntity(binding.ToRow());
+            _bindingTable.Add(binding.ToRow());
         }
 
         public IEnumerable<WebSite> RetrieveWebSites()
         {
-            return webSiteTable.Query.ToList().OrderBy(t => t.Name).Select(ws => ws.ToModel()).ToList();
+            return _webSiteTable.Query.ToList().OrderBy(t => t.Name).Select(ws => ws.ToModel()).ToList();
         }
 
         public IEnumerable<WebSite> RetrieveWebSitesWithBindings()

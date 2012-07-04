@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure;
@@ -18,8 +19,8 @@ namespace AzureWebFarm.Tests.Storage
         {
             _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
             _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
-            _webSiteTable.CreateIfNotExist();
-            _bindingTable.CreateIfNotExist();
+            _webSiteTable.Initialize();
+            _bindingTable.Initialize();
             _repository = new WebSiteRepository(_webSiteTable, _bindingTable);
         }
 
@@ -38,7 +39,7 @@ namespace AzureWebFarm.Tests.Storage
                 sites.Add(CreateWebSiteRow());
             }
 
-            table.AddEntity(sites);
+            table.Add(sites);
 
             return sites;
         }
@@ -128,12 +129,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }
@@ -154,7 +155,7 @@ namespace AzureWebFarm.Tests.Storage
             var newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
 
             Assert.IsNotNull(newsite);
-            _webSiteTable.DeleteEntity(newsite);
+            _webSiteTable.Delete(newsite);
         }
 
         [Test]
@@ -194,12 +195,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbinding != null)
                 {
-                    _bindingTable.DeleteEntity(newbinding);
+                    _bindingTable.Delete(newbinding);
                 }
             }
         }
@@ -237,12 +238,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }
@@ -273,12 +274,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }
@@ -311,12 +312,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }
@@ -345,7 +346,7 @@ namespace AzureWebFarm.Tests.Storage
             }
             finally
             {
-                _webSiteTable.DeleteEntity(siteInfos);
+                _webSiteTable.Delete(siteInfos);
             }
         }
 
@@ -383,12 +384,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }
@@ -423,12 +424,12 @@ namespace AzureWebFarm.Tests.Storage
             {
                 if (newsite != null)
                 {
-                    _webSiteTable.DeleteEntity(newsite);
+                    _webSiteTable.Delete(newsite);
                 }
 
                 if (newbindings != null && newbindings.Any())
                 {
-                    _bindingTable.DeleteEntity(newbindings);
+                    _bindingTable.Delete(newbindings);
                 }
             }
         }

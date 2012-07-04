@@ -31,10 +31,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AzureToolkit">
+      <HintPath>..\packages\AzureToolkit.2.4.10\lib\net40\AzureToolkit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Web.Deployment, Version=8.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.7\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Services.Client" />
@@ -64,12 +70,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IISManager.cs" />
     <Compile Include="Services\SyncService.cs" />
-    <Compile Include="Storage\AzureBlobContainer.cs" />
-    <Compile Include="Storage\AzureTable.cs" />
     <Compile Include="Storage\BindingRow.cs" />
     <Compile Include="Storage\CertificateRepository.cs" />
-    <Compile Include="Storage\IAzureBlobContainer.cs" />
-    <Compile Include="Storage\IAzureTable.cs" />
     <Compile Include="Storage\SyncStatusRepository.cs" />
     <Compile Include="Storage\SyncStatusRow.cs" />
     <Compile Include="Storage\WebSiteRepository.cs" />
@@ -86,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SolutionImage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

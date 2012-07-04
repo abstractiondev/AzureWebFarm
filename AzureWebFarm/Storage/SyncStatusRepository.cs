@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
 using Microsoft.WindowsAzure;
@@ -10,7 +11,7 @@ namespace AzureWebFarm.Storage
 {
     public class SyncStatusRepository
     {
-        private readonly IAzureTable<SyncStatusRow> table;
+        private readonly IAzureTable<SyncStatusRow> _table;
 
         public SyncStatusRepository()
             : this("DataConnectionString")
@@ -34,8 +35,8 @@ namespace AzureWebFarm.Storage
 
         public SyncStatusRepository(IAzureTable<SyncStatusRow> table)
         {
-            this.table = table;
-            this.table.CreateIfNotExist();
+            _table = table;
+            _table.Initialize();
         }
 
         public void RemoveWebSiteStatus(string webSiteName)
@@ -43,18 +44,18 @@ namespace AzureWebFarm.Storage
             var webSiteStatus = RetrieveSyncStatus(webSiteName);
             if (webSiteStatus != null && webSiteStatus.Count() > 0)
             {
-                table.DeleteEntity(webSiteStatus.Select(s => s.ToRow()));
+                _table.Delete(webSiteStatus.Select(s => s.ToRow()));
             }
         }
 
         public void UpdateStatus(SyncStatus syncStatus)
         {
-            table.AddOrUpdateEntity(syncStatus.ToRow());
+            _table.AddOrUpdate(syncStatus.ToRow());
         }
 
         public IEnumerable<SyncStatus> RetrieveSyncStatus(string webSiteName)
         {
-            return table.Query
+            return _table.Query
                 .Where(
                     s =>
                     s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
@@ -65,7 +66,7 @@ namespace AzureWebFarm.Storage
 
         public IEnumerable<SyncStatus> RetrieveSyncStatusByInstanceId(string roleInstanceId)
         {
-            return table.Query
+            return _table.Query
                 .Where(
                     s =>
                     s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
