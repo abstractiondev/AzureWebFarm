@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Example.Web", "AzureWebFarm.Example.Web\AzureWebFarm.Example.Web.csproj", "{AB0C275A-7C67-4D5A-BFC8-52B490FF6516}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Tests", "AzureWebFarm.Tests\AzureWebFarm.Tests.csproj", "{4DBDC360-2DD4-41DB-93D0-D1E9F4A133A5}"
