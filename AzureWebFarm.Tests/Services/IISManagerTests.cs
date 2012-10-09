@@ -13,10 +13,38 @@ namespace AzureWebFarm.Tests.Services
     [TestFixture]
     public class IISManagerShould
     {
-        #region Setup/Teardown
+        #region Setup
+
+        [TestFixtureSetUp]
+        public void FixtureSetup()
+        {
+            using (var serverManager = new ServerManager())
+            {
+                _defaultSiteAlreadyExisted = serverManager.Sites.Count(s => s.Name == IISManager.RoleWebSiteName) > 0;
+                
+                if (!_defaultSiteAlreadyExisted)
+                {
+                    serverManager.Sites.Add(IISManager.RoleWebSiteName, @"c:\inetpub\wwwroot", 80);
+                    serverManager.CommitChanges();
+                }
+            }
+        }
+
+        [TestFixtureTearDown]
+        public void FixtureTeardown()
+        {
+            using (var serverManager = new ServerManager())
+            {
+                if (!_defaultSiteAlreadyExisted)
+                {
+                    serverManager.Sites.Remove(serverManager.Sites.Single(s => s.Name == IISManager.RoleWebSiteName));
+                    serverManager.CommitChanges();
+                }
+            }
+        }
 
         [SetUp]
-        public void MyTestInitialize()
+        public void Setup()
         {
             Cleanup();
             _excludedSites = new List<string>();
@@ -24,27 +52,22 @@ namespace AzureWebFarm.Tests.Services
             {
                 manager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList().ForEach(s => _excludedSites.Add(s.Name));
             }
-            Setup();
+            Directory.CreateDirectory(LocalSitesPath);
+            Directory.CreateDirectory(TempSitesPath);
         }
 
         [TearDown]
-        public void MyTestCleanup()
+        public void Teardown()
         {
             Cleanup();
         }
 
-
+        private bool _defaultSiteAlreadyExisted;
         private const string ContosoWebSiteName = "contosotest";
         private const string FabrikamWebSiteName = "fabrikamtest";
         private static readonly string LocalSitesPath = Path.Combine(Environment.CurrentDirectory, "testLocalSites");
         private static readonly string TempSitesPath = Path.Combine(Environment.CurrentDirectory, "testTempSites");
         private List<string> _excludedSites;
-
-        private static void Setup()
-        {
-            Directory.CreateDirectory(LocalSitesPath);
-            Directory.CreateDirectory(TempSitesPath);
-        }
 
         private static void Cleanup()
         {
@@ -59,7 +82,7 @@ namespace AzureWebFarm.Tests.Services
         {
             using (var serverManager = new ServerManager())
             {
-                return serverManager.Sites.Where(s => s.Name != "Default Web Site").ToList();
+                return serverManager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList();
             }
         }
 
