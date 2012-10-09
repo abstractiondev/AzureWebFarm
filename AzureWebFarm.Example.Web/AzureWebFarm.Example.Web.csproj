@@ -186,6 +186,9 @@
     <Content Include="Views\WebSite\CreateBinding.cshtml" />
     <Content Include="Views\Sync\Index.cshtml" />
     <None Include="Startup\license.rtf" />
+    <Content Include="Startup\Windows6.1-KB2618982-x64.msu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureWebFarm\AzureWebFarm.csproj">

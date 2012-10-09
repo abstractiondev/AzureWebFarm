@@ -15,6 +15,9 @@ set /a count+=1
 echo %count% > retries.txt
 if %count% GEQ 3 goto Exit
 
+echo "Installing hotfix for memory leak in web accelerator roles" >> startup.log
+"%~dp0Windows6.1-KB2618982-x64.msu" /quiet /norestart >> startup.log 2>> starterror.log
+
 echo Installing Web-Mgmt-Service... >> startup.log
 if exist "%windir%\system32\ServerManagerCmd.exe" "%windir%\system32\ServerManagerCmd.exe" -install Web-Mgmt-Service  >> startup.log 2>> starterror.log
 
