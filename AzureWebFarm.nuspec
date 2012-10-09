@@ -1,0 +1,47 @@
+﻿<?xml version='1.0' encoding='UTF-8'?> 
+<package>
+  <metadata>
+    <id>
+      AzureWebFarm
+    </id>
+    <version>
+      1.0.0
+    </version>
+    <authors>
+      Robert Moore
+    </authors>
+    <description>
+      MsDeploy enabled Web Farm using Web Roles in Azure based on Windows Azure Accelerator for Web Roles.
+    </description>
+    <projectUrl>
+      https://github.com/robdmoore/AzureWebFarm
+    </projectUrl>
+    <licenseUrl>
+      https://github.com/robdmoore/AzureWebFarm/blob/master/LICENSE.txt
+    </licenseUrl>
+    <iconUrl>
+      https://raw.github.com/robdmoore/AzureWebFarm/master/logo.png
+    </iconUrl>
+    <tags>
+      azure, iis, web farm, msdeploy, web deploy, web role
+    </tags>
+    <language>
+      en-US 
+    </language>
+    <dependencies>
+      <dependency id="WindowsAzure.Storage" version="1.7" />
+      <dependency id="AzureToolkit" version="2.4.10" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.WindowsAzure.ServiceRuntime" targetFramework="net40" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="AzureWebFarm\bin\Release\AzureWebFarm.dll" target="lib\NET40" />
+    <file src="AzureWebFarm\bin\Release\AzureWebFarm.pdb" target="lib\NET40" />
+    <!-- todo: <file src="AzureWebFarm\bin\Release\AzureWebFarm.XML" target="lib\NET40" />-->
+    <file src="AzureWebFarm.Example.Web\Startup\*.*" target="tools\Startup" />
+    <file src="AzureWebFarm.Example.Cloud\ServiceConfiguration.Cloud.cscfg" target="tools\ExampleConfigs" />
+    <file src="AzureWebFarm.Example.Cloud\ServiceDefinition.csdef" target="tools\ExampleConfigs" />
+  </files>
+</package>
