@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
 using AzureWebFarm.Helpers;
@@ -36,7 +37,7 @@ namespace AzureWebFarm.Services
 
         public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
             : this (
-                new WebSiteRepository(storageSettingName),
+                new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting(storageSettingName))),
                 new SyncStatusRepository(storageSettingName),
                 CloudStorageAccount.FromConfigurationSetting(storageSettingName),
                 localSitesPath,

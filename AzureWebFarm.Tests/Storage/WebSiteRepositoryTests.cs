@@ -9,6 +9,7 @@ using NUnit.Framework;
 
 namespace AzureWebFarm.Tests.Storage
 {
+    // ReSharper disable ReplaceWithSingleCallToFirstOrDefault
     [TestFixture]
     public class WebSiteRepositoryShould
     {
@@ -17,20 +18,19 @@ namespace AzureWebFarm.Tests.Storage
         [SetUp]
         public void Setup()
         {
-            _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
-            _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
-            _webSiteTable.Initialize();
-            _bindingTable.Initialize();
-            _repository = new WebSiteRepository(_webSiteTable, _bindingTable);
+            var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
+            _repository = new WebSiteRepository(factory);
+            _webSiteTable = factory.GetTable<WebSiteRow>(typeof(WebSiteRow).Name);
+            _bindingTable = factory.GetTable<BindingRow>(typeof(BindingRow).Name);
         }
 
         #endregion
 
         private WebSiteRepository _repository;
-        private AzureTable<WebSiteRow> _webSiteTable;
-        private AzureTable<BindingRow> _bindingTable;
+        private IAzureTable<WebSiteRow> _webSiteTable;
+        private IAzureTable<BindingRow> _bindingTable;
 
-        private static IEnumerable<WebSiteRow> CreateAndSaveWebSiteRows(AzureTable<WebSiteRow> table, int count)
+        private static IList<WebSiteRow> CreateAndSaveWebSiteRows(IAzureTable<WebSiteRow> table, int count)
         {
             var sites = new List<WebSiteRow>();
 
@@ -100,7 +100,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Create_and_remove_web_site_with_initial_binding()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -111,7 +111,7 @@ namespace AzureWebFarm.Tests.Storage
                 var idb = binding.Id.ToString();
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
-                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb);
+                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb).ToList();
 
                 Assert.IsNotNull(newsite);
 
@@ -120,7 +120,7 @@ namespace AzureWebFarm.Tests.Storage
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
                 Assert.IsNull(newsite);
 
-                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb);
+                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb).ToList();
 
                 Assert.IsNotNull(newbindings);
                 Assert.AreEqual(0, newbindings.Count());
@@ -159,7 +159,7 @@ namespace AzureWebFarm.Tests.Storage
         }
 
         [Test]
-        public void CreateNewWebSiteWithInitialBinding()
+        public void Create_new_web_site_with_initial_binding()
         {
             var newsite = default(WebSiteRow);
             var newbinding = default(BindingRow);
@@ -209,7 +209,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Create_new_web_site_with_many_bindings()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -223,7 +223,7 @@ namespace AzureWebFarm.Tests.Storage
                 Assert.AreEqual(site.Name, newsite.Name);
                 Assert.AreEqual(site.Description, newsite.Description);
 
-                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id);
+                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id).ToList();
 
                 Assert.IsNotNull(newbindings);
                 Assert.AreEqual(10, newbindings.Count());
@@ -252,7 +252,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Remove_binding()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -260,13 +260,12 @@ namespace AzureWebFarm.Tests.Storage
                 var binding = site.Bindings.First();
 
                 var id = site.Id.ToString();
-                var idb = binding.Id.ToString();
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
 
                 _repository.RemoveBinding(binding.Id);
 
-                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id);
+                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id).ToList();
                 Assert.IsNotNull(newbindings);
                 Assert.AreEqual(1, newbindings.Count());
             }
@@ -288,7 +287,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Remove_web_site()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -297,12 +296,12 @@ namespace AzureWebFarm.Tests.Storage
                 var id = site.Id.ToString();
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
-                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id);
+                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id).ToList();
 
                 _repository.RemoveWebSite(site.Id);
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
-                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id);
+                newbindings = _bindingTable.Query.Where(b => b.WebSiteId == site.Id).ToList();
 
                 Assert.IsNull(newsite);
                 Assert.IsNotNull(newbindings);
@@ -354,7 +353,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Update_binding()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -365,7 +364,7 @@ namespace AzureWebFarm.Tests.Storage
                 var idb = binding.Id.ToString();
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
-                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb);
+                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb).ToList();
 
                 binding.HostName = "www.newhost.com";
                 binding.IpAddress = "127.0.0.2";
@@ -398,7 +397,7 @@ namespace AzureWebFarm.Tests.Storage
         public void Update_web_site()
         {
             var newsite = default(WebSiteRow);
-            var newbindings = default(IEnumerable<BindingRow>);
+            var newbindings = default(IList<BindingRow>);
 
             try
             {
@@ -409,7 +408,7 @@ namespace AzureWebFarm.Tests.Storage
                 var idb = binding.Id.ToString();
 
                 newsite = _webSiteTable.Query.Where(t => t.RowKey == id).FirstOrDefault();
-                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb);
+                newbindings = _bindingTable.Query.Where(b => b.RowKey == idb).ToList();
 
                 site.Name = "New Name";
                 site.Description = "New Description";
@@ -434,4 +433,5 @@ namespace AzureWebFarm.Tests.Storage
             }
         }
     }
+    // ReSharper restore ReplaceWithSingleCallToFirstOrDefault
 }

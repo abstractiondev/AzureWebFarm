@@ -4,40 +4,18 @@ using System.Linq;
 using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
-using Microsoft.WindowsAzure;
 
 namespace AzureWebFarm.Storage
 {
     public class WebSiteRepository
     {
-        private readonly AzureTable<BindingRow> _bindingTable;
-        private readonly AzureTable<WebSiteRow> _webSiteTable;
+        private readonly IAzureTable<BindingRow> _bindingTable;
+        private readonly IAzureTable<WebSiteRow> _webSiteTable;
 
-        public WebSiteRepository()
-            : this("DataConnectionString")
+        public WebSiteRepository(IAzureStorageFactory factory)
         {
-        }
-
-        public WebSiteRepository(string settingName)
-            : this(CloudStorageAccount.FromConfigurationSetting(settingName), "WebSites", "Bindings")
-        {
-        }
-
-        public WebSiteRepository(CloudStorageAccount account)
-            : this(account, "WebSites", "Bindings")
-        {
-        }
-
-        public WebSiteRepository(CloudStorageAccount account, string webSiteTableName, string bindingTableName)
-            : this(new AzureTable<WebSiteRow>(account, webSiteTableName), new AzureTable<BindingRow>(account, bindingTableName))
-        {
-        }
-
-        public WebSiteRepository(AzureTable<WebSiteRow> webSiteTable, AzureTable<BindingRow> bindingTable)
-        {
-            _webSiteTable = webSiteTable;
-            _bindingTable = bindingTable;
-
+            _webSiteTable = factory.GetTable<WebSiteRow>(typeof(WebSiteRow).Name);
+            _bindingTable = factory.GetTable<BindingRow>(typeof(BindingRow).Name);
             _webSiteTable.Initialize();
             _bindingTable.Initialize();
         }
@@ -97,14 +75,18 @@ namespace AzureWebFarm.Storage
         {
             string key = webSiteId.ToString();
 
+            // ReSharper disable ReplaceWithSingleCallToFirstOrDefault
             return _webSiteTable.Query.Where(ws => ws.RowKey == key).FirstOrDefault().ToModel();
+            // ReSharper restore ReplaceWithSingleCallToFirstOrDefault
         }
 
         public Binding RetrieveBinding(Guid bindingId)
         {
             string key = bindingId.ToString();
 
+            // ReSharper disable ReplaceWithSingleCallToFirstOrDefault
             return _bindingTable.Query.Where(b => b.RowKey == key).FirstOrDefault().ToModel();
+            // ReSharper restore ReplaceWithSingleCallToFirstOrDefault
         }
 
         public WebSite RetrieveWebSiteWithBindings(Guid webSiteId)
@@ -116,12 +98,12 @@ namespace AzureWebFarm.Storage
             return website;
         }
 
-        public IEnumerable<Binding> RetrieveWebSiteBindings(Guid webSiteId)
+        public IList<Binding> RetrieveWebSiteBindings(Guid webSiteId)
         {
             return _bindingTable.Query.Where(b => b.WebSiteId == webSiteId).ToList().Select(b => b.ToModel()).ToList();
         }
 
-        public IEnumerable<Binding> RetrieveCertificateBindings(string certificateHash)
+        public IList<Binding> RetrieveCertificateBindings(string certificateHash)
         {
             var bindings = _bindingTable.Query.Where(b => b.CertificateThumbprint == certificateHash).ToList().Select(b => b.ToModel()).ToList();
 
@@ -140,7 +122,7 @@ namespace AzureWebFarm.Storage
             return bindings;
         }
 
-        public IEnumerable<Binding> RetrieveBindingsForPort(int port)
+        public IList<Binding> RetrieveBindingsForPort(int port)
         {
             return _bindingTable.Query.Where(b => b.Port == port).ToList().Select(b => b.ToModel()).ToList();
         }
@@ -151,12 +133,12 @@ namespace AzureWebFarm.Storage
             _bindingTable.Add(binding.ToRow());
         }
 
-        public IEnumerable<WebSite> RetrieveWebSites()
+        public IList<WebSite> RetrieveWebSites()
         {
             return _webSiteTable.Query.ToList().OrderBy(t => t.Name).Select(ws => ws.ToModel()).ToList();
         }
 
-        public IEnumerable<WebSite> RetrieveWebSitesWithBindings()
+        public IList<WebSite> RetrieveWebSitesWithBindings()
         {
             var sites = RetrieveWebSites();
 

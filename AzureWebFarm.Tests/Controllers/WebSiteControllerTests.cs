@@ -18,12 +18,11 @@ namespace AzureWebFarm.Tests.Controllers
         [SetUp]
         public void Setup()
         {
-            _webSiteTable = new AzureTable<WebSiteRow>(CloudStorageAccount.DevelopmentStorageAccount, "WebSitesTest");
-            _bindingTable = new AzureTable<BindingRow>(CloudStorageAccount.DevelopmentStorageAccount, "BindingsTest");
             _certificateRepository = new CertificateRepository();
-            _webSiteTable.Initialize();
-            _bindingTable.Initialize();
-            _webSiteRepository = new WebSiteRepository(_webSiteTable, _bindingTable);
+            var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
+            _webSiteRepository = new WebSiteRepository(factory);
+            _webSiteTable = factory.GetTable<WebSiteRow>(typeof (WebSiteRow).Name);
+            _bindingTable = factory.GetTable<BindingRow>(typeof (BindingRow).Name);
             _controller = new WebSiteController(_webSiteRepository, _certificateRepository);
         }
 
@@ -31,8 +30,8 @@ namespace AzureWebFarm.Tests.Controllers
 
         private WebSiteRepository _webSiteRepository;
         private CertificateRepository _certificateRepository;
-        private AzureTable<WebSiteRow> _webSiteTable;
-        private AzureTable<BindingRow> _bindingTable;
+        private IAzureTable<WebSiteRow> _webSiteTable;
+        private IAzureTable<BindingRow> _bindingTable;
         private WebSiteController _controller;
 
         [Test]
@@ -76,9 +75,12 @@ namespace AzureWebFarm.Tests.Controllers
             }
             finally
             {
-                var key = newsite.Id.ToString();
-                _bindingTable.Delete(_bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
-                _webSiteTable.Delete(_webSiteTable.Query.Where(b => b.RowKey == key));
+                if (newsite != null)
+                {
+                    var key = newsite.Id.ToString();
+                    _bindingTable.Delete(_bindingTable.Query.Where(b => b.WebSiteId == newsite.Id));
+                    _webSiteTable.Delete(_webSiteTable.Query.Where(b => b.RowKey == key));
+                }
             }
         }
     }

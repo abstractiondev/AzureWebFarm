@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
+using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Example.Web.Models;
 using AzureWebFarm.Services;
 using AzureWebFarm.Storage;
+using Microsoft.WindowsAzure;
 
 namespace AzureWebFarm.Example.Web.Controllers
 {
@@ -17,7 +19,7 @@ namespace AzureWebFarm.Example.Web.Controllers
         private readonly CertificateRepository _certificateRepository;
 
         public WebSiteController()
-            : this(new WebSiteRepository(), new CertificateRepository())
+            : this(new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting("DataConnectionString"))), new CertificateRepository())
         {
         }
 
