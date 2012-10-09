@@ -9,6 +9,15 @@ The Azure Web Farm allows you to use a Web Role and deploy multiple web sites vi
 If you [aren't able to use Azure Web Sites](http://robdmoore.id.au/blog/2012/06/09/windows-azure-web-sites-vs-web-roles/), but you don't want a slow and frustrating deployment option or to be locked into deploying only one web site on your roles then this is the project for you.
 
 ## Documentation ##
+
+### Installation ###
+1. Create a new MVC4 website in Visual Studio using the blank template and delete the Global.asax.cs, Global.asax, Web.config and Views/Web.config files.
+2. Install-Package AzureWebFarm
+3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
+4. Create a cloud project with the website as a web role
+5. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
+
+### Existing Documentation ###
 Note this will change over time as the distinguishing features of AzureWebFarm emerge, but for now I'll link to the Accelerator for Web Roles documentation since it's essentially still accurate.
 * [Home](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki)
 * [Setup and Configuration](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/Setup-and-Configuration)
