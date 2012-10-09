@@ -68,7 +68,6 @@
     <Compile Include="Entities\SyncStatus.cs" />
     <Compile Include="Entities\WebSite.cs" />
     <Compile Include="Extensions\BlobExtensions.cs" />
-    <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\ModelExtensions.cs" />
     <Compile Include="Extensions\TableStorageExtensionMethods.cs" />
     <Compile Include="Helpers\AzureRoleEnvironment.cs" />
