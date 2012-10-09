@@ -1,23 +1,31 @@
-# [DEPRECATED] Windows Azure Accelerator for Web Roles #
+# Azure Web Farm #
 
-## Notice
-With the release of [Windows Azure Web Sites](http://www.windowsazure.com/en-us/home/scenarios/web-sites/) we have no plans to continue updating this project. The vast majority of use cases for this project have been solved by Windows Azure Web Sites and as such we recommend migrating yours sites. If you have any questions please open an issue - we are happy to help in any way we can.
-
-You can read more about this [here](http://blog.ntotten.com/2012/06/21/update-on-the-windows-azure-accelerators/).
+This is a refresh of the [Accelerator for Web Roles project](https://github.com/microsoft-dpe/wa-accelerator-webroles). The objective of this project is to allow people to continue using the goodness of Accelerator for Web Roles, but with an increasingly production ready and tested code base and an easier upgrade and setup pathway.
 
 ## About
-The Windows Azure Accelerator for Web Roles makes it quick and easy for you to deploy one or more websites across multiple Web Role instances using Web Deploy. The accelerator includes a Visual Studio project template that creates a Windows Azure web role to host one or more websites. Once you have deployed this Web Role you can deploy your websites to Windows Azure using Web Deploy. Deployments to Windows Azure using Web Deploy take only about 30 seconds. Additionally, this tool will work with roles that have a single or many instances so you can scale up to handle as much traffic as you need.
-
+The Azure Web Farm allows you to use a Web Role and deploy multiple web sites via MsDeploy to it.
 
 ## When Should I Use This? ##
-UPDATE: See above for notice related to the future of this project. 
-
-Before you download and use this accelerator it is important to understand what it is and how it should be used. First, remember that the accelerator is sample code. It is not part of the Windows Azure Platform and is not a supported project. It is a tool that you can use if it fits your needs. The project is open source so you can modify it, fix bugs, or rip it apart and use pieces in any way that meets your needs. Second, the accelerator was designed to simplify certain types of deployments on Windows Azure. The accelerator was built to help developers deploy and host multiple websites on a single set of instances. The accelerator works best with sites that are small in size and simple in scope. For these scenarios the accelerator has been working well for many people. Now, if you are building a high performance, high scale site that has lots of complexity, lots of static content, or other similar scenarios this accelerator probably isn't for you.
+If you [aren't able to use Azure Web Sites](http://robdmoore.id.au/blog/2012/06/09/windows-azure-web-sites-vs-web-roles/), but you don't want a slow and frustrating deployment option or to be locked into deploying only one web site on your roles then this is the project for you.
 
 ## Documentation ##
-* [Home](/microsoft-dpe/wa-accelerator-webroles/wiki)
-* [Setup and Configuration](/microsoft-dpe/wa-accelerator-webroles/wiki/Setup-and-Configuration)
-* [Deploying](/microsoft-dpe/wa-accelerator-webroles/wiki/Deploying)
-* [Changing Portal Credentials](/microsoft-dpe/wa-accelerator-webroles/wiki/portal-credentials)
-* [Modifying Service Endpoints](/microsoft-dpe/wa-accelerator-webroles/wiki/service-endpoints)
-* [Known Issues](/microsoft-dpe/wa-accelerator-webroles/wiki/known-issues)
+Note this will change over time as the distinguishing features of AzureWebFarm emerge, but for now I'll link to the Accelerator for Web Roles documentation since it's essentially still accurate.
+* [Home](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki)
+* [Setup and Configuration](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/Setup-and-Configuration)
+* [Deploying](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/Deploying)
+* [Changing Portal Credentials](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/portal-credentials)
+* [Modifying Service Endpoints](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/service-endpoints)
+* [Known Issues](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/known-issues)
+
+## Contributions ##
+If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
+
+## Roadmap ##
+* Manage setup and maintenance of application via NuGet package
+* Provide unit test coverage across most of the code
+* Remove the ability to manage via frontend and instead require pre- and/or post-sync MsDeploy commands to manage IIS
+* Add the concept of a version of the site rather than scanning for last modified date across the site files
+* Add status reporting and a dashboard for all roles in operation and the version they currently have
+* If possible, upload the Web Deploy log when syncing a package so it can be inspected via the dashboard
+* Investigate putting Kudu in
+* Update the WPI exe in Startup and ensure the Web Deploy packages being used are the latest
