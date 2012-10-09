@@ -19,7 +19,7 @@ namespace AzureWebFarm.Example.Web.Controllers
         private readonly CertificateRepository _certificateRepository;
 
         public WebSiteController()
-            : this(new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting("DataConnectionString"))), new CertificateRepository())
+            : this(new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting("DataConnectionString") ?? CloudStorageAccount.DevelopmentStorageAccount)), new CertificateRepository())
         {
         }
 

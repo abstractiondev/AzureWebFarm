@@ -51,7 +51,7 @@
     <file src="AzureWebFarm.Example.Web\Models\*.*" target="content\Models" />
     <file src="AzureWebFarm.Example.Web\Scripts\*.*" target="content\Scripts" />
     <file src="AzureWebFarm.Example.Web\Startup\*.*" target="content\Startup" />
-    <file src="AzureWebFarm.Example.Web\Views\*.*" target="content\Views" />
+    <file src="AzureWebFarm.Example.Web\Views\**\*.*" target="content\Views" />
     <file src="AzureWebFarm.Example.Cloud\ServiceConfiguration.Cloud.cscfg" target="tools\ExampleConfigs" />
     <file src="AzureWebFarm.Example.Cloud\ServiceDefinition.csdef" target="tools\ExampleConfigs" />
   </files>
