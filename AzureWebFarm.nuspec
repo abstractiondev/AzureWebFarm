@@ -34,13 +34,24 @@
     </dependencies>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="Microsoft.WindowsAzure.ServiceRuntime" targetFramework="net40" />
+      <frameworkAssembly assemblyName="Microsoft.WindowsAzure.Diagnostics" targetFramework="net40" />
     </frameworkAssemblies>
   </metadata>
   <files>
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.dll" target="lib\NET40" />
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.pdb" target="lib\NET40" />
     <!-- todo: <file src="AzureWebFarm\bin\Release\AzureWebFarm.XML" target="lib\NET40" />-->
-    <file src="AzureWebFarm.Example.Web\Startup\*.*" target="tools\Startup" />
+    <file src="AzureWebFarm.Example.Web\web.config" target="content" />
+    <file src="AzureWebFarm.Example.Web\WebRole.cs" target="content" />
+    <file src="AzureWebFarm.Example.Web\Global.asax.cs" target="content" />
+    <file src="AzureWebFarm.Example.Web\Global.asax" target="content" />
+    <file src="AzureWebFarm.Example.Web\Content\*.*" target="content\Content" />
+    <file src="AzureWebFarm.Example.Web\Controllers\*.*" target="content\Controllers" />
+    <file src="AzureWebFarm.Example.Web\Extensions\*.*" target="content\Extensions" />
+    <file src="AzureWebFarm.Example.Web\Models\*.*" target="content\Models" />
+    <file src="AzureWebFarm.Example.Web\Scripts\*.*" target="content\Scripts" />
+    <file src="AzureWebFarm.Example.Web\Startup\*.*" target="content\Startup" />
+    <file src="AzureWebFarm.Example.Web\Views\*.*" target="content\Views" />
     <file src="AzureWebFarm.Example.Cloud\ServiceConfiguration.Cloud.cscfg" target="tools\ExampleConfigs" />
     <file src="AzureWebFarm.Example.Cloud\ServiceDefinition.csdef" target="tools\ExampleConfigs" />
   </files>
