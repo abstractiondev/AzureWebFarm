@@ -34,8 +34,6 @@
       <Setting name="SitesContainerName" />
       <Setting name="DirectoriesToExclude" />
       <Setting name="SyncIntervalInSeconds" />
-      <Setting name="AdminUserName" />
-      <Setting name="AdminUserPassword" />
     </ConfigurationSettings>
   </WebRole>
 </ServiceDefinition>
