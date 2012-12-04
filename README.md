@@ -16,27 +16,20 @@ If you [aren't able to use Azure Web Sites](http://robdmoore.id.au/blog/2012/06/
 3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
 4. Create a cloud project with the website as a web role
 5. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
-
-### Existing Documentation ###
-Note this will change over time as the distinguishing features of AzureWebFarm emerge, but for now I'll link to the Accelerator for Web Roles documentation since it's essentially still accurate.
-* [Home](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki)
-* [Setup and Configuration](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/Setup-and-Configuration)
-* [Deploying](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/Deploying)
-* [Changing Portal Credentials](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/portal-credentials)
-* [Modifying Service Endpoints](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/service-endpoints)
-* [Known Issues](https://github.com/microsoft-dpe/wa-accelerator-webroles/wiki/known-issues)
+6. Look in the packages/AzureWebFarm/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm
 
 ## Contributions ##
 If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
 
 ## Roadmap ##
-* Manage setup and maintenance of application via NuGet package
-* Provide unit test coverage across most of the code
-* Remove the ability to manage via frontend and instead require pre- and/or post-sync MsDeploy commands to manage IIS
+* [In progress] Manage setup and maintenance of application via NuGet package
+* [In progress] Provide unit test coverage across most of the code
+* [In progress] Remove the ability to manage via frontend and instead require pre- and/or post-sync MsDeploy commands to manage IIS
 * Add the concept of a version of the site rather than scanning for last modified date across the site files
 * Add status reporting and a dashboard for all roles in operation and the version they currently have
 * If possible, upload the Web Deploy log when syncing a package so it can be inspected via the dashboard
 * Investigate putting Kudu in
-* Update the WPI exe in Startup and ensure the Web Deploy packages being used are the latest
+* Update the WPI exe in Startup and ensure the Web Deploy packages being used are the latest (use Chocolatey?)
 * Install .NET 4.5
-* IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration?
+* Support Windows Server 2012 Web Roles
+* IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them)?
