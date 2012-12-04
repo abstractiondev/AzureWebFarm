@@ -38,3 +38,5 @@ If you would like to contribute to this project then feel free to communicate wi
 * If possible, upload the Web Deploy log when syncing a package so it can be inspected via the dashboard
 * Investigate putting Kudu in
 * Update the WPI exe in Startup and ensure the Web Deploy packages being used are the latest
+* Install .NET 4.5
+* IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration?
