@@ -31,6 +31,7 @@
     <dependencies>
       <dependency id="WindowsAzure.Storage" version="1.7" />
       <dependency id="AzureToolkit" version="2.4.10" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.7.0.3" />
     </dependencies>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="Microsoft.WindowsAzure.ServiceRuntime" targetFramework="net40" />
@@ -40,8 +41,8 @@
   <files>
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.dll" target="lib\NET40" />
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.pdb" target="lib\NET40" />
-    <file src="AzureWebFarm\bin\Release\Microsoft.Web.Administration.pdb" target="lib\NET40" />
-    <file src="AzureWebFarm\bin\Release\Microsoft.Web.Deployment.pdb" target="lib\NET40" />
+    <file src="AzureWebFarm\bin\Release\Microsoft.Web.Administration.dll" target="lib\NET40" />
+    <file src="AzureWebFarm\bin\Release\Microsoft.Web.Deployment.dll" target="lib\NET40" />
     <!-- todo: <file src="AzureWebFarm\bin\Release\AzureWebFarm.XML" target="lib\NET40" />-->
     <file src="AzureWebFarm.Example.Web\app.config" target="content" />
     <file src="AzureWebFarm.Example.Web\web.config" target="content" />
@@ -57,5 +58,6 @@
     <file src="AzureWebFarm.Example.Web\Views\**\*.*" target="content\Views" />
     <file src="AzureWebFarm.Example.Cloud\ServiceConfiguration.Cloud.cscfg" target="tools\ExampleConfigs" />
     <file src="AzureWebFarm.Example.Cloud\ServiceDefinition.csdef" target="tools\ExampleConfigs" />
+    <file src="AzureWebFarm.AdminConsole\bin\Release\*.*" target="tools\AdminConsole" />
   </files>
 </package>
