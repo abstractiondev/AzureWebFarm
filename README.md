@@ -33,3 +33,4 @@ If you would like to contribute to this project then feel free to communicate wi
 * Install .NET 4.5
 * Support Windows Server 2012 Web Roles
 * IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them)?
+* Support environment-based config transforms out of the box
