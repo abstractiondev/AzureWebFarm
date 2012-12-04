@@ -11,7 +11,7 @@ namespace AzureWebFarm.AdminConsole
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.Write("Enter the storage account name: ");
             var accountName = Console.ReadLine();
