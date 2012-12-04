@@ -7,50 +7,71 @@ using System.IO;
 using System.Net;
 using System.Security.AccessControl;
 using AzureWebFarm.Services;
-using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Example.Web
 {
     public class WebRole : RoleEntryPoint
     {
+        // Core references from here http://weblogs.thinktecture.com/cweyer/2011/01/trying-to-troubleshoot-windows-azure-compute-role-startup-issues.html
+        public static void WriteExceptionToBlobStorage(Exception ex)
+        {
+            var storageAccount = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue("Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString"));
+
+            var container = storageAccount.CreateCloudBlobClient().GetContainerReference("exceptions");
+            container.CreateIfNotExist();
+
+            var blob = container.GetBlobReference(string.Format("exception-{0}-{1}.log", RoleEnvironment.CurrentRoleInstance.Id, DateTime.UtcNow.Ticks));
+            blob.UploadText(ex.ToString());
+        }
+
         private SyncService _syncService;
 
         public override bool OnStart()
         {
-            ServicePointManager.DefaultConnectionLimit = 12;
-            CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
-            {
-                string configuration = RoleEnvironment.IsAvailable ?
-                    RoleEnvironment.GetConfigurationSettingValue(configName) :
-                    ConfigurationManager.AppSettings[configName];
-
-                configSetter(configuration);
-            });
-
-            ConfigureDiagnosticMonitor();
-
             Trace.TraceInformation("WebRole.OnStart");
+            try
+            {
+                ServicePointManager.DefaultConnectionLimit = 12;
+                CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
+                {
+                    string configuration = RoleEnvironment.IsAvailable ?
+                        RoleEnvironment.GetConfigurationSettingValue(configName) :
+                        ConfigurationManager.AppSettings[configName];
 
-            // Initialize local resources
-            var localSitesPath = GetLocalResourcePathAndSetAccess("Sites");
-            var localTempPath = GetLocalResourcePathAndSetAccess("TempSites");
+                    configSetter(configuration);
+                });
 
-            // Get settings
-            var directoriesToExclude = RoleEnvironment.GetConfigurationSettingValue("DirectoriesToExclude").Split(';');
+                if (RoleEnvironment.IsAvailable && !RoleEnvironment.IsEmulated)
+                    ConfigureDiagnosticMonitor();
 
-            // WebDeploy creates temporary files during package creation. The default TEMP location allows for a 100MB
-            // quota (see http://msdn.microsoft.com/en-us/library/gg465400.aspx#Y976). 
-            // For large web deploy packages, the synchronization process will raise an IO exception because the "disk is full" 
-            // unless you ensure that the TEMP/TMP target directory has sufficient space
-            Environment.SetEnvironmentVariable("TMP", localTempPath);
-            Environment.SetEnvironmentVariable("TEMP", localTempPath);
+                // Initialize local resources
+                var localSitesPath = GetLocalResourcePathAndSetAccess("Sites");
+                var localTempPath = GetLocalResourcePathAndSetAccess("TempSites");
 
-            // Create the sync service and update the sites status
-            _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
-            _syncService.Start();
+                // Get settings
+                var directoriesToExclude = RoleEnvironment.GetConfigurationSettingValue("DirectoriesToExclude").Split(';');
+
+                // WebDeploy creates temporary files during package creation. The default TEMP location allows for a 100MB
+                // quota (see http://msdn.microsoft.com/en-us/library/gg465400.aspx#Y976). 
+                // For large web deploy packages, the synchronization process will raise an IO exception because the "disk is full" 
+                // unless you ensure that the TEMP/TMP target directory has sufficient space
+                Environment.SetEnvironmentVariable("TMP", localTempPath);
+                Environment.SetEnvironmentVariable("TEMP", localTempPath);
+
+                // Create the sync service and update the sites status
+                _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
+                _syncService.Start();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                WriteExceptionToBlobStorage(e);
+                throw;
+            }
 
             return base.OnStart();
         }
@@ -58,12 +79,21 @@ namespace AzureWebFarm.Example.Web
         // ReSharper disable FunctionNeverReturns
         public override void Run()
         {
-            Trace.TraceInformation("WebRole.Run");
-            var syncInterval = int.Parse(RoleEnvironment.GetConfigurationSettingValue("SyncIntervalInSeconds"), CultureInfo.InvariantCulture);
-            _syncService.SyncForever(TimeSpan.FromSeconds(syncInterval));
-            while (true)
+            try
             {
-                System.Threading.Thread.Sleep(10000);
+                Trace.TraceInformation("WebRole.Run");
+                var syncInterval = int.Parse(RoleEnvironment.GetConfigurationSettingValue("SyncIntervalInSeconds"), CultureInfo.InvariantCulture);
+                _syncService.SyncForever(TimeSpan.FromSeconds(syncInterval));
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(10000);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                WriteExceptionToBlobStorage(e);
+                throw;
             }
         }
         // ReSharper restore FunctionNeverReturns
