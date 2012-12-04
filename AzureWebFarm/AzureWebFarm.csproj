@@ -81,6 +81,7 @@
     <Compile Include="Helpers\AzureRoleEnvironment.cs" />
     <Compile Include="Helpers\FilesHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\BackgroundWorkerService.cs" />
     <Compile Include="Services\IISManager.cs" />
     <Compile Include="Services\SyncService.cs" />
     <Compile Include="Storage\BindingRow.cs" />
