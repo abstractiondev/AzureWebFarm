@@ -35,8 +35,8 @@ namespace AzureWebFarm.Tests.Services
 
         private static void SetupTestApp(int app, string siteName)
         {
-            Directory.CreateDirectory(Path.Combine(SitesPath, siteName, string.Format(TestAppPath, app)));
-            File.Copy(Path.Combine(TestPath, string.Format("TestApp{0}.exe", app)), Path.Combine(SitesPath, siteName, string.Format(TestAppExe, app)));
+            Directory.CreateDirectory(Path.Combine(SitesPath, siteName, "bin", string.Format(TestAppPath, app)));
+            File.Copy(Path.Combine(TestPath, string.Format("TestApp{0}.exe", app)), Path.Combine(SitesPath, siteName, "bin", string.Format(TestAppExe, app)));
         }
 
         [Test]
@@ -48,6 +48,7 @@ namespace AzureWebFarm.Tests.Services
 
             _service.Update(siteName);
 
+            _service.Wait();
             var outputFile = Path.Combine(ExePath, siteName, string.Format(TestAppPath, app), "file.txt");
             Assert.That(File.Exists(outputFile));
             Assert.That(File.ReadAllText(outputFile), Is.EqualTo(app.ToString()));

@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace AzureWebFarm.Services
 {
-    public class BackgroundWorkerService
+    public class BackgroundWorkerService : IDisposable
     {
-        private readonly string _sitesPath;
         private readonly string _executablePath;
         private readonly Dictionary<string, List<Executable>> _executables;
-        private ExecutableFinder _executableFinder;
+        private readonly ExecutableFinder _executableFinder;
 
         public BackgroundWorkerService(string sitesPath, string executablePath)
         {
-            _sitesPath = sitesPath;
             _executablePath = executablePath;
             _executables = new Dictionary<string, List<Executable>>();
             _executableFinder = new ExecutableFinder(sitesPath);
@@ -27,17 +24,46 @@ namespace AzureWebFarm.Services
             if (!_executables.ContainsKey(siteName))
                 _executables[siteName] = new List<Executable>();
 
-            var currentState = _executableFinder.FindExecutables(siteName);
-            
-            // todo: are there any console apps that aren't there any more?
-            // todo: are there any new console apps?
+            DisposeSite(siteName);
 
-            foreach (var e in currentState)
+            _executables[siteName].AddRange(_executableFinder.FindExecutables(siteName));
+            
+            foreach (var e in _executables[siteName])
             {
                 e.Copy(Path.Combine(_executablePath, siteName));
                 e.Execute();
-                // todo: remove this
-                e.Wait();
+            }
+        }
+
+        private void DisposeSite(string siteName)
+        {
+            foreach (var e in _executables[siteName])
+            {
+                e.Dispose();
+                _executables[siteName].Remove(e);
+            }
+        }
+
+        public void Dispose()
+        {
+            ForEach(e => e.Dispose());
+        }
+
+        public void Ping()
+        {
+            ForEach(e => e.Ping());
+        }
+
+        public void Wait()
+        {
+            ForEach(e => e.Wait());
+        }
+
+        private void ForEach(Action<Executable> action)
+        {
+            foreach (var e in _executables.Keys.SelectMany(site => _executables[site]))
+            {
+                action(e);
             }
         }
     }
@@ -53,11 +79,11 @@ namespace AzureWebFarm.Services
 
         public IEnumerable<Executable> FindExecutables(string siteName)
         {
-            var subDirs = Directory.EnumerateDirectories(Path.Combine(_sitesPath, siteName));
+            var subDirs = Directory.EnumerateDirectories(Path.Combine(_sitesPath, siteName, "bin"));
             foreach (var d in subDirs)
             {
                 var subDir = d.Split(Path.DirectorySeparatorChar).Last();
-                var exe = new Executable(Path.Combine(_sitesPath, siteName), subDir);
+                var exe = new Executable(Path.Combine(_sitesPath, siteName, "bin"), subDir);
                 
                 if (exe.Exists())
                     yield return exe;
@@ -78,17 +104,22 @@ namespace AzureWebFarm.Services
             _exeName = exeName;
         }
 
-        public string GetOriginalExePath()
+        private string GetOriginalDirPath()
         {
-            return Path.Combine(_basePath, _exeName, string.Format("{0}.exe", _exeName));
+            return Path.Combine(_basePath, _exeName);
         }
 
-        public string GetExecutionDirPath()
+        private string GetOriginalExePath()
+        {
+            return Path.Combine(GetOriginalDirPath(), string.Format("{0}.exe", _exeName));
+        }
+
+        private string GetExecutionDirPath()
         {
             return Path.Combine(_executionPath, _exeName);
         }
 
-        public string GetExecutionExePath()
+        private string GetExecutionExePath()
         {
             return Path.Combine(GetExecutionDirPath(), string.Format("{0}.exe", _exeName));
         }
@@ -101,26 +132,28 @@ namespace AzureWebFarm.Services
         public void Copy(string executionPath)
         {
             if (IsRunning())
-                Kill();
+                throw new InvalidOperationException("The executable is already running!");
 
             _executionPath = executionPath;
 
             if (!Directory.Exists(GetExecutionDirPath()))
                 Directory.CreateDirectory(GetExecutionDirPath());
 
-            File.Copy(GetOriginalExePath(), GetExecutionExePath(), true);
-        }
+            foreach (var f in Directory.GetFiles(GetOriginalDirPath(), "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(f, f.Replace(GetOriginalDirPath(), GetExecutionDirPath()));
+            }
 
-        public void Kill()
-        {
-            _process.Kill();
-            _process.Dispose();
-            _process = null;
+            var webConfigPath = Path.Combine(_basePath, "..", "web.config");
+            if (File.Exists(webConfigPath))
+            {
+                File.Copy(webConfigPath, GetExecutionDirPath());
+            }
         }
 
         public void Wait()
         {
-            _process.WaitForExit();
+            _process.WaitForExit(1000);
         }
 
         public void Execute()
@@ -151,7 +184,6 @@ namespace AzureWebFarm.Services
             if (IsRunning())
                 return;
 
-            // todo: log stuff
             if (_process.ExitCode != 0)
                 _process.Start();
         }
@@ -159,7 +191,13 @@ namespace AzureWebFarm.Services
         public void Dispose()
         {
             if (_process != null)
+            {
+                _process.Kill();
                 _process.Dispose();
+                _process = null;
+            }
+
+            Directory.Delete(GetExecutionDirPath(), true);
         }
     }
 }
