@@ -33,7 +33,7 @@ namespace AzureWebFarm.Tests.Services
             _service = new BackgroundWorkerService(SitesPath, ExePath);
         }
 
-        private void SetupTestApp(int app, string siteName)
+        private static void SetupTestApp(int app, string siteName)
         {
             Directory.CreateDirectory(Path.Combine(SitesPath, siteName, string.Format(TestAppPath, app)));
             File.Copy(Path.Combine(TestPath, string.Format("TestApp{0}.exe", app)), Path.Combine(SitesPath, siteName, string.Format(TestAppExe, app)));
