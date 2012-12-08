@@ -118,6 +118,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BackgroundWorkerServiceTests.cs" />
+    <Compile Include="Services\ExecutableTests.cs" />
     <Compile Include="Services\IISManagerTests.cs" />
     <Compile Include="Storage\WebSiteRepositoryTests.cs" />
   </ItemGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace AzureWebFarm.Services
 {
@@ -104,22 +105,22 @@ namespace AzureWebFarm.Services
             _exeName = exeName;
         }
 
-        private string GetOriginalDirPath()
+        public string GetOriginalDirPath()
         {
             return Path.Combine(_basePath, _exeName);
         }
 
-        private string GetOriginalExePath()
+        public string GetOriginalExePath()
         {
             return Path.Combine(GetOriginalDirPath(), string.Format("{0}.exe", _exeName));
         }
 
-        private string GetExecutionDirPath()
+        public string GetExecutionDirPath()
         {
             return Path.Combine(_executionPath, _exeName);
         }
 
-        private string GetExecutionExePath()
+        public string GetExecutionExePath()
         {
             return Path.Combine(GetExecutionDirPath(), string.Format("{0}.exe", _exeName));
         }
@@ -147,13 +148,14 @@ namespace AzureWebFarm.Services
             var webConfigPath = Path.Combine(_basePath, "..", "web.config");
             if (File.Exists(webConfigPath))
             {
-                File.Copy(webConfigPath, GetExecutionDirPath());
+                File.Copy(webConfigPath, Path.Combine(GetExecutionDirPath(), "web.config"));
             }
         }
 
         public void Wait()
         {
-            _process.WaitForExit(1000);
+            if (_process != null)
+                _process.WaitForExit(1000);
         }
 
         public void Execute()
@@ -192,12 +194,35 @@ namespace AzureWebFarm.Services
         {
             if (_process != null)
             {
-                _process.Kill();
+                if (IsRunning())
+                    _process.Kill();
                 _process.Dispose();
                 _process = null;
             }
 
-            Directory.Delete(GetExecutionDirPath(), true);
+            if (!string.IsNullOrEmpty(_executionPath))
+            {
+                for (var i = 0; i <= 5; i++)
+                {
+                    try
+                    {
+                        Directory.Delete(GetExecutionDirPath(), true);
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        Thread.Sleep(TimeSpan.FromMilliseconds(200));
+                        if (i == 5)
+                            throw;
+                    }
+                    catch(UnauthorizedAccessException)
+                    {
+                        Thread.Sleep(TimeSpan.FromMilliseconds(200));
+                        if (i == 5)
+                            throw;
+                    }
+                }
+            }
         }
     }
 }
