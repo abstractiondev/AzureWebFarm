@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace AzureWebFarm.Services
@@ -170,10 +171,12 @@ namespace AzureWebFarm.Services
             {
                 WorkingDirectory = GetExecutionDirPath(),
                 CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
+                WindowStyle = ProcessWindowStyle.Hidden,
+                ErrorDialog = false,
+                UseShellExecute = true
             };
 
-            _process = Process.Start(startInfo);
+            _process = Start(startInfo);
         }
 
         public bool IsRunning()
@@ -188,6 +191,23 @@ namespace AzureWebFarm.Services
 
             if (_process.ExitCode != 0)
                 _process.Start();
+        }
+
+        // http://social.msdn.microsoft.com/Forums/en/netfxbcl/thread/f6069441-4ab1-4299-ad6a-b8bb9ed36be3
+        private Process Start(ProcessStartInfo startInfo)
+        {
+            Process process;
+
+            lock (this)
+            {
+                using (new ChangeErrorMode(ErrorModes.FailCriticalErrors | ErrorModes.NoGpFaultErrorBox))
+                {
+                    process = Process.Start(startInfo);
+                    process.PriorityClass = ProcessPriorityClass.Idle;
+                }
+            }
+
+            return process;
         }
 
         public void Dispose()
@@ -223,6 +243,31 @@ namespace AzureWebFarm.Services
                     }
                 }
             }
+        }
+
+        [Flags]
+        public enum ErrorModes
+        {
+            Default = 0x0,
+            FailCriticalErrors = 0x1,
+            NoGpFaultErrorBox = 0x2,
+            NoAlignmentFaultExcept = 0x4,
+            NoOpenFileErrorBox = 0x8000
+        }
+
+        public struct ChangeErrorMode : IDisposable
+        {
+            private readonly int _oldMode;
+
+            public ChangeErrorMode(ErrorModes mode)
+            {
+                _oldMode = SetErrorMode((int)mode);
+            }
+
+            void IDisposable.Dispose() { SetErrorMode(_oldMode); }
+
+            [DllImport("kernel32.dll")]
+            private static extern int SetErrorMode(int newMode);
         }
     }
 }

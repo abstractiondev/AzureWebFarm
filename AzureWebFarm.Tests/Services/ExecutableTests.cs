@@ -98,9 +98,12 @@ namespace AzureWebFarm.Tests.Services
         }
 
         [Test]
-        public void Execute_file()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void Execute_file(int testExecutable)
         {
-            ArrangeTestExecutable(1);
+            ArrangeTestExecutable(testExecutable);
             _e.Copy(ExecutePath);
             
             _e.Execute();
@@ -160,6 +163,46 @@ namespace AzureWebFarm.Tests.Services
             _e.Wait();
 
             Assert.That(_e.IsRunning(), Is.False);
+        }
+
+        [Test]
+        public void Do_nothing_if_process_already_successfully_finished_executing_when_pinged()
+        {
+            ArrangeTestExecutable(1);
+            _e.Copy(ExecutePath);
+            _e.Execute();
+            _e.Wait();
+            var stream = File.Open(Path.Combine(ExecutePath, ExeName, string.Format("{0}.exe", ExeName)), FileMode.Open);
+            stream.Lock(0, 1);
+
+            _e.Ping();
+
+            stream.Unlock(0, 1);
+            stream.Dispose();
+        }
+
+        [Test]
+        public void Do_nothing_if_process_still_running()
+        {
+            ArrangeTestExecutable(4);
+            _e.Copy(ExecutePath);
+            _e.Execute();
+
+            _e.Ping();
+        }
+
+        [Test]
+        public void Restart_if_process_exited_with_non_zero_code()
+        {
+            ArrangeTestExecutable(3);
+            _e.Copy(ExecutePath);
+            _e.Execute();
+            _e.Wait();
+
+            _e.Ping();
+            
+            _e.Wait();
+            Assert.That(File.ReadAllText(Path.Combine(ExecutePath, ExeName, "file.txt")), Is.EqualTo("2"));
         }
     }
 }
