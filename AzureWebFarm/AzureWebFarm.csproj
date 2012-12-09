@@ -90,7 +90,7 @@
     <Compile Include="Storage\SyncStatusRow.cs" />
     <Compile Include="Storage\WebSiteRepository.cs" />
     <Compile Include="Storage\WebSiteRow.cs" />
-    <Compile Include="WebRole.cs" />
+    <Compile Include="WebFarmRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\LandingPage.html" />
