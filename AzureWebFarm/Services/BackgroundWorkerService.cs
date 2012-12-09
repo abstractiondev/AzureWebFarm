@@ -42,26 +42,26 @@ namespace AzureWebFarm.Services
             foreach (var e in _executables[siteName])
             {
                 e.Dispose();
-                _executables[siteName].Remove(e);
             }
+            _executables[siteName] = new List<Executable>();
         }
 
         public void Dispose()
         {
-            ForEach(e => e.Dispose());
+            ForEachExecutable(e => e.Dispose());
         }
 
         public void Ping()
         {
-            ForEach(e => e.Ping());
+            ForEachExecutable(e => e.Ping());
         }
 
         public void Wait(TimeSpan maxWait)
         {
-            ForEach(e => e.Wait(maxWait));
+            ForEachExecutable(e => e.Wait(maxWait));
         }
 
-        private void ForEach(Action<Executable> action)
+        private void ForEachExecutable(Action<Executable> action)
         {
             foreach (var e in _executables.Keys.SelectMany(site => _executables[site]))
             {

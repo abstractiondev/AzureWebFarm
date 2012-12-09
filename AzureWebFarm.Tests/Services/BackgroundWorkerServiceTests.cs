@@ -9,13 +9,16 @@ namespace AzureWebFarm.Tests.Services
     [TestFixture]
     class BackgroundWorkerServiceShould
     {
+        #region Setup
         private static readonly string TestPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", ""));
 
         private static readonly string SitesPath = Path.Combine(TestPath, "Sites");
         private static readonly string ExePath = Path.Combine(TestPath, "Executables");
 
-        private static readonly string TestAppPath = "TestApp{0}";
-        private static readonly string TestAppExe = Path.Combine(TestAppPath, "TestApp{0}.exe");
+        private const string TestAppPath = "TestApp{0}";
+        private const string TestAppExe = "TestApp{0}.exe";
+        private const string SiteName = "SiteName";
+        private const string WebConfigContents = "asdf";
 
         private BackgroundWorkerService _service;
 
@@ -28,31 +31,112 @@ namespace AzureWebFarm.Tests.Services
             if (Directory.Exists(ExePath))
                 Directory.Delete(ExePath, true);
 
-            Directory.CreateDirectory(SitesPath);
+            Directory.CreateDirectory(Path.Combine(SitesPath, SiteName));
             Directory.CreateDirectory(ExePath);
+
+            File.WriteAllText(Path.Combine(SitesPath, SiteName, "web.config"), WebConfigContents);
 
             _service = new BackgroundWorkerService(SitesPath, ExePath);
         }
 
-        private static void SetupTestApp(int app, string siteName)
+        [TearDown]
+        public void Teardown()
         {
-            Directory.CreateDirectory(Path.Combine(SitesPath, siteName, "bin", string.Format(TestAppPath, app)));
-            File.Copy(Path.Combine(TestPath, string.Format("TestApp{0}.exe", app)), Path.Combine(SitesPath, siteName, "bin", string.Format(TestAppExe, app)));
+            if (_service != null)
+                _service.Dispose();
         }
+
+        private static string GetOriginalDropPath(string siteName, int app)
+        {
+            return Path.Combine(SitesPath, siteName, "bin", string.Format(TestAppPath, app));
+        }
+
+        private static string GetExecutionDropPath(string siteName, int app)
+        {
+            return Path.Combine(ExePath, siteName, string.Format(TestAppPath, app));
+        }
+
+        private static void ArrangeTestApp(int app, string siteName, int destApp = 0)
+        {
+            if (destApp == 0)
+                destApp = app;
+            var dirPath = GetOriginalDropPath(siteName, destApp);
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            File.Copy(Path.Combine(TestPath, string.Format(TestAppExe, app)), Path.Combine(GetOriginalDropPath(siteName, destApp), string.Format(TestAppExe, destApp)), true);
+        }
+
+        private static void AssertAppWasRun(string siteName, int app, string expectedText)
+        {
+            var outputFile = Path.Combine(GetExecutionDropPath(siteName, app), "file.txt");
+            Assert.That(File.Exists(outputFile), outputFile + " didn't exist");
+            Assert.That(File.ReadAllText(outputFile), Is.EqualTo(expectedText), "Text in " + outputFile + " didn't match expectation");
+            var webConfigFile = Path.Combine(GetExecutionDropPath(siteName, app), "web.config");
+            Assert.That(File.Exists(webConfigFile), webConfigFile + " didn't exist");
+            Assert.That(File.ReadAllText(webConfigFile), Is.EqualTo(WebConfigContents), "Text in " + webConfigFile + " didn't match expectation");
+        }
+        #endregion
 
         [Test]
         public void Run_executable()
         {
-            const string siteName = "test";
-            const int app = 1;
-            SetupTestApp(app, siteName);
+            ArrangeTestApp(1, SiteName);
 
-            _service.Update(siteName);
+            _service.Update(SiteName);
 
             _service.Wait(TimeSpan.FromSeconds(1));
-            var outputFile = Path.Combine(ExePath, siteName, string.Format(TestAppPath, app), "file.txt");
-            Assert.That(File.Exists(outputFile));
-            Assert.That(File.ReadAllText(outputFile), Is.EqualTo(app.ToString()));
+            AssertAppWasRun(SiteName, 1, "1");
+        }
+        
+        [Test]
+        public void Update_with_new_updated_unchanged_and_deleted_executables_works_as_expected()
+        {
+            // Yes this doesn't follow single AAA syntax, but it's a complex integration test rather than a unit test
+            // Arrange initial run
+            ArrangeTestApp(1, SiteName);
+            ArrangeTestApp(2, SiteName);
+            ArrangeTestApp(3, SiteName);
+
+            // Act for initial run
+            _service.Update(SiteName);
+
+            // Assert initial run was successful
+            _service.Wait(TimeSpan.FromSeconds(5));
+            AssertAppWasRun(SiteName, 1, "1");
+            AssertAppWasRun(SiteName, 2, "2");
+            AssertAppWasRun(SiteName, 3, "1");
+
+            // Arrange update
+            // 1: Unchanged
+            ArrangeTestApp(1, SiteName, 2); // 2: Updated
+            Directory.Delete(GetOriginalDropPath(SiteName, 3), true); // 3: Deleted
+            ArrangeTestApp(4, SiteName); // 4: New
+            // Delete file.txt for 1 and 2 to ensure they got re-run
+            File.Delete(Path.Combine(GetExecutionDropPath(SiteName, 1), "file.txt"));
+            File.Delete(Path.Combine(GetExecutionDropPath(SiteName, 2), "file.txt"));
+
+            // Act for update
+            _service.Update(SiteName);
+
+            // Assert update run was successful
+            _service.Wait(TimeSpan.FromSeconds(5));
+            AssertAppWasRun(SiteName, 1, "1"); // 1 should have re-run
+            AssertAppWasRun(SiteName, 2, "1"); // 2 should have re-run using 1 executable
+            Assert.That(Directory.Exists(GetExecutionDropPath(SiteName, 3)), Is.False, "App 3 should have been deleted"); // 3 should have been cleaned up
+            AssertAppWasRun(SiteName, 4, "4"); // e4 should have run
+        }
+
+        [Test]
+        public void Update_while_executable_is_running()
+        {
+            ArrangeTestApp(4, SiteName);
+
+            _service.Update(SiteName);
+            _service.Update(SiteName);
+            _service.Update(SiteName);
+
+            _service.Wait(TimeSpan.FromSeconds(1));
+            AssertAppWasRun(SiteName, 4, "4");
         }
     }
 }

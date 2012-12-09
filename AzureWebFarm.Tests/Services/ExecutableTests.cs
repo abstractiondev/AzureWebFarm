@@ -9,6 +9,7 @@ namespace AzureWebFarm.Tests.Services
     [TestFixture]
     class ExecutableShould
     {
+        #region Setup
         private static readonly string TestPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", ""));
         private static readonly string OriginalPath = Path.Combine(TestPath, "original");
         private static readonly string ExecutePath = Path.Combine(TestPath, "execute");
@@ -25,6 +26,7 @@ namespace AzureWebFarm.Tests.Services
         [SetUp]
         public void Setup()
         {
+            // todo: Use Palmer for the next two delete calls since they occasionally fail
             if (Directory.Exists(OriginalPath))
                 Directory.Delete(OriginalPath, true);
 
@@ -50,7 +52,8 @@ namespace AzureWebFarm.Tests.Services
         {
             File.Copy(Path.Combine(TestPath, string.Format("TestApp{0}.exe", i)), Path.Combine(OriginalPath, ExeName, string.Format("{0}.exe", ExeName)), true);
         }
-        
+        #endregion
+
         [Test]
         public void Return_correct_original_file_paths()
         {
