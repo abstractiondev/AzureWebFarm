@@ -18,7 +18,9 @@ namespace AzureWebFarm.Tests.Services
         private const string TestAppPath = "TestApp{0}";
         private const string TestAppExe = "TestApp{0}.exe";
         private const string SiteName = "SiteName";
+        private const string SiteName2 = "SiteName2";
         private const string WebConfigContents = "asdf";
+        private const string WebConfig2Contents = "asdf2";
 
         private BackgroundWorkerService _service;
 
@@ -32,9 +34,11 @@ namespace AzureWebFarm.Tests.Services
                 Directory.Delete(ExePath, true);
 
             Directory.CreateDirectory(Path.Combine(SitesPath, SiteName));
+            Directory.CreateDirectory(Path.Combine(SitesPath, SiteName2));
             Directory.CreateDirectory(ExePath);
 
             File.WriteAllText(Path.Combine(SitesPath, SiteName, "web.config"), WebConfigContents);
+            File.WriteAllText(Path.Combine(SitesPath, SiteName2, "web.config"), WebConfig2Contents);
 
             _service = new BackgroundWorkerService(SitesPath, ExePath);
         }
@@ -73,7 +77,7 @@ namespace AzureWebFarm.Tests.Services
             Assert.That(File.ReadAllText(outputFile), Is.EqualTo(expectedText), "Text in " + outputFile + " didn't match expectation");
             var webConfigFile = Path.Combine(GetExecutionDropPath(siteName, app), "web.config");
             Assert.That(File.Exists(webConfigFile), webConfigFile + " didn't exist");
-            Assert.That(File.ReadAllText(webConfigFile), Is.EqualTo(WebConfigContents), "Text in " + webConfigFile + " didn't match expectation");
+            Assert.That(File.ReadAllText(webConfigFile), Is.EqualTo(siteName == SiteName ? WebConfigContents : WebConfig2Contents), "Text in " + webConfigFile + " didn't match expectation");
         }
         #endregion
 
@@ -137,6 +141,22 @@ namespace AzureWebFarm.Tests.Services
 
             _service.Wait(TimeSpan.FromSeconds(1));
             AssertAppWasRun(SiteName, 4, "4");
+        }
+        
+        [Test]
+        public void Ping_all_executables()
+        {
+            ArrangeTestApp(3, SiteName);
+            ArrangeTestApp(3, SiteName2);
+            _service.Update(SiteName);
+            _service.Update(SiteName2);
+            _service.Wait(TimeSpan.FromSeconds(5));
+
+            _service.Ping();
+
+            _service.Wait(TimeSpan.FromSeconds(5));
+            AssertAppWasRun(SiteName, 3, "2");
+            AssertAppWasRun(SiteName2, 3, "2");
         }
     }
 }
