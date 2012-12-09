@@ -22,6 +22,7 @@ If you [aren't able to use Azure Web Sites](http://robdmoore.id.au/blog/2012/06/
 If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
 
 ## Roadmap ##
+* [In progress] Add support to automatically execute lightweight console applications
 * [In progress] Manage setup and maintenance of application via NuGet package
 * [In progress] Provide unit test coverage across most of the code
 * [In progress] Remove the ability to manage via frontend and instead require pre- and/or post-sync MsDeploy commands to manage IIS
@@ -34,4 +35,3 @@ If you would like to contribute to this project then feel free to communicate wi
 * Support Windows Server 2012 Web Roles
 * IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them)?
 * Support environment-based config transforms out of the box
-* Add support to automatically execute lightweight console applications
