@@ -18,8 +18,11 @@ namespace TestApp3
                 case "1":
                     File.WriteAllText("file.txt", "2");
                     throw new Exception();
-                default:
+                case "2":
                     File.WriteAllText("file.txt", "3");
+                    break;
+                case "3":
+                    File.WriteAllText("file.txt", "4");
                     break;
             }
         }

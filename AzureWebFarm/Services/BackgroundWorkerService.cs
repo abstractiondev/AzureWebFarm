@@ -156,7 +156,7 @@ namespace AzureWebFarm.Services
         public void Wait()
         {
             if (_process != null)
-                _process.WaitForExit(1000);
+                _process.WaitForExit(3000);
         }
 
         public void Execute()
@@ -173,7 +173,7 @@ namespace AzureWebFarm.Services
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 ErrorDialog = false,
-                UseShellExecute = true
+                UseShellExecute = false
             };
 
             _process = Start(startInfo);

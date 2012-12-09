@@ -204,5 +204,22 @@ namespace AzureWebFarm.Tests.Services
             _e.Wait();
             Assert.That(File.ReadAllText(Path.Combine(ExecutePath, ExeName, "file.txt")), Is.EqualTo("2"));
         }
+
+        [Test]
+        public void Restart_multiple_times_if_process_exits_repeatedly_with_non_zero_code_but_not_after_it_returns_zero_exit_code()
+        {
+            ArrangeTestExecutable(3);
+            _e.Copy(ExecutePath);
+            _e.Execute();
+            _e.Wait();
+
+            _e.Ping(); // "2"
+            _e.Wait();
+            _e.Ping(); // "3"
+            _e.Wait();
+            _e.Ping(); // not run
+
+            Assert.That(File.ReadAllText(Path.Combine(ExecutePath, ExeName, "file.txt")), Is.EqualTo("3"));
+        }
     }
 }
