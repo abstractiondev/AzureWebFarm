@@ -51,6 +51,7 @@ namespace AzureWebFarm
                 // Initialize local resources
                 var localSitesPath = GetLocalResourcePathAndSetAccess("Sites");
                 var localTempPath = GetLocalResourcePathAndSetAccess("TempSites");
+                var localExecutionPath = GetLocalResourcePathAndSetAccess("Execution");
 
                 // Get settings
                 var directoriesToExclude = RoleEnvironment.GetConfigurationSettingValue("DirectoriesToExclude").Split(';');
@@ -62,8 +63,9 @@ namespace AzureWebFarm
                 Environment.SetEnvironmentVariable("TMP", localTempPath);
                 Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
-                // Create the sync service and update the sites status
+                // Create the sync service and background worker service and update the sites status
                 _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
+                var backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
                 _syncService.Start();
             }
             catch (Exception e)
