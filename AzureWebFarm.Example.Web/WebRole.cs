@@ -4,7 +4,7 @@ namespace AzureWebFarm.Example.Web
 {
     public class WebRole : RoleEntryPoint
     {
-        private WebFarmRole _webRole;
+        private readonly WebFarmRole _webRole;
 
         public WebRole()
         {
