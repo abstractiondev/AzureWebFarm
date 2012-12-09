@@ -29,6 +29,7 @@ namespace AzureWebFarm
         }
 
         private SyncService _syncService;
+        private BackgroundWorkerService _backgroundWorker;
 
         public void OnStart()
         {
@@ -63,9 +64,16 @@ namespace AzureWebFarm
                 Environment.SetEnvironmentVariable("TMP", localTempPath);
                 Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
-                // Create the sync service and background worker service and update the sites status
+                // Create the sync service and background worker
                 _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
-                var backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
+                _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
+
+                // Subscribe the background worker to relevant events in the sync service
+                _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
+                _syncService.SiteUpdated += (sender, args, siteName) => _backgroundWorker.Update(siteName);
+                _syncService.SiteDeleted += (sender, args, siteName) => _backgroundWorker.DisposeSite(siteName);
+
+                // Update the sites with initial state
                 _syncService.Start();
             }
             catch (Exception e)

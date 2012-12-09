@@ -27,6 +27,7 @@ namespace AzureWebFarm.Services
                 _executables[siteName] = new List<Executable>();
 
             DisposeSite(siteName);
+            _executables[siteName] = new List<Executable>();
 
             _executables[siteName].AddRange(_executableFinder.FindExecutables(siteName));
             
@@ -37,13 +38,12 @@ namespace AzureWebFarm.Services
             }
         }
 
-        private void DisposeSite(string siteName)
+        public void DisposeSite(string siteName)
         {
             foreach (var e in _executables[siteName])
             {
                 e.Dispose();
             }
-            _executables[siteName] = new List<Executable>();
         }
 
         public void Dispose()
