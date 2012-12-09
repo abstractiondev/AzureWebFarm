@@ -19,6 +19,7 @@ namespace AzureWebFarm.Services
 {
     public class SyncService
     {
+        #region Setup / Constructor
         private const string BlobStopName = "stop";
 
         private readonly WebSiteRepository _sitesRepository;
@@ -61,7 +62,9 @@ namespace AzureWebFarm.Services
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
             _container.CreateIfNotExist();
         }
+        #endregion
 
+        #region Public methods
         public void UpdateAllSitesSyncStatus(string roleInstanceId, bool isOnline)
         {
             foreach (var syncStatus in _syncStatusRepository.RetrieveSyncStatusByInstanceId(roleInstanceId))
@@ -106,10 +109,15 @@ namespace AzureWebFarm.Services
                     SyncOnce();
                 }
 
+
+
                 Thread.Sleep(interval);
             }
         }
         // ReSharper restore FunctionNeverReturns
+        #endregion
+
+        #region Sync Once
 
         private void SyncOnce()
         {
@@ -154,65 +162,9 @@ namespace AzureWebFarm.Services
             Trace.TraceInformation("SyncService - Synchronization completed.");
         }
 
-        public static bool IsSyncEnabled()
-        {
-            var blobStop = GetCloudBlobStop();
-            var enable = !blobStop.Exists();
-            return enable;
-        }
+        #endregion
 
-        public static void SyncEnable()
-        {
-            var blobStop = GetCloudBlobStop();
-            blobStop.DeleteIfExists();
-
-            Trace.TraceInformation("SyncService - Synchronization resumed.");
-        }
-
-        public static void SyncDisable()
-        {
-            var blobStop = GetCloudBlobStop();
-            if (!blobStop.Exists())
-            {
-                blobStop.UploadText(string.Empty); 
-            }
-
-            Trace.TraceInformation("SyncService - Synchronization paused.");
-        }
-
-        private static CloudBlob GetCloudBlobStop()
-        {
-            var storageAccount = CloudStorageAccount.FromConfigurationSetting("DataConnectionstring");
-            var sitesContainerName = RoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
-            var container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
-            var blobStop = container.GetBlobReference(BlobStopName);
-            return blobStop;
-        }
-
-        private static DateTime GetFolderLastModifiedTimeUtc(string sitePath)
-        {
-            try
-            {
-                var lastModifiedTime = File.GetLastWriteTimeUtc(sitePath);
-
-                foreach (var filePath in Directory.EnumerateFileSystemEntries(sitePath, "*", SearchOption.AllDirectories))
-                {
-                    var fileLastWriteTimeUtc = File.GetLastWriteTimeUtc(filePath);
-                    if (fileLastWriteTimeUtc > lastModifiedTime)
-                    {
-                        lastModifiedTime = fileLastWriteTimeUtc;
-                    }
-                }
-
-                return lastModifiedTime;
-            }
-            catch (PathTooLongException e)
-            {
-                Trace.TraceError("SyncService - Failed to retrieve last modified time.{0}{1}", Environment.NewLine, e.TraceInformation());
-
-                return DateTime.MinValue;
-            }
-        }
+        #region Update IIS from table storage
 
         private void UpdateIISSitesFromTableStorage()
         {
@@ -250,6 +202,9 @@ namespace AzureWebFarm.Services
                 }
             }
         }
+        #endregion
+
+        #region Update temp dir from blob storage
 
         private void SyncBlobToLocal()
         {
@@ -367,6 +322,9 @@ namespace AzureWebFarm.Services
                 _entries.Remove(path);
             }
         }
+        #endregion
+
+        #region Update IIS from temp dir
 
         private void DeploySitesFromLocal()
         {
@@ -429,6 +387,9 @@ namespace AzureWebFarm.Services
                 }
             }
         }
+        #endregion
+
+        #region Package new sites to temp dir
 
         /// <summary>
         /// Packages sites that are in IIS but not in local temp storage.
@@ -490,7 +451,70 @@ namespace AzureWebFarm.Services
                 }
             }
         }
+        #endregion
 
+        #region Helpers
+
+        public static bool IsSyncEnabled()
+        {
+            var blobStop = GetCloudBlobStop();
+            var enable = !blobStop.Exists();
+            return enable;
+        }
+
+        public static void SyncEnable()
+        {
+            var blobStop = GetCloudBlobStop();
+            blobStop.DeleteIfExists();
+
+            Trace.TraceInformation("SyncService - Synchronization resumed.");
+        }
+
+        public static void SyncDisable()
+        {
+            var blobStop = GetCloudBlobStop();
+            if (!blobStop.Exists())
+            {
+                blobStop.UploadText(string.Empty);
+            }
+
+            Trace.TraceInformation("SyncService - Synchronization paused.");
+        }
+
+        private static CloudBlob GetCloudBlobStop()
+        {
+            var storageAccount = CloudStorageAccount.FromConfigurationSetting("DataConnectionstring");
+            var sitesContainerName = RoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
+            var container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
+            var blobStop = container.GetBlobReference(BlobStopName);
+            return blobStop;
+        }
+
+        private static DateTime GetFolderLastModifiedTimeUtc(string sitePath)
+        {
+            try
+            {
+                var lastModifiedTime = File.GetLastWriteTimeUtc(sitePath);
+
+                foreach (var filePath in Directory.EnumerateFileSystemEntries(sitePath, "*", SearchOption.AllDirectories))
+                {
+                    var fileLastWriteTimeUtc = File.GetLastWriteTimeUtc(filePath);
+                    if (fileLastWriteTimeUtc > lastModifiedTime)
+                    {
+                        lastModifiedTime = fileLastWriteTimeUtc;
+                    }
+                }
+
+                return lastModifiedTime;
+            }
+            catch (PathTooLongException e)
+            {
+                Trace.TraceError("SyncService - Failed to retrieve last modified time.{0}{1}", Environment.NewLine, e.TraceInformation());
+
+                return DateTime.MinValue;
+            }
+        }
+        
         private IEnumerable<Tuple<string, FileEntry>> EnumerateLocalEntries()
         {
             foreach (var filePath in Directory.EnumerateFileSystemEntries(_localTempPath, "*", SearchOption.AllDirectories))
@@ -552,5 +576,38 @@ namespace AzureWebFarm.Services
 
             _syncStatusRepository.UpdateStatus(syncStatus);
         }
+        #endregion
+
+        #region Events
+
+        public delegate void PingEventHandler(object sender, EventArgs e);
+        public event PingEventHandler Ping;
+
+        protected virtual void OnPing()
+        {
+            var handler = Ping;
+            if (handler != null)
+                handler(this, EventArgs.Empty);
+        }
+
+        public delegate void SiteUpdatedEventHandler(object sender, EventArgs e, string siteName);
+        public event SiteUpdatedEventHandler SiteUpdated;
+
+        protected virtual void OnSiteUpdated(string siteName)
+        {
+            var handler = SiteUpdated;
+            if (handler != null)
+                handler(this, EventArgs.Empty, siteName);
+        }
+
+        public event SiteUpdatedEventHandler SiteDeleted;
+
+        protected virtual void OnSiteDeleted(string siteName)
+        {
+            var handler = SiteDeleted;
+            if (handler != null)
+                handler(this, EventArgs.Empty, siteName);
+        }
+        #endregion
     }
 }
