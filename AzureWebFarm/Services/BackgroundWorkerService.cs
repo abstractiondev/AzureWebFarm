@@ -56,9 +56,9 @@ namespace AzureWebFarm.Services
             ForEach(e => e.Ping());
         }
 
-        public void Wait()
+        public void Wait(TimeSpan maxWait)
         {
-            ForEach(e => e.Wait());
+            ForEach(e => e.Wait(maxWait));
         }
 
         private void ForEach(Action<Executable> action)
@@ -153,10 +153,10 @@ namespace AzureWebFarm.Services
             }
         }
 
-        public void Wait()
+        public void Wait(TimeSpan maxWait)
         {
             if (_process != null)
-                _process.WaitForExit(3000);
+                _process.WaitForExit(Convert.ToInt32(maxWait.TotalMilliseconds));
         }
 
         public void Execute()

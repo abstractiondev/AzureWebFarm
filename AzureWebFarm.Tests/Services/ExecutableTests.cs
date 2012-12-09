@@ -107,8 +107,8 @@ namespace AzureWebFarm.Tests.Services
             _e.Copy(ExecutePath);
             
             _e.Execute();
-            
-            _e.Wait();
+
+            _e.Wait(TimeSpan.FromSeconds(1));
             Assert.That(File.Exists(Path.Combine(ExecutePath, ExeName, "file.txt")), "Executable was actually run");
         }
 
@@ -160,7 +160,7 @@ namespace AzureWebFarm.Tests.Services
 
             if (wasRunningInFirstPlace)
                 _e.Execute();
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(1));
 
             Assert.That(_e.IsRunning(), Is.False);
         }
@@ -171,7 +171,7 @@ namespace AzureWebFarm.Tests.Services
             ArrangeTestExecutable(1);
             _e.Copy(ExecutePath);
             _e.Execute();
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(1));
             var stream = File.Open(Path.Combine(ExecutePath, ExeName, string.Format("{0}.exe", ExeName)), FileMode.Open);
             stream.Lock(0, 1);
 
@@ -197,11 +197,11 @@ namespace AzureWebFarm.Tests.Services
             ArrangeTestExecutable(3);
             _e.Copy(ExecutePath);
             _e.Execute();
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(1));
 
             _e.Ping();
-            
-            _e.Wait();
+
+            _e.Wait(TimeSpan.FromSeconds(1));
             Assert.That(File.ReadAllText(Path.Combine(ExecutePath, ExeName, "file.txt")), Is.EqualTo("2"));
         }
 
@@ -211,12 +211,12 @@ namespace AzureWebFarm.Tests.Services
             ArrangeTestExecutable(3);
             _e.Copy(ExecutePath);
             _e.Execute();
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(5));
 
             _e.Ping(); // "2"
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(5));
             _e.Ping(); // "3"
-            _e.Wait();
+            _e.Wait(TimeSpan.FromSeconds(5));
             _e.Ping(); // not run
 
             Assert.That(File.ReadAllText(Path.Combine(ExecutePath, ExeName, "file.txt")), Is.EqualTo("3"));

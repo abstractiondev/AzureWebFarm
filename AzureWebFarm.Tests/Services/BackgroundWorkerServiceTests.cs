@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using AzureWebFarm.Services;
 using NUnit.Framework;
@@ -48,7 +49,7 @@ namespace AzureWebFarm.Tests.Services
 
             _service.Update(siteName);
 
-            _service.Wait();
+            _service.Wait(TimeSpan.FromSeconds(1));
             var outputFile = Path.Combine(ExePath, siteName, string.Format(TestAppPath, app), "file.txt");
             Assert.That(File.Exists(outputFile));
             Assert.That(File.ReadAllText(outputFile), Is.EqualTo(app.ToString()));
