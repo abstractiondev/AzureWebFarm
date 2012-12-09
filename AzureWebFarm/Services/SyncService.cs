@@ -109,7 +109,7 @@ namespace AzureWebFarm.Services
                     SyncOnce();
                 }
 
-
+                OnPing();
 
                 Thread.Sleep(interval);
             }
@@ -199,6 +199,8 @@ namespace AzureWebFarm.Services
                         
                         _entries.Remove(siteName);
                     }
+
+                    OnSiteDeleted(siteName);
                 }
             }
         }
@@ -375,6 +377,7 @@ namespace AzureWebFarm.Services
                                 }
 
                                 UpdateSyncStatus(site, SyncInstanceStatus.Deployed);
+                                OnSiteUpdated(site);
                                 _siteDeployTimes[site] = DateTime.UtcNow;
                             }
                             catch (Exception)
@@ -389,7 +392,7 @@ namespace AzureWebFarm.Services
         }
         #endregion
 
-        #region Package new sites to temp dir
+        #region Package new/updated sites to temp dir
 
         /// <summary>
         /// Packages sites that are in IIS but not in local temp storage.
@@ -420,6 +423,7 @@ namespace AzureWebFarm.Services
                         if (_siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime.AddSeconds(30) < DateTime.UtcNow)
                         {
                             UpdateSyncStatus(siteName, SyncInstanceStatus.Deployed);
+                            OnSiteUpdated(siteName);
 
                             var tempSitePath = Path.Combine(_localTempPath, siteName);
                             if (!Directory.Exists(tempSitePath))
