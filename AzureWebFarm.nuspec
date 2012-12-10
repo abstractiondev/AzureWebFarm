@@ -11,7 +11,7 @@
       Robert Moore
     </authors>
     <description>
-      MsDeploy enabled Web Farm using Web Roles in Azure based on Windows Azure Accelerator for Web Roles.
+      MsDeploy enabled Web Farm using Web Roles in Azure based on Windows Azure Accelerator for Web Roles and including a background worker execution model.
     </description>
     <projectUrl>
       https://github.com/robdmoore/AzureWebFarm
