@@ -14,7 +14,8 @@ If you [aren't able to use Azure Web Sites](http://robdmoore.id.au/blog/2012/06/
 1. Create a new MVC4 website in Visual Studio using the blank template and delete the Global.asax.cs, Global.asax, Web.config and Views/Web.config files.
 2. Install-Package AzureWebFarm
 3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
-4. Ensure App.Config is marked as Content and all the files in the StartUp folder are marked Copy Always
+4. Ensure all the files in the StartUp folder are marked Copy Always
+5. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created
 5. Create a cloud project with the website as a web role
 6. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
 7. Look in the packages/AzureWebFarm/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm
