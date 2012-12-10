@@ -37,6 +37,18 @@ If you want to have a console application that runs periodically then simply inc
 
 You must ensure that your console application can handle being run simultaneously on multiple servers since it will be running on every server in your web farm. You must also ensure that it is resilient to being shutdown and restarted at any point in time since whenever you deploy your website that is what will happen to all the console applications for that website.
 
+### Including a Background Worker in the web deployment package ###
+
+The easiest way to do this is to use a bit of MSBuild in your web project such as (assumes the `.exe` output is the same name as the project and the console app project sub folder is at the same level as the web project subfolder in your solution, also assumes the web deploy is being generated in the default directory):
+
+	  <Target Name="AddBackgroundWorker" BeforeTargets="PackageUsingManifest">
+	    <Message Text="Copying Background Worker files into package temp path so it's copied into web deploy package." />
+	    <ItemGroup>
+		  <WorkerFiles Include="$(ProjectDir)..\MyBackgroundWorkerProjectDirectory\bin\$(Configuration)\*.*" />
+	    </ItemGroup>
+	    <Copy SourceFiles="@(WorkerFiles)" DestinationFolder="$(BaseIntermediateOutputPath)\$(Configuration)\Package\PackageTmp\bin\MyBackgroundWorkerProjectDirectory" />
+	  </Target>
+
 ## Contributions ##
 If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
 
