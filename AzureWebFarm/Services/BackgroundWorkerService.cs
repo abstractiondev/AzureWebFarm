@@ -23,18 +23,21 @@ namespace AzureWebFarm.Services
 
         public void Update(string siteName)
         {
-            if (!_executables.ContainsKey(siteName))
+            lock (this)
+            {
+                if (!_executables.ContainsKey(siteName))
+                    _executables[siteName] = new List<Executable>();
+
+                DisposeSite(siteName);
                 _executables[siteName] = new List<Executable>();
 
-            DisposeSite(siteName);
-            _executables[siteName] = new List<Executable>();
+                _executables[siteName].AddRange(_executableFinder.FindExecutables(siteName));
 
-            _executables[siteName].AddRange(_executableFinder.FindExecutables(siteName));
-            
-            foreach (var e in _executables[siteName])
-            {
-                e.Copy(Path.Combine(_executablePath, siteName));
-                e.Execute();
+                foreach (var e in _executables[siteName])
+                {
+                    e.Copy(Path.Combine(_executablePath, siteName));
+                    e.Execute();
+                }
             }
         }
 
@@ -63,9 +66,12 @@ namespace AzureWebFarm.Services
 
         private void ForEachExecutable(Action<Executable> action)
         {
-            foreach (var e in _executables.Keys.SelectMany(site => _executables[site]))
+            lock (this)
             {
-                action(e);
+                foreach (var e in _executables.Keys.SelectMany(site => _executables[site]))
+                {
+                    action(e);
+                }
             }
         }
     }
