@@ -56,6 +56,7 @@ If you would like to contribute to this project then feel free to communicate wi
 
 ### Version 0.9.1.1 ###
 * Fixed potential NRE in the worker role (exposed by race condition)
+* Fixed other potential race conditions
 
 ### Version 0.9.1 ###
 * Added support to automatically execute lightweight console applications
