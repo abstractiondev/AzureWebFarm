@@ -186,6 +186,9 @@ namespace AzureWebFarm.Services
 
         public void Ping()
         {
+            if (_process == null)
+                return;
+
             if (IsRunning())
                 return;
 

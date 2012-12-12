@@ -54,6 +54,9 @@ If you would like to contribute to this project then feel free to communicate wi
 
 ## Changelog ##
 
+### Version 0.9.1.1 ###
+* Fixed potential NRE in the worker role (exposed by race condition)
+
 ### Version 0.9.1 ###
 * Added support to automatically execute lightweight console applications
 * Remove the ability to manage via frontend and instead provided a console application
@@ -73,3 +76,4 @@ If you would like to contribute to this project then feel free to communicate wi
 * Install .NET 4.5 / support Azure 2.0 libs / support Windows Server 2012 Web Roles
 * IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them as-is though...)?
 * Support environment-based config transforms out of the box for web.config, app.config, servicedefinition.csdef and serviceconfiguration.cscfg
+* Make debugging background workers easier by logging console output and any exceptions to table storage

@@ -195,6 +195,12 @@ namespace AzureWebFarm.Tests.Services
         }
 
         [Test]
+        public void Call_ping_when_process_not_started()
+        {
+            _e.Ping();
+        }
+
+        [Test]
         public void Restart_if_process_exited_with_non_zero_code()
         {
             ArrangeTestExecutable(3);
