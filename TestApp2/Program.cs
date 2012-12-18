@@ -4,7 +4,7 @@ namespace TestApp2
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             File.WriteAllText("file.txt", "2");
         }

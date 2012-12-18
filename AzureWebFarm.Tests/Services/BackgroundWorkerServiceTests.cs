@@ -135,6 +135,7 @@ namespace AzureWebFarm.Tests.Services
         {
             ArrangeTestApp(4, SiteName);
 
+            // Update multiple times to make sure that when the executable is disposed while running it doesn't throw an exception
             _service.Update(SiteName);
             _service.Update(SiteName);
             _service.Update(SiteName);

@@ -23,7 +23,7 @@ namespace AzureWebFarm.Services
 
         public void Update(string siteName)
         {
-            lock (this)
+            lock (_executables)
             {
                 if (!_executables.ContainsKey(siteName))
                     _executables[siteName] = new List<Executable>();
@@ -66,7 +66,7 @@ namespace AzureWebFarm.Services
 
         private void ForEachExecutable(Action<Executable> action)
         {
-            lock (this)
+            lock (_executables)
             {
                 foreach (var e in _executables.Keys.SelectMany(site => _executables[site]))
                 {
@@ -105,6 +105,7 @@ namespace AzureWebFarm.Services
         private string _executionPath;
         private readonly string _exeName;
         private Process _process;
+        private static volatile object _lockObject = new object();
 
         public Executable(string basePath, string exeName)
         {
@@ -207,7 +208,7 @@ namespace AzureWebFarm.Services
         {
             Process process;
 
-            lock (this)
+            lock (_lockObject)
             {
                 using (new ChangeErrorMode(ErrorModes.FailCriticalErrors | ErrorModes.NoGpFaultErrorBox))
                 {
