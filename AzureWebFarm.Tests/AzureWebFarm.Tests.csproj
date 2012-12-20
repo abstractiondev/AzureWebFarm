@@ -120,10 +120,17 @@
     <Compile Include="Services\BackgroundWorkerServiceTests.cs" />
     <Compile Include="Services\ExecutableTests.cs" />
     <Compile Include="Services\IISManagerTests.cs" />
+    <Compile Include="Services\SyncServiceTests.cs" />
     <Compile Include="Storage\WebSiteRepositoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />
+    <Content Include="_resources\iisstart.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="_resources\welcome.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureWebFarm.Example.Web\AzureWebFarm.Example.Web.csproj">
@@ -159,6 +166,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="_resources\Content.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="_resources\Content2.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="_resources\Package.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

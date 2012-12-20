@@ -85,7 +85,6 @@
     <Compile Include="Services\IISManager.cs" />
     <Compile Include="Services\SyncService.cs" />
     <Compile Include="Storage\BindingRow.cs" />
-    <Compile Include="Storage\CertificateRepository.cs" />
     <Compile Include="Storage\SyncStatusRepository.cs" />
     <Compile Include="Storage\SyncStatusRow.cs" />
     <Compile Include="Storage\WebSiteRepository.cs" />

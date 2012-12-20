@@ -33,8 +33,8 @@ namespace AzureWebFarm.Services
 
         private readonly IDictionary<string, FileEntry> _entries;
         private readonly Dictionary<string, DateTime> _siteDeployTimes;
-
-        private static readonly string RoleWebSiteName = RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web";
+        
+        public static int SyncWait = 30;
 
         public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
             : this (
@@ -58,7 +58,7 @@ namespace AzureWebFarm.Services
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
 
-            var sitesContainerName = RoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
+            var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
             _container.CreateIfNotExist();
         }
@@ -134,6 +134,15 @@ namespace AzureWebFarm.Services
 
             try
             {
+                SyncLocalToBlob();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("SyncService [Local Storage => Blob] - Failed to synchronize blob storage and local site folders.{0}{1}", Environment.NewLine, e.TraceInformation());
+            }
+
+            try
+            {
                 SyncBlobToLocal();
             }
             catch (Exception e)
@@ -166,7 +175,7 @@ namespace AzureWebFarm.Services
 
         #region Update IIS from table storage
 
-        private void UpdateIISSitesFromTableStorage()
+        public void UpdateIISSitesFromTableStorage()
         {
             var allSites = _sitesRepository.RetrieveWebSitesWithBindings();
 
@@ -206,9 +215,9 @@ namespace AzureWebFarm.Services
         }
         #endregion
 
-        #region Update temp dir from blob storage
+        #region Update blob storage from temp dir
 
-        private void SyncBlobToLocal()
+        public void SyncLocalToBlob()
         {
             var seen = new HashSet<string>();
 
@@ -229,6 +238,7 @@ namespace AzureWebFarm.Services
                     }
                     else
                     {
+                        Trace.TraceInformation("SyncService [Local Storage => Blob] - Uploading file: '{0}'", path);
                         using (var stream = File.Open(Path.Combine(_localTempPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                         {
                             newBlob.Metadata["IsDirectory"] = bool.FalseString;
@@ -255,20 +265,28 @@ namespace AzureWebFarm.Services
                         File.Delete(path);
                     }
                 }
-                catch (Exception) {}
+                catch
+                {
+                }
 
                 _entries.Remove(path);
             }
+        }
 
-            seen = new HashSet<string>();
+        #endregion
+
+        #region Update temp dir from blob storage
+
+        public void SyncBlobToLocal()
+        {
+            var seen = new HashSet<string>();
 
             var blobs = _container.ListBlobs(
-                new BlobRequestOptions 
-                { 
-                    UseFlatBlobListing = true, 
+                new BlobRequestOptions
+                {
+                    UseFlatBlobListing = true,
                     BlobListingDetails = BlobListingDetails.Metadata
-                }
-            ).OfType<CloudBlob>();
+                }).OfType<CloudBlob>();
 
             foreach (var blob in blobs)
             {
@@ -276,7 +294,7 @@ namespace AzureWebFarm.Services
                 var entry = new FileEntry
                 {
                     CloudLastModified = blob.Properties.LastModifiedUtc,
-                    IsDirectory = blob.Metadata.AllKeys.Any(k => k.Equals("IsDirectory")) && 
+                    IsDirectory = blob.Metadata.AllKeys.Any(k => k.Equals("IsDirectory")) &&
                                   blob.Metadata["IsDirectory"].Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase)
                 };
 
@@ -285,7 +303,7 @@ namespace AzureWebFarm.Services
                 if (!_entries.ContainsKey(path) || _entries[path].CloudLastModified < entry.CloudLastModified)
                 {
                     var tempPath = Path.Combine(_localTempPath, path);
-                    
+
                     if (entry.IsDirectory)
                     {
                         Directory.CreateDirectory(tempPath);
@@ -318,7 +336,9 @@ namespace AzureWebFarm.Services
                     {
                         File.Delete(Path.Combine(_localTempPath, path));
                     }
-                    catch (Exception) {}
+                    catch
+                    {
+                    }
                 }
 
                 _entries.Remove(path);
@@ -328,7 +348,7 @@ namespace AzureWebFarm.Services
 
         #region Update IIS from temp dir
 
-        private void DeploySitesFromLocal()
+        public void DeploySitesFromLocal()
         {
             Trace.TraceInformation("SyncService [Local Storage => IIS] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
@@ -398,7 +418,7 @@ namespace AzureWebFarm.Services
         /// Packages sites that are in IIS but not in local temp storage.
         /// There are new sites that have been deployed to this instance using Web Deploy.
         /// </summary>
-        private void PackageSitesToLocal()
+        public void PackageSitesToLocal()
         {
             Trace.TraceInformation("SyncService [IIS => Local Storage] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
@@ -407,38 +427,38 @@ namespace AzureWebFarm.Services
                 foreach (var site in serverManager.Sites.ToArray())
                 {
                     var siteName = site.Name.Replace("-", ".").ToLowerInvariant();
-                    
-                    if (!site.Name.Equals(RoleWebSiteName, StringComparison.OrdinalIgnoreCase))
-                    {                        
+
+                    if (!site.Name.Equals(IISManager.RoleWebSiteName, StringComparison.OrdinalIgnoreCase))
+                    {
                         var sitePath = Path.Combine(_localSitesPath, siteName);
                         var siteLastModifiedTime = GetFolderLastModifiedTimeUtc(sitePath);
 
                         if (!_siteDeployTimes.ContainsKey(siteName))
                         {
-                            _siteDeployTimes.Add(siteName, siteLastModifiedTime);
+                            _siteDeployTimes.Add(siteName, DateTime.MinValue);
                         }
 
                         Trace.TraceInformation("SyncService [IIS => Local Storage] - Site last modified time: '{0}'", siteLastModifiedTime);
 
-                        if (_siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime.AddSeconds(30) < DateTime.UtcNow)
+                        // If the site has been modified since the last deploy, but not within the last {SyncWait}s (otherwise it might be mid-sync)
+                        if (_siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime < DateTime.UtcNow.AddSeconds(-SyncWait))
                         {
+                            // Update status to deployed
                             UpdateSyncStatus(siteName, SyncInstanceStatus.Deployed);
-                            OnSiteUpdated(siteName);
 
+                            // Ensure the temp path exists
                             var tempSitePath = Path.Combine(_localTempPath, siteName);
                             if (!Directory.Exists(tempSitePath))
                             {
                                 Directory.CreateDirectory(tempSitePath);
                             }
-                            
-                            var packageFile = Path.Combine(tempSitePath, siteName + ".zip");
 
                             // Create a package of the site and move it to local temp sites
+                            var packageFile = Path.Combine(tempSitePath, siteName + ".zip");
                             Trace.TraceInformation("SyncService [IIS => Local Storage] - Creating a package of the site '{0}' and moving it to local temp sites '{1}'", siteName, packageFile);
-
                             try
                             {
-                                using (DeploymentObject deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.DirPath, sitePath))
+                                using (var deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.DirPath, sitePath))
                                 {
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.Package, packageFile, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }
