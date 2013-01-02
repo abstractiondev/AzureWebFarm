@@ -19,12 +19,12 @@ Also, if you want to support the execution of background tasks (via console appl
 4. Ensure all the files in the StartUp folder are marked Copy Always
 5. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like:
 
-      <PropertyGroup>
-        <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
-      </PropertyGroup>
-      <Target Name="CopyAppConfigurationIntoPackage" BeforeTargets="AfterPackageComputeService" Condition="$(Env)!=''">
-        <Copy SourceFiles="$(ProjectDir)..\$(WebProjectName)\App.config" DestinationFiles="$(ProjectDir)obj\$(Configuration)\$(WebProjectName)\bin\$(WebProjectName).dll.config" />
-      </Target>
+          <PropertyGroup>
+            <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
+          </PropertyGroup>
+          <Target Name="CopyAppConfigurationIntoPackage" BeforeTargets="AfterPackageComputeService" Condition="$(Env)!=''">
+            <Copy SourceFiles="$(ProjectDir)..\$(WebProjectName)\App.config" DestinationFiles="$(ProjectDir)obj\$(Configuration)\$(WebProjectName)\bin\$(WebProjectName).dll.config" />
+          </Target>
 
 6. Create a cloud project with the website as a web role
 7. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
