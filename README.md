@@ -84,3 +84,4 @@ If you would like to contribute to this project then feel free to communicate wi
 * IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them as-is though...)?
 * Support environment-based config transforms out of the box for web.config, app.config, servicedefinition.csdef and serviceconfiguration.cscfg
 * Make debugging background workers easier by logging console output and any exceptions to table storage
+* Use checksum comparison for syncing the package and capture the trace output so it can be logged somewhere for inspection
