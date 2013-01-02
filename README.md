@@ -17,7 +17,7 @@ Also, if you want to support the execution of background tasks (via console appl
 2. `Install-Package AzureWebFarm`
 3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
 4. Ensure all the files in the StartUp folder are marked Copy Always
-5. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like:
+5. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like this in your `.ccproj` file:
 
           <PropertyGroup>
             <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
