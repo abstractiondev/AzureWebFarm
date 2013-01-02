@@ -77,6 +77,9 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Palmer">
+      <HintPath>..\packages\Palmer.0.1.4724.20297\lib\portable-win+net40+sl40+wp\Palmer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />

@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using AzureWebFarm.Services;
 using NUnit.Framework;
+using Palmer;
 
 namespace AzureWebFarm.Tests.Services
 {
@@ -26,12 +27,11 @@ namespace AzureWebFarm.Tests.Services
         [SetUp]
         public void Setup()
         {
-            // todo: Use Palmer for the next two delete calls since they occasionally fail
             if (Directory.Exists(OriginalPath))
-                Directory.Delete(OriginalPath, true);
+                Retry.On<IOException>().For(TimeSpan.FromSeconds(5)).With(c => Directory.Delete(OriginalPath, true));
 
             if (Directory.Exists(ExecutePath))
-                Directory.Delete(ExecutePath, true);
+                Retry.On<IOException>().For(TimeSpan.FromSeconds(5)).With(c => Directory.Delete(ExecutePath, true));
 
             Directory.CreateDirectory(Path.Combine(OriginalPath, ExeName));
 
