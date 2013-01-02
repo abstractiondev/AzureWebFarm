@@ -18,15 +18,17 @@ Also, if you want to support the execution of background tasks (via console appl
 3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
 4. Ensure all the files in the StartUp folder are marked Copy Always
 5. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like:
-	  <PropertyGroup>
-	    <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
-	  </PropertyGroup>
-	  <Target Name="CopyAppConfigurationIntoPackage" BeforeTargets="AfterPackageComputeService" Condition="$(Env)!=''">
-	    <Copy SourceFiles="$(ProjectDir)..\$(WebProjectName)\App.config" DestinationFiles="$(ProjectDir)obj\$(Configuration)\$(WebProjectName)\bin\$(WebProjectName).dll.config" />
-	  </Target>
-5. Create a cloud project with the website as a web role
-6. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
-7. Look in the packages/AzureWebFarm/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings
+
+      <PropertyGroup>
+        <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
+      </PropertyGroup>
+      <Target Name="CopyAppConfigurationIntoPackage" BeforeTargets="AfterPackageComputeService" Condition="$(Env)!=''">
+        <Copy SourceFiles="$(ProjectDir)..\$(WebProjectName)\App.config" DestinationFiles="$(ProjectDir)obj\$(Configuration)\$(WebProjectName)\bin\$(WebProjectName).dll.config" />
+      </Target>
+
+6. Create a cloud project with the website as a web role
+7. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
+8. Look in the packages/AzureWebFarm/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings
 
 If you get lost check out the AzureWebFarm.Example.Web and AzureWebFarm.Example.Cloud projects for guidance.
 
