@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -29,6 +30,7 @@ namespace AzureWebFarm.Tests.Services
         private WebSiteRepository _repo;
         private IAzureTable<WebSiteRow> _webSiteTable;
         private IAzureTable<BindingRow> _bindingTable;
+        private List<string> _excludedSites;
 
         public string GetConfigValue(string setting)
         {
@@ -67,6 +69,11 @@ namespace AzureWebFarm.Tests.Services
             // Clean up IIS and table storage to prepare for test
             using (var serverManager = new ServerManager())
             {
+                _excludedSites = new List<string>();
+                using (var manager = new ServerManager())
+                {
+                    manager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList().ForEach(s => _excludedSites.Add(s.Name));
+                }
                 CleanupWebsiteTest(serverManager);
             }
 
@@ -77,7 +84,8 @@ namespace AzureWebFarm.Tests.Services
                 CloudStorageAccount.DevelopmentStorageAccount,
                 _sitePath,
                 _tempPath,
-                new string[] { }
+                new string[] { },
+                _excludedSites
             );
         }
 
@@ -113,7 +121,7 @@ namespace AzureWebFarm.Tests.Services
         private void CleanupWebsiteTest(ServerManager serverManager)
         {
             // Remove all IIS websites
-            serverManager.Sites.ToList().ForEach(s => serverManager.Sites.Remove(s));
+            serverManager.Sites.Where(s => !_excludedSites.Contains(s.Name)).ToList().ForEach(s => serverManager.Sites.Remove(s));
             serverManager.CommitChanges();
             // Clean table storage
             _webSiteTable.Delete(_webSiteTable.Query.ToList());

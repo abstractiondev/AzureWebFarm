@@ -28,6 +28,7 @@ namespace AzureWebFarm.Services
         private readonly string _localSitesPath;
         private readonly string _localTempPath;
         private readonly IEnumerable<string> _directoriesToExclude;
+        private readonly IEnumerable<string> _sitesToExclude;
 
         private readonly CloudBlobContainer _container;
 
@@ -43,11 +44,12 @@ namespace AzureWebFarm.Services
                 CloudStorageAccount.FromConfigurationSetting(storageSettingName),
                 localSitesPath,
                 localTempPath,
-                directoriesToExclude
+                directoriesToExclude,
+                new string[] {}
             )
         {}
 
-        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude)
+        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude)
         {
             _sitesRepository = sitesRepository;
             _syncStatusRepository = syncStatusRepository;
@@ -55,6 +57,7 @@ namespace AzureWebFarm.Services
             _localSitesPath = localSitesPath;
             _localTempPath = localTempPath;
             _directoriesToExclude = directoriesToExclude;
+            _sitesToExclude = sitesToExclude;
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
 
@@ -182,7 +185,7 @@ namespace AzureWebFarm.Services
             if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
             {
                 var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
-                iisManager.UpdateSites(allSites);
+                iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
             }
 
             // Cleanup
@@ -424,7 +427,7 @@ namespace AzureWebFarm.Services
 
             using (var serverManager = new ServerManager())
             {
-                foreach (var site in serverManager.Sites.ToArray())
+                foreach (var site in serverManager.Sites.Where(s => !_sitesToExclude.Contains(s.Name)))
                 {
                     var siteName = site.Name.Replace("-", ".").ToLowerInvariant();
 
