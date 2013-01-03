@@ -29,6 +29,7 @@ Also, if you want to support the execution of background tasks (via console appl
 6. Create a cloud project with the website as a web role
 7. Look in the packages/AzureWebFarm/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work
 8. Look in the packages/AzureWebFarm/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings
+9. If you are migrating to AzureWebFarm from Accelerator for Azure Web Roles then you will need to transfer the data from the Bindings table to the BindingRow table and the WebSites table to the WebSiteRow table - this is a breaking change from Accelerator for Azure Web Roles, but should be the only one
 
 If you get lost check out the AzureWebFarm.Example.Web and AzureWebFarm.Example.Cloud projects for guidance.
 
