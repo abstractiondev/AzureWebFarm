@@ -15,5 +15,7 @@ namespace AzureWebFarm.Entities
         public SyncInstanceStatus Status { get; set; }
 
         public bool IsOnline { get; set; }
+        
+        public string LastError { get; set; }
     }
 }

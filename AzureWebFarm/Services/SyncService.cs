@@ -34,7 +34,7 @@ namespace AzureWebFarm.Services
 
         private readonly IDictionary<string, FileEntry> _entries;
         private readonly Dictionary<string, DateTime> _siteDeployTimes;
-        
+
         public static int SyncWait = 30;
 
         public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
@@ -403,9 +403,9 @@ namespace AzureWebFarm.Services
                                 OnSiteUpdated(site);
                                 _siteDeployTimes[site] = DateTime.UtcNow;
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
-                                UpdateSyncStatus(site, SyncInstanceStatus.Error);
+                                UpdateSyncStatus(site, SyncInstanceStatus.Error, ex);
                                 throw;
                             }
                         }
@@ -468,9 +468,9 @@ namespace AzureWebFarm.Services
 
                                 _siteDeployTimes[siteName] = DateTime.UtcNow;
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
-                                UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
+                                UpdateSyncStatus(siteName, SyncInstanceStatus.Error, ex);
                                 throw;
                             }
                         }
@@ -591,17 +591,25 @@ namespace AzureWebFarm.Services
             return false;
         }
 
-        private void UpdateSyncStatus(string webSiteName, SyncInstanceStatus status)
+        private void UpdateSyncStatus(string webSiteName, SyncInstanceStatus status, Exception lastError = null)
         {
             var syncStatus = new SyncStatus
             {
                 SiteName = webSiteName,
                 RoleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName,
                 Status = status,
-                IsOnline = true
+                IsOnline = true,
+                LastError = lastError == null ? null : lastError.TraceInformation()
             };
 
-            _syncStatusRepository.UpdateStatus(syncStatus);
+            try
+            {
+                _syncStatusRepository.UpdateStatus(syncStatus);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("An error occured updating site sync status: {0}", ex.TraceInformation());
+            }
         }
         #endregion
 
