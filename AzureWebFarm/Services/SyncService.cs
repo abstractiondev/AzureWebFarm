@@ -643,6 +643,16 @@ namespace AzureWebFarm.Services
             if (handler != null)
                 handler(this, EventArgs.Empty, siteName);
         }
+
+        public event WebFarmRole.ExceptionEventHandler ExceptionRaised;
+
+        protected virtual void OnException(Exception ex)
+        {
+            var handler = ExceptionRaised;
+            if (handler != null)
+                handler(ex);
+        }
+
         #endregion
     }
 }

@@ -16,8 +16,19 @@ namespace AzureWebFarm
 {
     public class WebFarmRole
     {
+        private readonly ExceptionEventHandler _exceptionEventHandler;
         private SyncService _syncService;
         private BackgroundWorkerService _backgroundWorker;
+
+        public WebFarmRole(ExceptionEventHandler exceptionEventHandler = null)
+        {
+            if (exceptionEventHandler == null)
+            {
+                exceptionEventHandler = e => Trace.TraceError(e.ToString());
+            }
+            _exceptionEventHandler = exceptionEventHandler;
+            ExceptionRaised += _exceptionEventHandler;
+        }
 
         public void OnStart()
         {
@@ -60,7 +71,7 @@ namespace AzureWebFarm
                 _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
                 _syncService.SiteUpdated += (sender, args, siteName) => _backgroundWorker.Update(siteName);
                 _syncService.SiteDeleted += (sender, args, siteName) => _backgroundWorker.DisposeSite(siteName);
-
+                _syncService.ExceptionRaised += _exceptionEventHandler;
                 // Update the sites with initial state
                 _syncService.Start();
             }
@@ -101,6 +112,16 @@ namespace AzureWebFarm
             // Set the sites as not synced for this instance
             var roleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName;
             _syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
+        }
+
+        private event ExceptionEventHandler ExceptionRaised;
+        public delegate void ExceptionEventHandler(Exception ex);
+        
+        protected virtual void OnException(Exception ex)
+        {
+            var handler = ExceptionRaised;
+            if (handler != null)
+                handler(ex);
         }
         
         private static string GetLocalResourcePathAndSetAccess(string localResourceName)
