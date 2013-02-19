@@ -91,7 +91,7 @@ namespace AzureWebFarm.Services
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError("IISManager.CommitChanges (Cleanup IIS){0}{1}", Environment.NewLine, e.TraceInformation());
+                    OnException(new Exception("IISManager.CommitChanges (Cleanup IIS)", e));
                 }
             }
 
@@ -242,7 +242,7 @@ namespace AzureWebFarm.Services
                     catch (Exception e)
                     {
                         UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
-                        Trace.TraceError("IISManager.CommitChanges for site '{0}'{1}{2}", site.Name, Environment.NewLine, e.TraceInformation());
+                        OnException(new Exception(string.Format("IISManager.CommitChanges for site '{0}'", site.Name), e));
                     }
                 }
             }

@@ -71,7 +71,7 @@ namespace AzureWebFarm
             }
             catch (Exception e)
             {
-                Trace.TraceError(e.ToString());
+                OnException(e);
                 DiagnosticsHelper.WriteExceptionToBlobStorage(e);
                 throw;
             }
@@ -92,7 +92,7 @@ namespace AzureWebFarm
             }
             catch (Exception e)
             {
-                Trace.TraceError(e.ToString());
+                OnException(e);
                 DiagnosticsHelper.WriteExceptionToBlobStorage(e);
                 throw;
             }
