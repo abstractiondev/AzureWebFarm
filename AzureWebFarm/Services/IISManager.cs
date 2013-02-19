@@ -355,5 +355,14 @@ namespace AzureWebFarm.Services
                 _syncStatusRepository.UpdateStatus(syncStatus);
             }
         }
+
+        public event WebFarmRole.ExceptionEventHandler ExceptionRaised;
+
+        private void OnException(Exception ex)
+        {
+            var handler = ExceptionRaised;
+            if (handler != null)
+                handler(ex);
+        }
     }
 }

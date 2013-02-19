@@ -185,6 +185,7 @@ namespace AzureWebFarm.Services
             if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
             {
                 var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
+                iisManager.ExceptionRaised += ExceptionRaised;
                 iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
             }
 
