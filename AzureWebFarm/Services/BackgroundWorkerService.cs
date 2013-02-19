@@ -154,9 +154,10 @@ namespace AzureWebFarm.Services
             }
 
             var webConfigPath = Path.Combine(_basePath, "..", "web.config");
-            if (File.Exists(webConfigPath))
+            var targetPath = Path.Combine(GetExecutionDirPath(), "web.config");
+            if (File.Exists(webConfigPath) && !File.Exists(targetPath))
             {
-                File.Copy(webConfigPath, Path.Combine(GetExecutionDirPath(), "web.config"));
+                File.Copy(webConfigPath, targetPath);
             }
         }
 

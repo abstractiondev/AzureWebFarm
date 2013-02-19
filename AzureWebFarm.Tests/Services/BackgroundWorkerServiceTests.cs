@@ -19,6 +19,7 @@ namespace AzureWebFarm.Tests.Services
         private const string TestAppExe = "TestApp{0}.exe";
         private const string SiteName = "SiteName";
         private const string SiteName2 = "SiteName2";
+        private const string OriginalWebConfigContents = "original web config";
         private const string WebConfigContents = "asdf";
         private const string WebConfig2Contents = "asdf2";
 
@@ -60,7 +61,7 @@ namespace AzureWebFarm.Tests.Services
             return Path.Combine(ExePath, siteName, string.Format(TestAppPath, app));
         }
 
-        private static void ArrangeTestApp(int app, string siteName, int destApp = 0)
+        private static void ArrangeTestApp(int app, string siteName, int destApp = 0, bool alreadyHasWebConfig = false)
         {
             if (destApp == 0)
                 destApp = app;
@@ -68,16 +69,20 @@ namespace AzureWebFarm.Tests.Services
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);
             File.Copy(Path.Combine(TestPath, string.Format(TestAppExe, app)), Path.Combine(GetOriginalDropPath(siteName, destApp), string.Format(TestAppExe, destApp)), true);
+            if (alreadyHasWebConfig)
+                File.WriteAllText(Path.Combine(GetOriginalDropPath(siteName, destApp), "web.config"), OriginalWebConfigContents);
         }
 
-        private static void AssertAppWasRun(string siteName, int app, string expectedText)
+        private static void AssertAppWasRun(string siteName, int app, string expectedText, string expectedWebConfig = null)
         {
+            if (string.IsNullOrEmpty(expectedWebConfig))
+                expectedWebConfig = siteName == SiteName ? WebConfigContents : WebConfig2Contents;
             var outputFile = Path.Combine(GetExecutionDropPath(siteName, app), "file.txt");
             Assert.That(File.Exists(outputFile), outputFile + " didn't exist");
             Assert.That(File.ReadAllText(outputFile), Is.EqualTo(expectedText), "Text in " + outputFile + " didn't match expectation");
             var webConfigFile = Path.Combine(GetExecutionDropPath(siteName, app), "web.config");
             Assert.That(File.Exists(webConfigFile), webConfigFile + " didn't exist");
-            Assert.That(File.ReadAllText(webConfigFile), Is.EqualTo(siteName == SiteName ? WebConfigContents : WebConfig2Contents), "Text in " + webConfigFile + " didn't match expectation");
+            Assert.That(File.ReadAllText(webConfigFile), Is.EqualTo(expectedWebConfig), "Text in " + webConfigFile + " didn't match expectation");
         }
         #endregion
 
@@ -142,6 +147,17 @@ namespace AzureWebFarm.Tests.Services
 
             _service.Wait(TimeSpan.FromSeconds(1));
             AssertAppWasRun(SiteName, 4, "4");
+        }
+
+        [Test]
+        public void Avoid_copying_web_config_if_it_already_exists()
+        {
+            ArrangeTestApp(4, SiteName, 0, true);
+
+            _service.Update(SiteName);
+
+            _service.Wait(TimeSpan.FromSeconds(1));
+            AssertAppWasRun(SiteName, 4, "4", OriginalWebConfigContents);
         }
         
         [Test]
