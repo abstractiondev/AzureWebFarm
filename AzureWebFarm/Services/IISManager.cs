@@ -91,7 +91,7 @@ namespace AzureWebFarm.Services
                 }
                 catch (Exception e)
                 {
-                    OnException(new Exception("IISManager.CommitChanges (Cleanup IIS)", e));
+                    WebFarmRole.OnException(new Exception("IISManager.CommitChanges (Cleanup IIS)", e));
                 }
             }
 
@@ -242,7 +242,7 @@ namespace AzureWebFarm.Services
                     catch (Exception e)
                     {
                         UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
-                        OnException(new Exception(string.Format("IISManager.CommitChanges for site '{0}'", site.Name), e));
+                        WebFarmRole.OnException(new Exception(string.Format("IISManager.CommitChanges for site '{0}'", site.Name), e));
                     }
                 }
             }
@@ -354,15 +354,6 @@ namespace AzureWebFarm.Services
 
                 _syncStatusRepository.UpdateStatus(syncStatus);
             }
-        }
-
-        public event WebFarmRole.ExceptionEventHandler ExceptionRaised;
-
-        private void OnException(Exception ex)
-        {
-            var handler = ExceptionRaised;
-            if (handler != null)
-                handler(ex);
         }
     }
 }

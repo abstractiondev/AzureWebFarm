@@ -65,7 +65,6 @@ namespace AzureWebFarm
                 _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
                 _syncService.SiteUpdated += (sender, args, siteName) => _backgroundWorker.Update(siteName);
                 _syncService.SiteDeleted += (sender, args, siteName) => _backgroundWorker.DisposeSite(siteName);
-                _syncService.ExceptionRaised += ExceptionHandler;
                 // Update the sites with initial state
                 _syncService.Start();
             }
@@ -108,16 +107,20 @@ namespace AzureWebFarm
             _syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
         }
 
-        private event ExceptionEventHandler ExceptionRaised;
+        private static event ExceptionEventHandler ExceptionRaised;
         public delegate void ExceptionEventHandler(Exception ex);
         
-        private void OnException(Exception ex)
+        public static void OnException(Exception ex)
         {
             var handler = ExceptionRaised;
             if (handler != null)
                 handler(ex);
         }
 
+        /// <summary>
+        /// Override this method to provide a handler for logging (or performing other actions as a result of) exceptions.
+        /// </summary>
+        /// <param name="e">The exception raised by AzureWebFarm</param>
         protected virtual void ExceptionHandler(Exception e)
         {
             Trace.TraceError(e.ToString());

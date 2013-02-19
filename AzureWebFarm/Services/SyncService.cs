@@ -132,7 +132,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("SyncService [Table => IIS] - Failed to update IIS site information from table storage.", e));
+                WebFarmRole.OnException(new Exception("SyncService [Table => IIS] - Failed to update IIS site information from table storage.", e));
             }
 
             try
@@ -141,7 +141,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("SyncService [Local Storage => Blob] - Failed to synchronize blob storage and local site folders.", e));
+                WebFarmRole.OnException(new Exception("SyncService [Local Storage => Blob] - Failed to synchronize blob storage and local site folders.", e));
             }
 
             try
@@ -150,7 +150,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("SyncService [Blob => Local Storage] - Failed to synchronize local site folders and blob storage.", e));
+                WebFarmRole.OnException(new Exception("SyncService [Blob => Local Storage] - Failed to synchronize local site folders and blob storage.", e));
             }
 
             try
@@ -159,7 +159,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("SyncService [Local Storage => IIS] - Failed to deploy MSDeploy package in local storage to IIS.", e));
+                WebFarmRole.OnException(new Exception("SyncService [Local Storage => IIS] - Failed to deploy MSDeploy package in local storage to IIS.", e));
             }
 
             try
@@ -168,7 +168,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("SyncService [IIS => Local Storage] - Failed to create an MSDeploy package in local storage from updates in IIS.", e));
+                WebFarmRole.OnException(new Exception("SyncService [IIS => Local Storage] - Failed to create an MSDeploy package in local storage from updates in IIS.", e));
             }
 
             Trace.TraceInformation("SyncService - Synchronization completed.");
@@ -185,7 +185,6 @@ namespace AzureWebFarm.Services
             if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
             {
                 var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
-                iisManager.ExceptionRaised += ExceptionRaised;
                 iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
             }
 
@@ -537,7 +536,7 @@ namespace AzureWebFarm.Services
             }
             catch (PathTooLongException e)
             {
-                OnException(new Exception("SyncService - Failed to retrieve last modified time.", e));
+                WebFarmRole.OnException(new Exception("SyncService - Failed to retrieve last modified time.", e));
                 return DateTime.MinValue;
             }
         }
@@ -608,7 +607,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                OnException(new Exception("An error occured updating site sync status.", e));
+                WebFarmRole.OnException(new Exception("An error occured updating site sync status.", e));
             }
         }
         #endregion
@@ -642,15 +641,6 @@ namespace AzureWebFarm.Services
             var handler = SiteDeleted;
             if (handler != null)
                 handler(this, EventArgs.Empty, siteName);
-        }
-
-        public event WebFarmRole.ExceptionEventHandler ExceptionRaised;
-
-        private void OnException(Exception ex)
-        {
-            var handler = ExceptionRaised;
-            if (handler != null)
-                handler(ex);
         }
 
         #endregion
