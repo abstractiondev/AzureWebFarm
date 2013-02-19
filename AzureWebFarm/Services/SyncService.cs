@@ -646,7 +646,7 @@ namespace AzureWebFarm.Services
 
         public event WebFarmRole.ExceptionEventHandler ExceptionRaised;
 
-        protected virtual void OnException(Exception ex)
+        private void OnException(Exception ex)
         {
             var handler = ExceptionRaised;
             if (handler != null)
