@@ -46,6 +46,8 @@ namespace AzureWebFarm.Tests.Services
         public void Teardown()
         {
             _e.Dispose();
+
+            File.Delete(Path.Combine(TestPath, "web.config"));
         }
 
         private void ArrangeTestExecutable(int i)
