@@ -83,7 +83,8 @@ namespace AzureWebFarm
                 var storageFactory = new AzureStorageFactory(storageAccount);
                 var websiteRepository = new WebSiteRepository(storageFactory);
                 var syncStatusRepository = new SyncStatusRepository(storageFactory);
-                _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[]{}, () => Constants.IsSyncEnabled);
+                var iisManager = new IISManager(localSitesPath, localTempPath, syncStatusRepository, _logFactory);
+                _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[]{}, () => Constants.IsSyncEnabled, iisManager, _logFactory);
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
 
                 // Subscribe the background worker to relevant events in the sync service

@@ -9,6 +9,7 @@ using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
 using AzureWebFarm.Storage;
+using Castle.Core.Logging;
 using Microsoft.Web.Administration;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
@@ -65,8 +66,8 @@ namespace AzureWebFarm.Tests.Services
             // Website Repository
             var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
             _repo = new WebSiteRepository(factory);
-            _webSiteTable = factory.GetTable<WebSiteRow>("WebSitesTest");
-            _bindingTable = factory.GetTable<BindingRow>("BindingsTest");
+            _webSiteTable = factory.GetTable<WebSiteRow>(typeof(WebSiteRow).Name);
+            _bindingTable = factory.GetTable<BindingRow>(typeof(BindingRow).Name);
 
             // Clean up IIS and table storage to prepare for test
             using (var serverManager = new ServerManager())
@@ -88,7 +89,9 @@ namespace AzureWebFarm.Tests.Services
                 _tempPath,
                 new string[] { },
                 _excludedSites,
-                () => true
+                () => true,
+                new IISManager(_sitePath, _tempPath, new SyncStatusRepository(factory), new NullLogFactory()),
+                new NullLogFactory()
             );
         }
 

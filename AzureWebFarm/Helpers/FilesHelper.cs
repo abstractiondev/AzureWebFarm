@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using AzureToolkit;
+using Castle.Core.Logging;
 
 namespace AzureWebFarm.Helpers
 {
     internal static class FilesHelper
     {
-        public static void RemoveFolder(string folderPath)
+        public static void RemoveFolder(string folderPath, ILogger logger)
         {
             if (Directory.Exists(folderPath))
             {
@@ -17,7 +16,7 @@ namespace AzureWebFarm.Helpers
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceWarning("Remove Folder Error{0}{1}", Environment.NewLine, e.TraceInformation());
+                    logger.WarnFormat(e, "Error removing folder: {0}", folderPath);
                 }
             }
         }

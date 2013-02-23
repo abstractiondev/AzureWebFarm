@@ -8,6 +8,7 @@ using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
+using Castle.Core.Logging;
 using Microsoft.Web.Administration;
 using Microsoft.Web.Deployment;
 using Microsoft.WindowsAzure;
@@ -32,10 +33,12 @@ namespace AzureWebFarm.Services
         private readonly Dictionary<string, DateTime> _siteDeployTimes;
 
         private readonly Func<bool> _syncEnabled;
+        private readonly IISManager _iisManager;
 
         public static int SyncWait = 30;
+        private readonly ILogger _logger;
 
-        public SyncService(IWebSiteRepository sitesRepository, ISyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled)
+        public SyncService(IWebSiteRepository sitesRepository, ISyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled, IISManager iisManager, ILoggerFactory loggerFactory)
         {
             _sitesRepository = sitesRepository;
             _syncStatusRepository = syncStatusRepository;
@@ -45,8 +48,10 @@ namespace AzureWebFarm.Services
             _directoriesToExclude = directoriesToExclude;
             _sitesToExclude = sitesToExclude;
             _syncEnabled = syncEnabled;
+            _iisManager = iisManager;
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
+            _logger = loggerFactory.Create(GetType());
 
             var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployPackagesBlobContainerName).ToLowerInvariant();
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
@@ -87,7 +92,7 @@ namespace AzureWebFarm.Services
                 var currentTime = DateTime.Now;
                 if ((currentTime - lastHeartbeat).Minutes > 15)
                 {
-                    Trace.TraceInformation("SyncService - Synchronization is {0}...", _syncEnabled() ? "paused" : "active");
+                    _logger.DebugFormat("*heartbeat*; synchronization is {0}.", _syncEnabled() ? "paused" : "active");
                     lastHeartbeat = currentTime;
                 }
 
@@ -108,7 +113,7 @@ namespace AzureWebFarm.Services
 
         private void SyncOnce()
         {
-            Trace.TraceInformation("SyncService - Synchronizing role instances...");
+            _logger.Debug("Synchronizing role instances.");
 
             try
             {
@@ -116,7 +121,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                Trace.TraceError("SyncService [Table => IIS] - Failed to update IIS site information from table storage.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.Error("[Table => IIS] - Failed to update IIS site information from table storage", e);
             }
 
             try
@@ -125,7 +130,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                Trace.TraceError("SyncService [Local Storage => Blob] - Failed to synchronize blob storage and local site folders.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.Error("[Local Storage => Blob] - Failed to synchronize blob storage and local site folders.", e);
             }
 
             try
@@ -134,7 +139,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                Trace.TraceError("SyncService [Blob => Local Storage] - Failed to synchronize local site folders and blob storage.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.Error("[Blob => Local Storage] - Failed to synchronize local site folders and blob storage.", e);
             }
 
             try
@@ -143,7 +148,7 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                Trace.TraceError("SyncService [Local Storage => IIS] - Failed to deploy MSDeploy package in local storage to IIS.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.Error("[Local Storage => IIS] - Failed to deploy MSDeploy package in local storage to IIS.", e);
             }
 
             try
@@ -152,10 +157,10 @@ namespace AzureWebFarm.Services
             }
             catch (Exception e)
             {
-                Trace.TraceError("SyncService [IIS => Local Storage] - Failed to create an MSDeploy package in local storage from updates in IIS.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.Error("[IIS => Local Storage] - Failed to create an MSDeploy package in local storage from updates in IIS.", e);
             }
 
-            Trace.TraceInformation("SyncService - Synchronization completed.");
+            _logger.Debug("Synchronization iteration complete.");
         }
 
         #endregion
@@ -167,13 +172,10 @@ namespace AzureWebFarm.Services
             var allSites = _sitesRepository.RetrieveWebSitesWithBindings();
 
             if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment())
-            {
-                var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
-                iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
-            }
+                _iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
 
             // Cleanup
-            for (int i = _siteDeployTimes.Count - 1; i >= 0; i--)
+            for (var i = _siteDeployTimes.Count - 1; i >= 0; i--)
             {
                 var siteName = _siteDeployTimes.ElementAt(i).Key;
                 if (!allSites.Any(s => s.Name.Equals(siteName, StringComparison.OrdinalIgnoreCase)))
@@ -184,8 +186,8 @@ namespace AzureWebFarm.Services
                     var sitePath = Path.Combine(_localSitesPath, siteName);
                     var tempSitePath = Path.Combine(_localTempPath, siteName);
 
-                    FilesHelper.RemoveFolder(sitePath);
-                    FilesHelper.RemoveFolder(tempSitePath);
+                    FilesHelper.RemoveFolder(sitePath, _logger);
+                    FilesHelper.RemoveFolder(tempSitePath, _logger);
 
                     if (_entries.ContainsKey(siteName))
                     {
@@ -225,7 +227,7 @@ namespace AzureWebFarm.Services
                     }
                     else
                     {
-                        Trace.TraceInformation("SyncService [Local Storage => Blob] - Uploading file: '{0}'", path);
+                        _logger.InfoFormat("[Local Storage => Blob] - Uploading file: '{0}'", path);
                         using (var stream = File.Open(Path.Combine(_localTempPath, path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
                         {
                             newBlob.Metadata["IsDirectory"] = bool.FalseString;
@@ -254,7 +256,7 @@ namespace AzureWebFarm.Services
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceWarning("Error deleting unused file: {0}", e);
+                    _logger.Warn("[Local Storage => Blob] - Error deleting unused file: {0}", e);
                 }
 
                 _entries.Remove(path);
@@ -299,7 +301,7 @@ namespace AzureWebFarm.Services
                     else
                     {
                         Directory.CreateDirectory(Path.Combine(_localTempPath, Path.GetDirectoryName(path)));
-                        Trace.TraceInformation("SyncService [Blob => Local Storage] - Downloading file: '{0}'", path);
+                        _logger.InfoFormat("[Blob => Local Storage] - Downloading file: '{0}'", path);
 
                         using (var stream = File.Open(tempPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete))
                         {
@@ -326,7 +328,7 @@ namespace AzureWebFarm.Services
                     }
                     catch (Exception e)
                     {
-                        Trace.TraceWarning("Error cleaning up unused directory: {0}", e);
+                        _logger.Warn("Error cleaning up unused directory: {0}", e);
                     }
                 }
 
@@ -339,7 +341,7 @@ namespace AzureWebFarm.Services
 
         public void DeploySitesFromLocal()
         {
-            Trace.TraceInformation("SyncService [Local Storage => IIS] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
+            _logger.DebugFormat("[Local Storage => IIS] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
             foreach (var site in Directory.EnumerateDirectories(_localTempPath).Select(d => Path.GetFileName(d).ToLowerInvariant()))
             {
@@ -372,11 +374,11 @@ namespace AzureWebFarm.Services
                         }
 
                         var packageLastModifiedTime = Directory.GetLastWriteTimeUtc(packageFile);
-                        Trace.TraceInformation("SyncService [Local Storage => IIS] - Package last modified time: '{0}'", packageLastModifiedTime);
+                        _logger.DebugFormat("[Local Storage => IIS] - Package last modified time: '{0}'", packageLastModifiedTime);
 
                         if (_siteDeployTimes[site] < packageLastModifiedTime)
                         {
-                            Trace.TraceInformation("SyncService [Local Storage => IIS] - Deploying the package '{0}' to '{1}' with MSDeploy", packageFile, sitePath);
+                            _logger.InfoFormat("[Local Storage => IIS] - Deploying the package '{0}' to '{1}' with MSDeploy", packageFile, sitePath);
 
                             try
                             {
@@ -409,7 +411,7 @@ namespace AzureWebFarm.Services
         /// </summary>
         public void PackageSitesToLocal()
         {
-            Trace.TraceInformation("SyncService [IIS => Local Storage] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
+            _logger.DebugFormat("[IIS => Local Storage] - Site deploy times: {0}", string.Join(",", _siteDeployTimes.Select(t => t.Key + " - " + t.Value).ToArray()));
 
             using (var serverManager = new ServerManager())
             {
@@ -427,7 +429,7 @@ namespace AzureWebFarm.Services
                             _siteDeployTimes.Add(siteName, DateTime.MinValue);
                         }
 
-                        Trace.TraceInformation("SyncService [IIS => Local Storage] - Site last modified time: '{0}'", siteLastModifiedTime);
+                        _logger.DebugFormat("[IIS => Local Storage] - Site last modified time: '{0}'", siteLastModifiedTime);
 
                         // If the site has been modified since the last deploy, but not within the last {SyncWait}s (otherwise it might be mid-sync)
                         if (_siteDeployTimes[siteName] < siteLastModifiedTime && siteLastModifiedTime < DateTime.UtcNow.AddSeconds(-SyncWait))
@@ -444,7 +446,7 @@ namespace AzureWebFarm.Services
 
                             // Create a package of the site and move it to local temp sites
                             var packageFile = Path.Combine(tempSitePath, siteName + ".zip");
-                            Trace.TraceInformation("SyncService [IIS => Local Storage] - Creating a package of the site '{0}' and moving it to local temp sites '{1}'", siteName, packageFile);
+                            _logger.InfoFormat("[IIS => Local Storage] - Creating a package of the site '{0}' and moving it to local temp sites '{1}'", siteName, packageFile);
                             try
                             {
                                 using (var deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.DirPath, sitePath))
@@ -468,7 +470,7 @@ namespace AzureWebFarm.Services
 
         #region Helpers
 
-        private static DateTime GetFolderLastModifiedTimeUtc(string sitePath)
+        private DateTime GetFolderLastModifiedTimeUtc(string sitePath)
         {
             try
             {
@@ -487,7 +489,7 @@ namespace AzureWebFarm.Services
             }
             catch (PathTooLongException e)
             {
-                Trace.TraceError("SyncService - Failed to retrieve last modified time.{0}{1}", Environment.NewLine, e.TraceInformation());
+                _logger.ErrorFormat(e, "Failed to retrieve last modified time for '{0}'.", sitePath);
 
                 return DateTime.MinValue;
             }
@@ -548,9 +550,9 @@ namespace AzureWebFarm.Services
             {
                 _syncStatusRepository.UpdateStatus(syncStatus);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Trace.TraceError("An error occured updating site sync status: {0}", ex.TraceInformation());
+                _logger.ErrorFormat(e, "An error occured updating site sync status for site '{0}' to '{1}'. Last Error: {2}", webSiteName, status, lastError);
             }
         }
         #endregion

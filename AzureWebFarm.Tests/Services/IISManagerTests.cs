@@ -5,6 +5,7 @@ using System.Linq;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
+using Castle.Core.Logging;
 using Microsoft.Web.Administration;
 using NUnit.Framework;
 using Binding = AzureWebFarm.Entities.Binding;
@@ -151,7 +152,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
             var sites = new List<WebSite> {contosoWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -224,7 +225,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
             var sites = new List<WebSite> {fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -292,7 +293,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -351,7 +352,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);

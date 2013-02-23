@@ -9,6 +9,7 @@ using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
+using Castle.Core.Logging;
 using Microsoft.Web.Administration;
 using Binding = AzureWebFarm.Entities.Binding;
 
@@ -19,23 +20,25 @@ namespace AzureWebFarm.Services
         private readonly ISyncStatusRepository _syncStatusRepository;
         private readonly string _localSitesPath;
         private readonly string _tempSitesPath;
+        private readonly ILogger _logger;
 
-        public IISManager(string localSitesPath, string tempSitesPath, ISyncStatusRepository syncStatusRepository)
+        public IISManager(string localSitesPath, string tempSitesPath, ISyncStatusRepository syncStatusRepository, ILoggerFactory loggerFactory)
         {
             _syncStatusRepository = syncStatusRepository;
             _localSitesPath = localSitesPath;
             _tempSitesPath = tempSitesPath;
+            _logger = loggerFactory.Create(GetType());
         }
 
         public void UpdateSites(IEnumerable<WebSite> sites, List<string> sitesToIgnore = null)
         {
-            Trace.TraceInformation("IISManager.Sites list from table: {0}", string.Join(",", sites.Select(s => s.Name)));
+            _logger.DebugFormat("Sites list from table: {0}", string.Join(",", sites.Select(s => s.Name)));
 
             using (var serverManager = new ServerManager())
             {
                 var iisSites = serverManager.Sites;
 
-                Trace.TraceInformation("IISManager.Sites list from IIS: {0}", string.Join(",", iisSites.Select(s => s.Name)));
+                _logger.DebugFormat("Sites list from IIS: {0}", string.Join(",", iisSites.Select(s => s.Name)));
 
                 // Find sites that need to be removed
                 foreach (var iisSite in iisSites.ToArray())
@@ -48,7 +51,7 @@ namespace AzureWebFarm.Services
                         sitesToIgnore.All(s => name != s.ToLowerInvariant()))
                     {
                         // Remove site
-                        Trace.TraceInformation("IISManager.Removing site '{0}'", iisSite.Name);
+                        _logger.InfoFormat("Removing site '{0}'", iisSite.Name);
 
                         serverManager.Sites.Remove(iisSite);
 
@@ -61,19 +64,19 @@ namespace AzureWebFarm.Services
                             var sitePath = Path.Combine(_localSitesPath, iisSite.Name);
                             var tempSitePath = Path.Combine(_tempSitesPath, iisSite.Name);
 
-                            FilesHelper.RemoveFolder(sitePath);
-                            FilesHelper.RemoveFolder(tempSitePath);
+                            FilesHelper.RemoveFolder(sitePath, _logger);
+                            FilesHelper.RemoveFolder(tempSitePath, _logger);
                         }
                         catch (Exception e)
                         {
-                            Trace.TraceWarning("IISManager.Remove Site Path Error{0}{1}", Environment.NewLine, e.TraceInformation());
+                            _logger.Warn("Error removing site path", e);
                         }
 
                         // Remove appPool
                         var appPool = serverManager.ApplicationPools.SingleOrDefault(ap => ap.Name.Equals(iisSite.Name, StringComparison.OrdinalIgnoreCase));
                         if (appPool != null)
                         {
-                            Trace.TraceInformation("IISManager.Removing appPool '{0}'", appPool.Name);
+                            _logger.InfoFormat("Removing app pool '{0}'", appPool.Name);
 
                             serverManager.ApplicationPools.Remove(appPool);
                         }
@@ -86,7 +89,7 @@ namespace AzureWebFarm.Services
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError("IISManager.CommitChanges (Cleanup IIS){0}{1}", Environment.NewLine, e.TraceInformation());
+                    _logger.Error("Error committing changes to IIS while updating sites", e);
                 }
             }
 
@@ -123,7 +126,7 @@ namespace AzureWebFarm.Services
                         }
 
                         // Add web site
-                        Trace.TraceInformation("IISManager.Adding site '{0}'", siteName);
+                        _logger.InfoFormat("Adding site '{0}'", siteName);
 
                         var defaultBinding = site.Bindings.First();
 
@@ -136,7 +139,7 @@ namespace AzureWebFarm.Services
 
                         if (cert != null)
                         {
-                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}' and Certificate '{2}'", site.Name, defaultBinding.BindingInformation, cert.Thumbprint);
+                            _logger.InfoFormat("Adding website '{0}' with Binding Information '{1}' and Certificate '{2}'", site.Name, defaultBinding.BindingInformation, cert.Thumbprint);
 
                             iisSite = serverManager.Sites.Add(
                                 siteName,
@@ -146,7 +149,7 @@ namespace AzureWebFarm.Services
                         }
                         else
                         {
-                            Trace.TraceInformation("IISManager.Adding WebSite '{0}' with Binding Information '{1}'", site.Name, defaultBinding.BindingInformation);
+                            _logger.InfoFormat("Adding website '{0}' with Binding Information '{1}'", site.Name, defaultBinding.BindingInformation);
 
                             iisSite = serverManager.Sites.Add(
                                 siteName,
@@ -159,7 +162,7 @@ namespace AzureWebFarm.Services
                         var appPool = serverManager.ApplicationPools.SingleOrDefault(ap => ap.Name.Equals(siteName, StringComparison.OrdinalIgnoreCase));
                         if (appPool == null)
                         {
-                            Trace.TraceInformation("IISManager.Adding AppPool '{0}' for site '{0}'", siteName);
+                            _logger.InfoFormat("Adding app pool '{0}' for site '{0}'", siteName);
 
                             appPool = serverManager.ApplicationPools.Add(siteName);
                             appPool.ManagedRuntimeVersion = "v4.0";
@@ -186,7 +189,7 @@ namespace AzureWebFarm.Services
                     {
                         if (!site.Bindings.Any(b => AreEqualsBindings(binding, b)))
                         {
-                            Trace.TraceInformation("IISManager.Removing binding with protocol: '{0}'", binding.Protocol);
+                            _logger.InfoFormat("Removing binding with protocol '{0}' from website '{1}'", binding.Protocol, site);
                             iisSite.Bindings.Remove(binding);
                         }
                     }
@@ -206,12 +209,12 @@ namespace AzureWebFarm.Services
 
                             if (cert != null)
                             {
-                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}' and Certificate '{3}'", binding.Id, site.Name, binding.BindingInformation, cert.Thumbprint);
+                                _logger.InfoFormat("Adding Binding '{0}' for website '{1}' with Binding Information '{2}' and Certificate '{3}'", binding.Id, site.Name, binding.BindingInformation, cert.Thumbprint);
                                 iisSite.Bindings.Add(binding.BindingInformation, cert.GetCertHash(), StoreName.My.ToString());
                             }
                             else
                             {
-                                Trace.TraceInformation("IISManager.Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}'", binding.Id, site.Name, binding.BindingInformation);
+                                _logger.InfoFormat("Adding Binding '{0}' for WebSite '{1}' with Binding Information '{2}'", binding.Id, site.Name, binding.BindingInformation);
                                 iisSite.Bindings.Add(binding.BindingInformation, binding.Protocol);
                             }
                         }
@@ -219,13 +222,13 @@ namespace AzureWebFarm.Services
 
                     try
                     {
-                        Trace.TraceInformation("IISManager.Committing Changes for site '{0}'", site.Name);
+                        _logger.DebugFormat("Committing updates to IIS for site '{0}'", site.Name);
                         serverManager.CommitChanges();
                     }
                     catch (Exception e)
                     {
                         UpdateSyncStatus(siteName, SyncInstanceStatus.Error);
-                        Trace.TraceError("IISManager.CommitChanges for site '{0}'{1}{2}", site.Name, Environment.NewLine, e.TraceInformation());
+                        _logger.ErrorFormat(e, "Error committing changes for site '{0}'", site.Name);
                     }
                 }
             }
@@ -247,7 +250,7 @@ namespace AzureWebFarm.Services
             return cert;
         }
 
-        private static void UpdateApplications(WebSite site, ServerManager serverManager, string siteName, string sitePath, ApplicationPool appPool)
+        private void UpdateApplications(WebSite site, ServerManager serverManager, string siteName, string sitePath, ApplicationPool appPool)
         {
             var iisSites = serverManager.Sites;
             var adminSite = iisSites[AzureRoleEnvironment.RoleWebsiteName()];
@@ -261,7 +264,7 @@ namespace AzureWebFarm.Services
             {
                 if (testApplication == null)
                 {
-                    Trace.TraceInformation("IISManager.Adding Test application for site '{0}'", siteName);
+                    _logger.InfoFormat("Adding Test application for site '{0}'", siteName);
                     testApplication = adminSite.Applications.Add("/test/" + siteName, sitePath);
                     testApplication.ApplicationPoolName = appPool.Name;
                 }
@@ -270,7 +273,7 @@ namespace AzureWebFarm.Services
             {
                 if (testApplication != null)
                 {
-                    Trace.TraceInformation("IISManager.Removing Test application for site '{0}'", siteName);
+                    _logger.InfoFormat("Removing Test application for site '{0}'", siteName);
                     adminSite.Applications.Remove(testApplication);
                 }
             }
@@ -279,7 +282,7 @@ namespace AzureWebFarm.Services
             {
                 if (cdnApplication == null)
                 {
-                    Trace.TraceInformation("IISManager.Adding CDN application for site '{0}'", siteName);
+                    _logger.InfoFormat("Adding CDN application for site '{0}'", siteName);
                     cdnApplication = adminSite.Applications.Add("/cdn/" + siteName, Path.Combine(sitePath, "cdn"));
                     cdnApplication.ApplicationPoolName = appPool.Name;
                 }
@@ -288,7 +291,7 @@ namespace AzureWebFarm.Services
             {
                 if (cdnApplication != null)
                 {
-                    Trace.TraceInformation("IISManager.Removing CDN application for site '{0}'", siteName);
+                    _logger.InfoFormat("Removing CDN application for site '{0}'", siteName);
                     adminSite.Applications.Remove(cdnApplication);
                 }
             }
@@ -305,7 +308,7 @@ namespace AzureWebFarm.Services
                 iisBinding.Host.Equals(binding.HostName, StringComparison.OrdinalIgnoreCase);
         }
 
-        private static void RemoveApplications(SiteCollection iisSites, string siteName)
+        private void RemoveApplications(SiteCollection iisSites, string siteName)
         {
             var adminSite = iisSites[AzureRoleEnvironment.RoleWebsiteName()];
 
@@ -314,7 +317,7 @@ namespace AzureWebFarm.Services
                                        app.Path.EndsWith("/cdn/" + siteName, StringComparison.OrdinalIgnoreCase)
                                        select app;
 
-            Trace.TraceInformation("IISManager.Removing Test and CDN applications for site '{0}'", siteName);
+            _logger.InfoFormat("IISManager.Removing Test and CDN applications for site '{0}'", siteName);
 
             foreach (var app in applicationsToRemove.ToArray())
             {
