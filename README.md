@@ -13,6 +13,8 @@ Also, if you want to support the execution of background tasks (via console appl
 ## Documentation ##
 
 ### Web Farm Installation and Setup ###
+Ensure you have Azure SDK 1.8 installed. The web farm will likely work with 1.7, and possibly 1.6 as well, but it's built against 1.8. It's also worth using 1.8 just for the huge deployment speed improvements anyway.
+
 1. Create a new ASP.NET MVC 4 website in Visual Studio using the blank template and delete the Global.asax.cs, Global.asax, Web.config and Views/Web.config files.
 2. `Install-Package AzureWebFarm`
 3. (optional) use ReSharper (or similar) to change the namespaces to match your assembly namespace
