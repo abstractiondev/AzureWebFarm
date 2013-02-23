@@ -50,13 +50,24 @@ You must ensure that your console application can handle being run simultaneousl
 
 The easiest way to do this is to use a bit of MSBuild in your web project such as (assumes the `.exe` output is the same name as the project and the console app project sub folder is at the same level as the web project subfolder in your solution, also assumes the web deploy is being generated in the default directory):
 
-	  <Target Name="AddBackgroundWorker" BeforeTargets="PackageUsingManifest">
-	    <Message Text="Copying Background Worker files into package temp path so it's copied into web deploy package." />
-	    <ItemGroup>
-		  <WorkerFiles Include="$(ProjectDir)..\MyBackgroundWorkerProjectDirectory\bin\$(Configuration)\*.*" />
-	    </ItemGroup>
-	    <Copy SourceFiles="@(WorkerFiles)" DestinationFolder="$(BaseIntermediateOutputPath)\$(Configuration)\Package\PackageTmp\bin\MyBackgroundWorkerProjectDirectory" />
-	  </Target>
+      <Target Name="AddBackgroundWorker" BeforeTargets="PackageUsingManifest">
+        <Message Text="Copying Background Worker files into package temp path so it's copied into web deploy package." />
+        <ItemGroup>
+          <WorkerFiles Include="$(ProjectDir)..\MyBackgroundWorkerProjectDirectory\bin\$(Configuration)\*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(WorkerFiles)" DestinationFolder="$(BaseIntermediateOutputPath)\$(Configuration)\Package\PackageTmp\bin\MyBackgroundWorkerProjectDirectory" />
+      </Target>
+
+In order to be able to run your console application locally you might want to copy the web.config file from your web project to your background worker when it's built. You can easily accomplish this with the following snippet of MSBuild in the project file for your console application:
+
+      <Target Name="CopyWebConfigInDev" AfterTargets="Build">
+        <Message Text="Copying web.config from web project into the execution directory" />
+        <Copy SourceFiles="$(ProjectDir)\..\MyWebProjectDirectory\web.config" DestinationFolder="$(OutputPath)" />
+      </Target>
+
+If you do this then you probably should modify the `AddBackgroundWorker` task above to remove the web.config file that is copied in, otherwise (assuming you use config transforms and thus have a different web.config file after deploying) your development web.config file will be used by the deployed background worker. You can do this by adding the following MSBuild line to the end of the `AddBackgroundWorker` target:
+
+      <Delete Files="$(BaseIntermediateOutputPath)\$(Configuration)\Package\PackageTmp\bin\MyBackgroundWorkerProjectDirectory\web.config" />
 
 ## Contributions ##
 If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
