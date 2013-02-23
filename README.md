@@ -77,10 +77,27 @@ If you do this then you probably should modify the `AddBackgroundWorker` task ab
 
       <Delete Files="$(BaseIntermediateOutputPath)\$(Configuration)\Package\PackageTmp\bin\MyBackgroundWorkerProjectDirectory\web.config" />
 
+Note: If you include a `web.config` file in the background worker folder within the web deploy package then it will not be overwritten by the `web.config` file deployed to the website.
+
 ## Contributions ##
 If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
 
 ## Changelog ##
+
+### Version 0.9.2.X ###
+* If a `web.config` file is included with a background worker application then it will no longer cause an exception in the web farm and in fact will not be overwitten
+* Upgraded to Azure SDK 1.8
+* Added missing HTTP certificate config in the example cloud project config files
+* Set a bunch of internally used classes to `internal` from `public`
+* Refactored core code to make it easier to unit test
+* Changes to config settings while the farm is deployed will now update the farm without requiring the roles to be manually restarted (the roles won't automatically restart either - they will always use the latest version of the config settings)
+* Added handling to OnStop to ensure all ASP.NET requests are served before a role is restarted as per [http://blogs.msdn.com/b/windowsazure/archive/2013/01/14/the-right-way-to-handle-azure-onstop-events.aspx]( http://blogs.msdn.com/b/windowsazure/archive/2013/01/14/the-right-way-to-handle-azure-onstop-events.aspx)
+* Added configurable logging via Castle.Core
+* Removed dependency on Azure Storage within uncaught code called from OnRun() - this means that the web farm should not go down if there is an Azure Storage outage
+* Added configuration setting to allow for syncing to be disabled without needing to redeploy the farm
+
+### Version 0.9.1.2 ###
+* Logged the last error that occurred when updating sync status to error
 
 ### Version 0.9.1.1 ###
 * Fixed potential NRE in the worker role (exposed by race condition)
