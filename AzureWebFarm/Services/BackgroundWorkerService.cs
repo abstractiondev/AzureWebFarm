@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace AzureWebFarm.Services
 {
-    public class BackgroundWorkerService : IDisposable
+    internal class BackgroundWorkerService : IDisposable
     {
         private readonly string _executablePath;
         private readonly Dictionary<string, List<Executable>> _executables;
@@ -76,7 +76,7 @@ namespace AzureWebFarm.Services
         }
     }
 
-    public class ExecutableFinder
+    internal class ExecutableFinder
     {
         private readonly string _sitesPath;
 
@@ -99,7 +99,7 @@ namespace AzureWebFarm.Services
         } 
     }
 
-    public class Executable : IDisposable
+    internal class Executable : IDisposable
     {
         private readonly string _basePath;
         private string _executionPath;

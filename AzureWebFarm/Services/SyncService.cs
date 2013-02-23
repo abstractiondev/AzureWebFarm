@@ -15,7 +15,7 @@ using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Services
 {
-    public class SyncService
+    internal class SyncService
     {
         #region Setup / Constructor
 

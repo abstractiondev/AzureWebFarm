@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,12 +10,11 @@ using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
 using Microsoft.Web.Administration;
-using Microsoft.WindowsAzure.ServiceRuntime;
 using Binding = AzureWebFarm.Entities.Binding;
 
 namespace AzureWebFarm.Services
 {
-    public class IISManager
+    internal class IISManager
     {
         private readonly ISyncStatusRepository _syncStatusRepository;
         private readonly string _localSitesPath;
