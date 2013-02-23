@@ -2,11 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using AzureToolkit;
-using AzureWebFarm.Extensions;
 
 namespace AzureWebFarm.Helpers
 {
-    public static class FilesHelper
+    internal static class FilesHelper
     {
         public static void RemoveFolder(string folderPath)
         {

@@ -7,7 +7,7 @@ using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Helpers
 {
-    public class DiagnosticsHelper
+    internal class DiagnosticsHelper
     {
         // Core references from here 
         /// <summary>
