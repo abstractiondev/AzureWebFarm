@@ -25,14 +25,28 @@ namespace AzureWebFarm
             try
             {
                 ServicePointManager.DefaultConnectionLimit = 12;
-                CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
-                {
-                    var configuration = RoleEnvironment.IsAvailable ?
-                        RoleEnvironment.GetConfigurationSettingValue(configName) :
-                        ConfigurationManager.AppSettings[configName];
 
-                    configSetter(configuration);
-                });
+                // Allow Azure Storage to always use the latest version of a config setting
+                CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
+                    {
+                        if (!RoleEnvironment.IsAvailable)
+                        {
+                            configSetter(ConfigurationManager.AppSettings[configName]);
+                            return;
+                        }
+
+                        configSetter(RoleEnvironment.GetConfigurationSettingValue(configName));
+                        // Apply any changes to config when the config is edited http://msdn.microsoft.com/en-us/library/windowsazure/gg494982.aspx
+                        RoleEnvironment.Changed += (sender, arg) =>
+                        {
+                            if (!arg.Changes.OfType<RoleEnvironmentConfigurationSettingChange>().Any(change => (change.ConfigurationSettingName == configName)))
+                                return;
+
+                            if (!configSetter(RoleEnvironment.GetConfigurationSettingValue(configName)))
+                                RoleEnvironment.RequestRecycle();
+                        };
+                    }
+                );
 
                 if (RoleEnvironment.IsAvailable && !RoleEnvironment.IsEmulated)
                     DiagnosticsHelper.ConfigureDiagnosticMonitor();
