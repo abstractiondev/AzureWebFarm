@@ -113,6 +113,17 @@ namespace AzureWebFarm
             // Set the sites as not synced for this instance
             var roleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName;
             _syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
+
+            // http://blogs.msdn.com/b/windowsazure/archive/2013/01/14/the-right-way-to-handle-azure-onstop-events.aspx
+            var pcrc = new PerformanceCounter("ASP.NET", "Requests Current", "");
+            while (true)
+            {
+                var rc = pcrc.NextValue();
+                Trace.TraceInformation("ASP.NET Requests Current = {0}", rc);
+                if (rc <= 0)
+                    break;
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
         }
         
         private static string GetLocalResourcePathAndSetAccess(string localResourceName)
