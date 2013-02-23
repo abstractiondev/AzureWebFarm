@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureToolkit;
 using AzureWebFarm.Entities;
-using AzureWebFarm.Extensions;
 using AzureWebFarm.Helpers;
 
 namespace AzureWebFarm.Storage

@@ -80,9 +80,7 @@
     <Compile Include="Entities\FileEntry.cs" />
     <Compile Include="Entities\SyncStatus.cs" />
     <Compile Include="Entities\WebSite.cs" />
-    <Compile Include="Extensions\BlobExtensions.cs" />
-    <Compile Include="Extensions\ModelExtensions.cs" />
-    <Compile Include="Extensions\TableStorageExtensionMethods.cs" />
+    <Compile Include="Storage\ModelExtensions.cs" />
     <Compile Include="Helpers\AzureRoleEnvironment.cs" />
     <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\DiagnosticsHelper.cs" />

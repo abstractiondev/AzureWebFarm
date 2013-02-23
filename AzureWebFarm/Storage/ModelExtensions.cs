@@ -1,9 +1,8 @@
 ﻿using System;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
-using AzureWebFarm.Storage;
 
-namespace AzureWebFarm.Extensions
+namespace AzureWebFarm.Storage
 {
     public static class ModelExtensions
     {
