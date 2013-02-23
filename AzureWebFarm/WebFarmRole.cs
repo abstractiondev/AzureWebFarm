@@ -11,6 +11,7 @@ using AzureToolkit;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
 using AzureWebFarm.Storage;
+using Castle.Core.Logging;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -18,8 +19,19 @@ namespace AzureWebFarm
 {
     public class WebFarmRole
     {
+        private readonly ILoggerFactory _logFactory;
         private SyncService _syncService;
         private BackgroundWorkerService _backgroundWorker;
+        private ILogger _logger;
+
+        public WebFarmRole(ILoggerFactory logFactory = null)
+        {
+            // If a log factory isn't specified use Trace, which will end up in diagnostics
+            if (logFactory == null)
+                logFactory = new TraceLoggerFactory();
+            _logFactory = logFactory;
+            _logger = logFactory.Create(GetType());
+        }
 
         public void OnStart()
         {
@@ -28,7 +40,7 @@ namespace AzureWebFarm
                 // Set-up diagnostics
                 if (!AzureRoleEnvironment.IsEmulated())
                     DiagnosticsHelper.ConfigureDiagnosticMonitor();
-                Trace.TraceInformation("WebRole.OnStart");
+                _logger.Info("WebRole.OnStart called");
 
                 ServicePointManager.DefaultConnectionLimit = 12;
 
@@ -84,7 +96,7 @@ namespace AzureWebFarm
             }
             catch (Exception e)
             {
-                Trace.TraceError(e.ToString());
+                _logger.Error("Uncaught exception in OnStart()", e);
                 DiagnosticsHelper.WriteExceptionToBlobStorage(e);
                 throw;
             }
@@ -94,12 +106,12 @@ namespace AzureWebFarm
         {
             try
             {
-                Trace.TraceInformation("WebRole.Run");
+                _logger.Info("WebRole.Run called");
                 _syncService.SyncForever(() => Constants.SyncInterval);
             }
             catch (Exception e)
             {
-                Trace.TraceError(e.ToString());
+                _logger.Error("Uncaught exception in Run()", e);
                 DiagnosticsHelper.WriteExceptionToBlobStorage(e);
                 throw;
             }
@@ -107,7 +119,7 @@ namespace AzureWebFarm
 
         public void OnStop()
         {
-            Trace.TraceInformation("WebRole.OnStop");
+            _logger.Info("WebRole.OnStop called");
 
             // Set the sites as not synced for this instance
             _syncService.UpdateAllSitesSyncStatus(AzureRoleEnvironment.CurrentRoleInstanceId(), false);
@@ -117,7 +129,7 @@ namespace AzureWebFarm
             while (true)
             {
                 var rc = pcrc.NextValue();
-                Trace.TraceInformation("ASP.NET Requests Current = {0}", rc);
+                _logger.InfoFormat("ASP.NET Requests Current = {0}", rc);
                 if (rc <= 0)
                     break;
                 Thread.Sleep(TimeSpan.FromSeconds(1));

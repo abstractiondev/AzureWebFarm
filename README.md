@@ -35,6 +35,12 @@ Ensure you have Azure SDK 1.8 installed. The web farm will likely work with 1.7,
 
 If you get lost check out the AzureWebFarm.Example.Web and AzureWebFarm.Example.Cloud projects for guidance.
 
+### Logging ###
+
+By default the web farm will log a range of diagnostics data using Windows Azure Diagnostics. If there are any errors on startup of the role then they will be placed in the exceptions blob container in the storage account configured for diagnostics. If there are any errors during the operation of the farm then they will appear in the `WADLogs` table - note: there is a lot of noise in there due to the debugging logging.
+
+If you would like more fine-grained control over logging then simply pass in an `ILoggerFactory` ([from Castle.Core](http://docs.castleproject.org/Windsor.Logging-Facility.ashx)) to the constructor of `WebFarmRole` in your `WebRole` class.
+
 ### Background Worker Setup ###
 If there is a subfolder within the bin directory of your website that contains a `.exe` file of the same name as the subfolder, e.g. `MySiteRoot\bin\SubFolder\SubFolder.exe` then the contents of the sub folder will be copied to an isolated folder and the executable file will be run.
 
