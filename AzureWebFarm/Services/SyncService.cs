@@ -94,7 +94,7 @@ namespace AzureWebFarm.Services
         }
 
         // ReSharper disable FunctionNeverReturns
-        public void SyncForever(TimeSpan interval)
+        public void SyncForever(Func<TimeSpan> interval)
         {
             var lastHeartbeat = DateTime.MinValue;
 
@@ -114,7 +114,7 @@ namespace AzureWebFarm.Services
 
                 OnPing();
 
-                Thread.Sleep(interval);
+                Thread.Sleep(interval());
             }
         }
         // ReSharper restore FunctionNeverReturns

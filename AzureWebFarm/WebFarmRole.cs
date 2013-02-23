@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Threading;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
 using Microsoft.WindowsAzure;
@@ -40,9 +42,6 @@ namespace AzureWebFarm
                 var localTempPath = GetLocalResourcePathAndSetAccess("TempSites");
                 var localExecutionPath = GetLocalResourcePathAndSetAccess("Execution");
 
-                // Get settings
-                var directoriesToExclude = RoleEnvironment.GetConfigurationSettingValue("DirectoriesToExclude").Split(';');
-
                 // WebDeploy creates temporary files during package creation. The default TEMP location allows for a 100MB
                 // quota (see http://msdn.microsoft.com/en-us/library/gg465400.aspx#Y976). 
                 // For large web deploy packages, the synchronization process will raise an IO exception because the "disk is full" 
@@ -51,7 +50,7 @@ namespace AzureWebFarm
                 Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
                 // Create the sync service and background worker
-                _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring",
+                _syncService = new SyncService(localSitesPath, localTempPath, Constants.DirectoriesToExclude, Constants.StorageConnectionStringKey,
                     () => Constants.IsSyncEnabled
                 );
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
@@ -78,11 +77,10 @@ namespace AzureWebFarm
             try
             {
                 Trace.TraceInformation("WebRole.Run");
-                var syncInterval = int.Parse(RoleEnvironment.GetConfigurationSettingValue("SyncIntervalInSeconds"), CultureInfo.InvariantCulture);
-                _syncService.SyncForever(TimeSpan.FromSeconds(syncInterval));
+                _syncService.SyncForever(() => Constants.SyncInterval);
                 while (true)
                 {
-                    System.Threading.Thread.Sleep(10000);
+                    Thread.Sleep(10000);
                 }
             }
             catch (Exception e)
@@ -108,7 +106,7 @@ namespace AzureWebFarm
             var resourcePath = RoleEnvironment.GetLocalResource(localResourceName).RootPath.TrimEnd('\\');
 
             var localDataSec = Directory.GetAccessControl(resourcePath);
-            localDataSec.AddAccessRule(new FileSystemAccessRule(new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
+            localDataSec.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
             Directory.SetAccessControl(resourcePath, localDataSec);
 
             return resourcePath;
