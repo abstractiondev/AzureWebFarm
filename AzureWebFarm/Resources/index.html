@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{WebSiteName}</title>
+    <link href="site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="page">
+        <div id="title">
+            <h1>{WebSiteName}</h1>
+        </div>
+        <div style="clear: both;"></div>
+        <h2>Welcome</h2>
+        <p>This site was created using <a href="http://github.com/robdmoore/azurewebfarm">AzureWebFarm</a>. To deploy your web site deploy to the current web farm use the following information:</p>
+        <ul>
+            <li><strong>Server:</strong> https://<em>{mywebfarm}</em>.cloudapp.net:8172/msdeploy.axd</li>
+            <li><strong>Username:</strong> <em>{RDP username}</em></li>
+            <li><strong>Password:</strong> <em>{RDP password}</em></li>
+            <li><strong>Auth Type:</strong> Basic</li>
+            <li><strong>Allow untrusted certificates:</strong> Yes (unless you have configured a valid SSL cert and use your custom domain rather than <em>{mywebfarm}</em>.cloudapp.net)</li>
+        </ul>
+        <p>If you are using msdeploy.exe directly for instance, then you might have a command that looks something like this:</p>
+        <blockquote><pre>"C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe" -source:package='<em>MyWebProject</em>.csproj.zip' -setParamFile:<em>MyWebProject</em>.csproj.SetParameters.xml -verb:sync -disableLink:AppPoolExtension -disableLink:ContentExtension -disableLink:CertificateExtension -dest:auto,computerName='https://<em>{mywebfarm}</em>.cloudapp.net:8172/msdeploy.axd',userName='<em>{RDP username}</em>',password='<em>{RDP password}</em>',includeAcls='False',authType='basic' -allowUntrusted -useCheckSum</pre></blockquote>
+    </div>
+</body>
+</html>

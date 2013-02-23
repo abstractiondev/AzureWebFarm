@@ -112,28 +112,16 @@ namespace AzureWebFarm.Services
                             Directory.CreateDirectory(sitePath);
                         }
 
-                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.LandingPage.html"))
+                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.index.html"))
                         {
                             var fileContent = new StreamReader(stream).ReadToEnd().Replace("{WebSiteName}", siteName);
                             File.WriteAllText(Path.Combine(sitePath, "index.html"), fileContent);
                         }
 
-                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.LandingStyle.css"))
+                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.site.css"))
                         {
                             var fileContent = new StreamReader(stream).ReadToEnd();
-                            File.WriteAllText(Path.Combine(sitePath, "Site.css"), fileContent);
-                        }
-
-                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.PublishImage.png"))
-                        {
-                            var bitmap = new Bitmap(stream);
-                            bitmap.Save(Path.Combine(sitePath, "publish.png"));
-                        }
-
-                        using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AzureWebFarm.Resources.SolutionImage.png"))
-                        {
-                            var bitmap = new Bitmap(stream);
-                            bitmap.Save(Path.Combine(sitePath, "solution.png"));
+                            File.WriteAllText(Path.Combine(sitePath, "site.css"), fileContent);
                         }
 
                         // Add web site
