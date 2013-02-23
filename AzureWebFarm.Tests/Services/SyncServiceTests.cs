@@ -85,7 +85,8 @@ namespace AzureWebFarm.Tests.Services
                 _sitePath,
                 _tempPath,
                 new string[] { },
-                _excludedSites
+                _excludedSites,
+                () => true
             );
         }
 

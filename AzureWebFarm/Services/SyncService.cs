@@ -19,8 +19,9 @@ namespace AzureWebFarm.Services
 {
     public class SyncService
     {
+        private readonly Func<bool> _syncEnabled;
+
         #region Setup / Constructor
-        private const string BlobStopName = "stop";
 
         private readonly WebSiteRepository _sitesRepository;
         private readonly SyncStatusRepository _syncStatusRepository;
@@ -37,7 +38,7 @@ namespace AzureWebFarm.Services
 
         public static int SyncWait = 30;
 
-        public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName)
+        public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName, Func<bool> syncEnabled)
             : this (
                 new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting(storageSettingName))),
                 new SyncStatusRepository(storageSettingName),
@@ -45,11 +46,12 @@ namespace AzureWebFarm.Services
                 localSitesPath,
                 localTempPath,
                 directoriesToExclude,
-                new string[] {}
+                new string[] {},
+                syncEnabled
             )
         {}
 
-        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude)
+        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled)
         {
             _sitesRepository = sitesRepository;
             _syncStatusRepository = syncStatusRepository;
@@ -58,6 +60,7 @@ namespace AzureWebFarm.Services
             _localTempPath = localTempPath;
             _directoriesToExclude = directoriesToExclude;
             _sitesToExclude = sitesToExclude;
+            _syncEnabled = syncEnabled;
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
 
@@ -93,21 +96,18 @@ namespace AzureWebFarm.Services
         // ReSharper disable FunctionNeverReturns
         public void SyncForever(TimeSpan interval)
         {
-            var blobStop = _container.GetBlobReference(BlobStopName);
             var lastHeartbeat = DateTime.MinValue;
 
             while (true)
             {
-                var isPaused = blobStop.Exists();
- 
                 var currentTime = DateTime.Now;
                 if ((currentTime - lastHeartbeat).Minutes > 15)
                 {
-                    Trace.TraceInformation("SyncService - Synchronization is {0}...", isPaused ? "paused" : "active");
+                    Trace.TraceInformation("SyncService - Synchronization is {0}...", _syncEnabled() ? "paused" : "active");
                     lastHeartbeat = currentTime;
                 }
 
-                if (!isPaused)
+                if (!_syncEnabled())
                 {
                     SyncOnce();
                 }
@@ -481,41 +481,6 @@ namespace AzureWebFarm.Services
         #endregion
 
         #region Helpers
-
-        public static bool IsSyncEnabled()
-        {
-            var blobStop = GetCloudBlobStop();
-            var enable = !blobStop.Exists();
-            return enable;
-        }
-
-        public static void SyncEnable()
-        {
-            var blobStop = GetCloudBlobStop();
-            blobStop.DeleteIfExists();
-
-            Trace.TraceInformation("SyncService - Synchronization resumed.");
-        }
-
-        public static void SyncDisable()
-        {
-            var blobStop = GetCloudBlobStop();
-            if (!blobStop.Exists())
-            {
-                blobStop.UploadText(string.Empty);
-            }
-
-            Trace.TraceInformation("SyncService - Synchronization paused.");
-        }
-
-        private static CloudBlob GetCloudBlobStop()
-        {
-            var storageAccount = CloudStorageAccount.FromConfigurationSetting("DataConnectionstring");
-            var sitesContainerName = RoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
-            var container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
-            var blobStop = container.GetBlobReference(BlobStopName);
-            return blobStop;
-        }
 
         private static DateTime GetFolderLastModifiedTimeUtc(string sitePath)
         {

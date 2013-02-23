@@ -51,7 +51,9 @@ namespace AzureWebFarm
                 Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
                 // Create the sync service and background worker
-                _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring");
+                _syncService = new SyncService(localSitesPath, localTempPath, directoriesToExclude, "DataConnectionstring",
+                    () => Constants.IsSyncEnabled
+                );
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
 
                 // Subscribe the background worker to relevant events in the sync service

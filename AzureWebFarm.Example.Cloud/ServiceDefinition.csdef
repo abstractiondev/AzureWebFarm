@@ -33,6 +33,7 @@
     </LocalResources>
     <ConfigurationSettings>
       <Setting name="DataConnectionString" />
+      <Setting name="SyncEnabled" />
       <Setting name="SitesContainerName" />
       <Setting name="DirectoriesToExclude" />
       <Setting name="SyncIntervalInSeconds" />
