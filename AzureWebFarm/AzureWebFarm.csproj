@@ -73,10 +73,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\Binding.cs" />
-    <Compile Include="Entities\Certificate.cs" />
     <Compile Include="Entities\Enums.cs" />
     <Compile Include="Entities\FileEntry.cs" />
-    <Compile Include="Entities\LogMessage.cs" />
     <Compile Include="Entities\SyncStatus.cs" />
     <Compile Include="Entities\WebSite.cs" />
     <Compile Include="Extensions\BlobExtensions.cs" />
