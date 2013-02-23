@@ -22,6 +22,8 @@ namespace AzureWebFarm.Tests.Services
     {
         #region Setup
 
+        private static readonly string RoleWebsiteName = AzureRoleEnvironment.RoleWebsiteName();
+
         private SyncService _syncService;
         private string _sitePath;
         private string _tempPath;
@@ -72,7 +74,7 @@ namespace AzureWebFarm.Tests.Services
                 _excludedSites = new List<string>();
                 using (var manager = new ServerManager())
                 {
-                    manager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList().ForEach(s => _excludedSites.Add(s.Name));
+                    manager.Sites.Where(s => s.Name != AzureRoleEnvironment.RoleWebsiteName()).ToList().ForEach(s => _excludedSites.Add(s.Name));
                 }
                 CleanupWebsiteTest(serverManager);
             }
@@ -80,7 +82,7 @@ namespace AzureWebFarm.Tests.Services
             // Sync Service
             _syncService = new SyncService(
                 _repo,
-                new SyncStatusRepository(CloudStorageAccount.DevelopmentStorageAccount),
+                new SyncStatusRepository(factory),
                 CloudStorageAccount.DevelopmentStorageAccount,
                 _sitePath,
                 _tempPath,
@@ -110,8 +112,8 @@ namespace AzureWebFarm.Tests.Services
             website.Bindings = new[] { binding };
 
             // Add role website to IIS / wwwroot directory
-            serverManager.Sites.Add(IISManager.RoleWebSiteName, "http", "*:80:test", Path.Combine(_sitePath, "deployment"));
-            Directory.CreateDirectory(Path.Combine(_sitePath, IISManager.RoleWebSiteName.Replace("-", ".").ToLowerInvariant()));
+            serverManager.Sites.Add(RoleWebsiteName, "http", "*:80:test", Path.Combine(_sitePath, "deployment"));
+            Directory.CreateDirectory(Path.Combine(_sitePath, RoleWebsiteName.Replace("-", ".").ToLowerInvariant()));
             serverManager.CommitChanges();
 
             GetBlobContainer().Delete();

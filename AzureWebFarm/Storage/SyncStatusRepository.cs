@@ -4,45 +4,32 @@ using System.Linq;
 using AzureToolkit;
 using AzureWebFarm.Entities;
 using AzureWebFarm.Extensions;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.ServiceRuntime;
+using AzureWebFarm.Helpers;
 
 namespace AzureWebFarm.Storage
 {
-    public class SyncStatusRepository
+    public interface ISyncStatusRepository
+    {
+        void RemoveWebSiteStatus(string webSiteName);
+        void UpdateStatus(SyncStatus syncStatus);
+        IEnumerable<SyncStatus> RetrieveSyncStatus(string webSiteName);
+        IEnumerable<SyncStatus> RetrieveSyncStatusByInstanceId(string roleInstanceId);
+    }
+
+    public class SyncStatusRepository : ISyncStatusRepository
     {
         private readonly IAzureTable<SyncStatusRow> _table;
 
-        public SyncStatusRepository()
-            : this("DataConnectionString")
+        public SyncStatusRepository(IAzureStorageFactory storageFactory)
         {
-        }
-
-        public SyncStatusRepository(string settingName)
-            : this(CloudStorageAccount.FromConfigurationSetting(settingName), "WebSitesSyncStatus")
-        {
-        }
-
-        public SyncStatusRepository(CloudStorageAccount account)
-            : this(account, "WebSitesSyncStatus")
-        {
-        }
-
-        public SyncStatusRepository(CloudStorageAccount account, string tableName)
-            : this(new AzureTable<SyncStatusRow>(account, tableName))
-        {
-        }
-
-        public SyncStatusRepository(IAzureTable<SyncStatusRow> table)
-        {
-            _table = table;
+            _table = storageFactory.GetTable<SyncStatusRow>(typeof (SyncStatusRow).Name);
             _table.Initialize();
         }
 
         public void RemoveWebSiteStatus(string webSiteName)
         {
             var webSiteStatus = RetrieveSyncStatus(webSiteName);
-            if (webSiteStatus != null && webSiteStatus.Count() > 0)
+            if (webSiteStatus != null && webSiteStatus.Any())
             {
                 _table.Delete(webSiteStatus.Select(s => s.ToRow()));
             }
@@ -58,7 +45,7 @@ namespace AzureWebFarm.Storage
             return _table.Query
                 .Where(
                     s =>
-                    s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
+                    s.PartitionKey.Equals(AzureRoleEnvironment.DeploymentId(), StringComparison.OrdinalIgnoreCase) &&
                     s.SiteName.Equals(webSiteName, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .Select(s => s.ToModel());
@@ -69,7 +56,7 @@ namespace AzureWebFarm.Storage
             return _table.Query
                 .Where(
                     s =>
-                    s.PartitionKey.Equals(RoleEnvironment.DeploymentId, StringComparison.OrdinalIgnoreCase) &&
+                    s.PartitionKey.Equals(AzureRoleEnvironment.DeploymentId(), StringComparison.OrdinalIgnoreCase) &&
                     s.RoleInstanceId.Equals(roleInstanceId, StringComparison.OrdinalIgnoreCase))
                 .ToList()
                 .Select(s => s.ToModel());

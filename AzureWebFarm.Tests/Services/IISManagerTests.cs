@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AzureWebFarm.Entities;
+using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
 using Microsoft.Web.Administration;
 using NUnit.Framework;
@@ -15,16 +16,18 @@ namespace AzureWebFarm.Tests.Services
     {
         #region Setup
 
+        private static readonly string RoleWebsiteName = AzureRoleEnvironment.RoleWebsiteName();
+
         [TestFixtureSetUp]
         public void FixtureSetup()
         {
             using (var serverManager = new ServerManager())
             {
-                _defaultSiteAlreadyExisted = serverManager.Sites.Count(s => s.Name == IISManager.RoleWebSiteName) > 0;
+                _defaultSiteAlreadyExisted = serverManager.Sites.Count(s => s.Name == RoleWebsiteName) > 0;
                 
                 if (!_defaultSiteAlreadyExisted)
                 {
-                    serverManager.Sites.Add(IISManager.RoleWebSiteName, @"c:\inetpub\wwwroot", 80);
+                    serverManager.Sites.Add(RoleWebsiteName, @"c:\inetpub\wwwroot", 80);
                     serverManager.CommitChanges();
                 }
             }
@@ -37,7 +40,7 @@ namespace AzureWebFarm.Tests.Services
             {
                 if (!_defaultSiteAlreadyExisted)
                 {
-                    serverManager.Sites.Remove(serverManager.Sites.Single(s => s.Name == IISManager.RoleWebSiteName));
+                    serverManager.Sites.Remove(serverManager.Sites.Single(s => s.Name == RoleWebsiteName));
                     serverManager.CommitChanges();
                 }
             }
@@ -50,7 +53,7 @@ namespace AzureWebFarm.Tests.Services
             _excludedSites = new List<string>();
             using (var manager = new ServerManager())
             {
-                manager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList().ForEach(s => _excludedSites.Add(s.Name));
+                manager.Sites.Where(s => s.Name != RoleWebsiteName).ToList().ForEach(s => _excludedSites.Add(s.Name));
             }
             Directory.CreateDirectory(LocalSitesPath);
             Directory.CreateDirectory(TempSitesPath);
@@ -82,7 +85,7 @@ namespace AzureWebFarm.Tests.Services
         {
             using (var serverManager = new ServerManager())
             {
-                return serverManager.Sites.Where(s => s.Name != IISManager.RoleWebSiteName).ToList();
+                return serverManager.Sites.Where(s => s.Name != RoleWebsiteName).ToList();
             }
         }
 

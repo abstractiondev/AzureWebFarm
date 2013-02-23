@@ -6,52 +6,36 @@ using System.Linq;
 using System.Threading;
 using AzureToolkit;
 using AzureWebFarm.Entities;
-using AzureWebFarm.Extensions;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
 using Microsoft.Web.Administration;
 using Microsoft.Web.Deployment;
 using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Services
 {
     public class SyncService
     {
-        private readonly Func<bool> _syncEnabled;
-
         #region Setup / Constructor
 
-        private readonly WebSiteRepository _sitesRepository;
-        private readonly SyncStatusRepository _syncStatusRepository;
+        private readonly IWebSiteRepository _sitesRepository;
+        private readonly ISyncStatusRepository _syncStatusRepository;
+        private readonly CloudBlobContainer _container;
 
         private readonly string _localSitesPath;
         private readonly string _localTempPath;
         private readonly IEnumerable<string> _directoriesToExclude;
         private readonly IEnumerable<string> _sitesToExclude;
 
-        private readonly CloudBlobContainer _container;
-
         private readonly IDictionary<string, FileEntry> _entries;
         private readonly Dictionary<string, DateTime> _siteDeployTimes;
 
+        private readonly Func<bool> _syncEnabled;
+
         public static int SyncWait = 30;
 
-        public SyncService(string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, string storageSettingName, Func<bool> syncEnabled)
-            : this (
-                new WebSiteRepository(new AzureStorageFactory(CloudStorageAccount.FromConfigurationSetting(storageSettingName))),
-                new SyncStatusRepository(storageSettingName),
-                CloudStorageAccount.FromConfigurationSetting(storageSettingName),
-                localSitesPath,
-                localTempPath,
-                directoriesToExclude,
-                new string[] {},
-                syncEnabled
-            )
-        {}
-
-        public SyncService(WebSiteRepository sitesRepository, SyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled)
+        public SyncService(IWebSiteRepository sitesRepository, ISyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled)
         {
             _sitesRepository = sitesRepository;
             _syncStatusRepository = syncStatusRepository;
@@ -64,7 +48,7 @@ namespace AzureWebFarm.Services
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
 
-            var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue("SitesContainerName").ToLowerInvariant();
+            var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployPackagesBlobContainerName).ToLowerInvariant();
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
             _container.CreateIfNotExist();
         }
@@ -182,7 +166,7 @@ namespace AzureWebFarm.Services
         {
             var allSites = _sitesRepository.RetrieveWebSitesWithBindings();
 
-            if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment)
+            if (!AzureRoleEnvironment.IsComputeEmulatorEnvironment())
             {
                 var iisManager = new IISManager(_localSitesPath, _localTempPath, _syncStatusRepository);
                 iisManager.UpdateSites(allSites, _sitesToExclude.ToList());
@@ -268,8 +252,9 @@ namespace AzureWebFarm.Services
                         File.Delete(path);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Trace.TraceWarning("Error deleting unused file: {0}", e);
                 }
 
                 _entries.Remove(path);
@@ -339,8 +324,9 @@ namespace AzureWebFarm.Services
                     {
                         File.Delete(Path.Combine(_localTempPath, path));
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        Trace.TraceWarning("Error cleaning up unused directory: {0}", e);
                     }
                 }
 
@@ -363,7 +349,7 @@ namespace AzureWebFarm.Services
                 if (Directory.Exists(tempSitePath))
                 {
                     // Sync from package to IIS App using MSDeploy
-                    string packageFile = null;
+                    string packageFile;
                     try
                     {
                         packageFile = Directory.EnumerateFiles(tempSitePath).SingleOrDefault(f => f.ToLowerInvariant().EndsWith(".zip"));
@@ -431,7 +417,7 @@ namespace AzureWebFarm.Services
                 {
                     var siteName = site.Name.Replace("-", ".").ToLowerInvariant();
 
-                    if (!site.Name.Equals(IISManager.RoleWebSiteName, StringComparison.OrdinalIgnoreCase))
+                    if (!site.Name.Equals(AzureRoleEnvironment.RoleWebsiteName(), StringComparison.OrdinalIgnoreCase))
                     {
                         var sitePath = Path.Combine(_localSitesPath, siteName);
                         var siteLastModifiedTime = GetFolderLastModifiedTimeUtc(sitePath);
@@ -538,22 +524,13 @@ namespace AzureWebFarm.Services
             }
 
             // Remove Site name
-            string path = topPath.Substring(position + 1);
-
+            var path = topPath.Substring(position + 1);
             if (_directoriesToExclude.Contains(path, StringComparer.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            foreach (var toExclude in _directoriesToExclude)
-            {
-                if (path.StartsWith(toExclude + "/"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return _directoriesToExclude.Any(toExclude => path.StartsWith(toExclude + "/"));
         }
 
         private void UpdateSyncStatus(string webSiteName, SyncInstanceStatus status, Exception lastError = null)
@@ -561,7 +538,7 @@ namespace AzureWebFarm.Services
             var syncStatus = new SyncStatus
             {
                 SiteName = webSiteName,
-                RoleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName,
+                RoleInstanceId = AzureRoleEnvironment.CurrentRoleInstanceId(),
                 Status = status,
                 IsOnline = true,
                 LastError = lastError == null ? null : lastError.TraceInformation()

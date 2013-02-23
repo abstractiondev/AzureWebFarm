@@ -7,8 +7,10 @@ using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using AzureToolkit;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
+using AzureWebFarm.Storage;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -21,35 +23,36 @@ namespace AzureWebFarm
 
         public void OnStart()
         {
-            Trace.TraceInformation("WebRole.OnStart");
             try
             {
+                // Set-up diagnostics
+                if (!AzureRoleEnvironment.IsEmulated())
+                    DiagnosticsHelper.ConfigureDiagnosticMonitor();
+                Trace.TraceInformation("WebRole.OnStart");
+
                 ServicePointManager.DefaultConnectionLimit = 12;
 
                 // Allow Azure Storage to always use the latest version of a config setting
                 CloudStorageAccount.SetConfigurationSettingPublisher((configName, configSetter) =>
                     {
-                        if (!RoleEnvironment.IsAvailable)
+                        if (!AzureRoleEnvironment.IsAvailable())
                         {
                             configSetter(ConfigurationManager.AppSettings[configName]);
                             return;
                         }
 
-                        configSetter(RoleEnvironment.GetConfigurationSettingValue(configName));
+                        configSetter(AzureRoleEnvironment.GetConfigurationSettingValue(configName));
                         // Apply any changes to config when the config is edited http://msdn.microsoft.com/en-us/library/windowsazure/gg494982.aspx
-                        RoleEnvironment.Changed += (sender, arg) =>
+                        AzureRoleEnvironment.Changed += (sender, arg) =>
                         {
                             if (!arg.Changes.OfType<RoleEnvironmentConfigurationSettingChange>().Any(change => (change.ConfigurationSettingName == configName)))
                                 return;
 
-                            if (!configSetter(RoleEnvironment.GetConfigurationSettingValue(configName)))
-                                RoleEnvironment.RequestRecycle();
+                            if (!configSetter(AzureRoleEnvironment.GetConfigurationSettingValue(configName)))
+                                AzureRoleEnvironment.RequestRecycle();
                         };
                     }
                 );
-
-                if (RoleEnvironment.IsAvailable && !RoleEnvironment.IsEmulated)
-                    DiagnosticsHelper.ConfigureDiagnosticMonitor();
 
                 // Initialize local resources
                 var localSitesPath = GetLocalResourcePathAndSetAccess("Sites");
@@ -64,9 +67,11 @@ namespace AzureWebFarm
                 Environment.SetEnvironmentVariable("TEMP", localTempPath);
 
                 // Create the sync service and background worker
-                _syncService = new SyncService(localSitesPath, localTempPath, Constants.DirectoriesToExclude, Constants.StorageConnectionStringKey,
-                    () => Constants.IsSyncEnabled
-                );
+                var storageAccount = CloudStorageAccount.FromConfigurationSetting(Constants.StorageConnectionStringKey);
+                var storageFactory = new AzureStorageFactory(storageAccount);
+                var websiteRepository = new WebSiteRepository(storageFactory);
+                var syncStatusRepository = new SyncStatusRepository(storageFactory);
+                _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[]{}, () => Constants.IsSyncEnabled);
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath);
 
                 // Subscribe the background worker to relevant events in the sync service
@@ -85,17 +90,12 @@ namespace AzureWebFarm
             }
         }
 
-        // ReSharper disable FunctionNeverReturns
         public void Run()
         {
             try
             {
                 Trace.TraceInformation("WebRole.Run");
                 _syncService.SyncForever(() => Constants.SyncInterval);
-                while (true)
-                {
-                    Thread.Sleep(10000);
-                }
             }
             catch (Exception e)
             {
@@ -104,15 +104,13 @@ namespace AzureWebFarm
                 throw;
             }
         }
-        // ReSharper restore FunctionNeverReturns
 
         public void OnStop()
         {
             Trace.TraceInformation("WebRole.OnStop");
 
             // Set the sites as not synced for this instance
-            var roleInstanceId = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName;
-            _syncService.UpdateAllSitesSyncStatus(roleInstanceId, false);
+            _syncService.UpdateAllSitesSyncStatus(AzureRoleEnvironment.CurrentRoleInstanceId(), false);
 
             // http://blogs.msdn.com/b/windowsazure/archive/2013/01/14/the-right-way-to-handle-azure-onstop-events.aspx
             var pcrc = new PerformanceCounter("ASP.NET", "Requests Current", "");
@@ -128,7 +126,7 @@ namespace AzureWebFarm
         
         private static string GetLocalResourcePathAndSetAccess(string localResourceName)
         {
-            var resourcePath = RoleEnvironment.GetLocalResource(localResourceName).RootPath.TrimEnd('\\');
+            var resourcePath = AzureRoleEnvironment.GetLocalResource(localResourceName).RootPath.TrimEnd('\\');
 
             var localDataSec = Directory.GetAccessControl(resourcePath);
             localDataSec.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));

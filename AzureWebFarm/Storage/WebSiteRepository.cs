@@ -7,7 +7,28 @@ using AzureWebFarm.Extensions;
 
 namespace AzureWebFarm.Storage
 {
-    public class WebSiteRepository
+    public interface IWebSiteRepository
+    {
+        void CreateWebSite(WebSite webSite);
+        void CreateWebSiteWithBinding(WebSite webSite, Binding binding);
+        void AddBindingToWebSite(Guid webSiteId, Binding binding);
+        void RemoveBinding(Guid bindingId);
+        void EditBinding(Binding binding);
+        void UpdateWebSite(WebSite webSite);
+        void UpdateBinding(Binding binding);
+        void RemoveWebSite(Guid webSiteId);
+        WebSite RetrieveWebSite(Guid webSiteId);
+        Binding RetrieveBinding(Guid bindingId);
+        WebSite RetrieveWebSiteWithBindings(Guid webSiteId);
+        IList<Binding> RetrieveWebSiteBindings(Guid webSiteId);
+        IList<Binding> RetrieveCertificateBindings(string certificateHash);
+        IList<Binding> RetrieveBindingsForPort(int port);
+        void AddBindingToWebSite(WebSite webSite, Binding binding);
+        IList<WebSite> RetrieveWebSites();
+        IList<WebSite> RetrieveWebSitesWithBindings();
+    }
+
+    public class WebSiteRepository : IWebSiteRepository
     {
         private readonly IAzureTable<BindingRow> _bindingTable;
         private readonly IAzureTable<WebSiteRow> _webSiteTable;

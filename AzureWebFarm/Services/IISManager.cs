@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AzureToolkit;
 using AzureWebFarm.Entities;
-using AzureWebFarm.Extensions;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Storage;
 using Microsoft.Web.Administration;
@@ -19,13 +18,11 @@ namespace AzureWebFarm.Services
 {
     public class IISManager
     {
-        private readonly SyncStatusRepository _syncStatusRepository;
+        private readonly ISyncStatusRepository _syncStatusRepository;
         private readonly string _localSitesPath;
         private readonly string _tempSitesPath;
 
-        public static string RoleWebSiteName = RoleEnvironment.IsAvailable ? RoleEnvironment.CurrentRoleInstance.Id + "_" + "Web" : "Default Web Site";
-
-        public IISManager(string localSitesPath, string tempSitesPath, SyncStatusRepository syncStatusRepository)
+        public IISManager(string localSitesPath, string tempSitesPath, ISyncStatusRepository syncStatusRepository)
         {
             _syncStatusRepository = syncStatusRepository;
             _localSitesPath = localSitesPath;
@@ -48,7 +45,7 @@ namespace AzureWebFarm.Services
                     var name = iisSite.Name.ToLowerInvariant();
 
                     // Never delete "webRoleSiteName", which is the website for this web role
-                    if (!name.Equals(RoleWebSiteName, StringComparison.OrdinalIgnoreCase) &&
+                    if (!name.Equals(AzureRoleEnvironment.RoleWebsiteName(), StringComparison.OrdinalIgnoreCase) &&
                         !sites.Select(s => s.Name.ToLowerInvariant()).Contains(name) &&
                         sitesToIgnore.All(s => name != s.ToLowerInvariant()))
                     {
@@ -267,7 +264,7 @@ namespace AzureWebFarm.Services
         private static void UpdateApplications(WebSite site, ServerManager serverManager, string siteName, string sitePath, ApplicationPool appPool)
         {
             var iisSites = serverManager.Sites;
-            var adminSite = iisSites[RoleWebSiteName];
+            var adminSite = iisSites[AzureRoleEnvironment.RoleWebsiteName()];
 
             var testApplication = adminSite.Applications.FirstOrDefault(
                 app => app.Path.EndsWith("/test/" + siteName, StringComparison.OrdinalIgnoreCase));
@@ -324,7 +321,7 @@ namespace AzureWebFarm.Services
 
         private static void RemoveApplications(SiteCollection iisSites, string siteName)
         {
-            var adminSite = iisSites[RoleWebSiteName];
+            var adminSite = iisSites[AzureRoleEnvironment.RoleWebsiteName()];
 
             var applicationsToRemove = from app in adminSite.Applications
                                        where app.Path.EndsWith("/test/" + siteName, StringComparison.OrdinalIgnoreCase) ||

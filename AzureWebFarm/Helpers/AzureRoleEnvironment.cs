@@ -1,20 +1,33 @@
 ﻿using System;
+using System.Configuration;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace AzureWebFarm.Helpers
 {
-    public static class AzureRoleEnvironment
+    internal static class AzureRoleEnvironment
     {
-        public static Func<string> DeploymentId = () => RoleEnvironment.DeploymentId;
-        public static Func<string> CurrentRoleInstanceId = () => RoleEnvironment.CurrentRoleInstance.Id;
-        public static Func<string, string> GetConfigurationSettingValue = RoleEnvironment.GetConfigurationSettingValue;
-
-        public static bool IsComputeEmulatorEnvironment
+        static AzureRoleEnvironment()
         {
-            get
-            {
-                return RoleEnvironment.IsAvailable && RoleEnvironment.DeploymentId.StartsWith("deployment", StringComparison.OrdinalIgnoreCase);
-            }
+            RoleEnvironment.Changed += OnChanged;
+        }
+
+        public static Func<bool> IsAvailable = () => RoleEnvironment.IsAvailable;
+        public static Func<string> DeploymentId = () => RoleEnvironment.DeploymentId;
+        public static Func<string> CurrentRoleInstanceId = () => IsAvailable() ? RoleEnvironment.CurrentRoleInstance.Id : Environment.MachineName;
+        public static Func<string, string> GetConfigurationSettingValue = key => IsAvailable() ? RoleEnvironment.GetConfigurationSettingValue(key) : ConfigurationManager.AppSettings[key];
+        public static Func<string> RoleWebsiteName = () => IsAvailable() ? CurrentRoleInstanceId() + "_" + "Web" : "Default Web Site";
+        public static Func<bool> IsComputeEmulatorEnvironment = () => IsAvailable() && DeploymentId().StartsWith("deployment", StringComparison.OrdinalIgnoreCase);
+        public static Func<bool> IsEmulated = () => IsAvailable() && RoleEnvironment.IsEmulated;
+        public static Action RequestRecycle = () => RoleEnvironment.RequestRecycle();
+        public static Func<string, LocalResource> GetLocalResource = resourceName => RoleEnvironment.GetLocalResource(resourceName);
+
+        public static event EventHandler<RoleEnvironmentChangedEventArgs> Changed;
+
+        public static void OnChanged(object caller, RoleEnvironmentChangedEventArgs args)
+        {
+            var handler = Changed;
+            if (handler != null)
+                handler(caller, args);
         }
     }
 }

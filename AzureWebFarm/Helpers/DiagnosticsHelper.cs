@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
-using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Helpers
 {
     public class DiagnosticsHelper
     {
-        private const string ConfigurationSettingName = "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString";
-
         // Core references from here 
         /// <summary>
         /// Logs exceptions to blob storage (useful for logging exceptions without delay before role crashes).
@@ -20,12 +17,12 @@ namespace AzureWebFarm.Helpers
         /// <param name="ex">The exception to log to blob storage</param>
         public static void WriteExceptionToBlobStorage(Exception ex)
         {
-            var storageAccount = CloudStorageAccount.Parse(RoleEnvironment.GetConfigurationSettingValue(ConfigurationSettingName));
+            var storageAccount = CloudStorageAccount.Parse(AzureRoleEnvironment.GetConfigurationSettingValue(Constants.DiagnosticsConnectionStringKey));
 
             var container = storageAccount.CreateCloudBlobClient().GetContainerReference("exceptions");
             container.CreateIfNotExist();
 
-            var blob = container.GetBlobReference(string.Format("exception-{0}-{1}.log", RoleEnvironment.CurrentRoleInstance.Id, DateTime.UtcNow.Ticks));
+            var blob = container.GetBlobReference(string.Format("exception-{0}-{1}.log", AzureRoleEnvironment.CurrentRoleInstanceId, DateTime.UtcNow.Ticks));
             blob.UploadText(ex.ToString());
         }
 
@@ -76,7 +73,7 @@ namespace AzureWebFarm.Helpers
             config.PerformanceCounters.ScheduledTransferPeriod = transferPeriod;
             config.PerformanceCounters.BufferQuotaInMB = bufferQuotaInMb;
 
-            DiagnosticMonitor.Start(ConfigurationSettingName, config);
+            DiagnosticMonitor.Start(Constants.DiagnosticsConnectionStringKey, config);
         }
     }
 }
