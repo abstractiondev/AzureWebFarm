@@ -113,18 +113,12 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
-    <Content Include="Startup\Microsoft.Web.Deployment.dll">
+    <None Include="Startup\Microsoft.Web.PlatformInstaller.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Startup\Microsoft.Web.PlatformInstaller.dll">
+    </None>
+    <None Include="Startup\WebpiCmd.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Startup\Microsoft.Web.PlatformInstaller.UI.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Startup\WebpiCmdLine.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -139,10 +133,9 @@
     <None Include="Startup\EnableRemoteManagement.reg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Startup\license.rtf" />
-    <Content Include="Startup\Windows6.1-KB2618982-x64.msu">
+    <None Include="Startup\license.rtf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureWebFarm\AzureWebFarm.csproj">

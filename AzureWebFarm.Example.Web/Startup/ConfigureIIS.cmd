@@ -15,9 +15,6 @@ set /a count+=1
 echo %count% > retries.txt
 if %count% GEQ 3 goto Exit
 
-echo "Installing hotfix for memory leak in web accelerator roles" >> startup.log
-"%~dp0Windows6.1-KB2618982-x64.msu" /quiet /norestart >> startup.log 2>> starterror.log
-
 echo Installing Web-Mgmt-Service... >> startup.log
 if exist "%windir%\system32\ServerManagerCmd.exe" "%windir%\system32\ServerManagerCmd.exe" -install Web-Mgmt-Service  >> startup.log 2>> starterror.log
 
@@ -32,8 +29,9 @@ md "%~dp0appdata" >> startup.log 2>> starterror.log
 
 reg add "hku\.default\software\microsoft\windows\currentversion\explorer\user shell folders" /v "Local AppData" /t REG_EXPAND_SZ /d "%~dp0appdata" /f >> startup.log 2>> starterror.log
 
+
 echo Installing WebDeploy... >> startup.log
-"%~dp0Webpicmdline.exe" /products: WDeployNoSMO,PHP53,MVC3 /log:webpi.log /AcceptEula >> startup.log 2>> starterror.log
+"%~dp0Webpicmd.exe" /Install /Products:WDeployPS /log:webpi.log /AcceptEula >> startup.log 2>> starterror.log
 
 reg add "hku\.default\software\microsoft\windows\currentversion\explorer\user shell folders" /v "Local AppData" /t REG_EXPAND_SZ /d %%USERPROFILE%%\AppData\Local /f >> startup.log 2>> starterror.log
 

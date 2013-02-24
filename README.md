@@ -89,6 +89,7 @@ If you would like to contribute to this project then feel free to communicate wi
 ## Changelog ##
 
 ### Version 0.9.2.X ###
+* Note: Breaking changes are noted in the `BREAKING_CHANGES.md` file
 * If a `web.config` file is included with a background worker application then it will no longer cause an exception in the web farm and in fact will not be overwitten
 * Upgraded to Azure SDK 1.8
 * Added missing HTTP certificate config in the example cloud project config files
@@ -99,6 +100,7 @@ If you would like to contribute to this project then feel free to communicate wi
 * Added configurable logging via Castle.Core
 * Removed dependency on Azure Storage within uncaught code called from OnRun() - this means that the web farm should not go down if there is an Azure Storage outage
 * Added configuration setting to allow for syncing to be disabled without needing to redeploy the farm
+* Changed the example config files to use Windows Server 2012 - if you want to change your existing farm to use this too then check out the `BREAKING_CHANGES.md` file
 
 ### Version 0.9.1.2 ###
 * Logged the last error that occurred when updating sync status to error
