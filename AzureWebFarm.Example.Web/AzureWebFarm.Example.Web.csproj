@@ -113,6 +113,9 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
+    <None Include="Startup\ConfigureIIS.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Startup\Microsoft.Web.PlatformInstaller.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -128,9 +131,6 @@
     <Content Include="packages.config" />
     <Content Include="App.config" />
     <None Include="Startup\ConfigureIIS.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Startup\EnableRemoteManagement.reg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Startup\license.rtf">

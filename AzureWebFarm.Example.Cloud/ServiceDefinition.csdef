@@ -3,7 +3,13 @@
   <WebRole name="AzureWebFarm.Example.Web" vmsize="Small">
     <Runtime executionContext="elevated" />
     <Startup>
-      <Task commandLine="Startup\ConfigureIIS.cmd" executionContext="elevated" taskType="simple" />
+      <Task commandLine="Startup\ConfigureIIS.cmd" executionContext="elevated" taskType="simple">
+        <Environment>
+          <Variable name="EMULATED">
+            <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+          </Variable>
+        </Environment>
+      </Task>
     </Startup>
     <Sites>
       <Site name="Web">

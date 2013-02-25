@@ -22,6 +22,9 @@
     <iconUrl>
       https://raw.github.com/robdmoore/AzureWebFarm/master/logo.png
     </iconUrl>
+    <releaseNotes>
+      Please see https://github.com/robdmoore/AzureWebFarm/blob/master/BREAKING_CHANGES.md for any breaking changes.
+    </releaseNotes>
     <tags>
       azure, iis, web farm, msdeploy, web deploy, web role
     </tags>
