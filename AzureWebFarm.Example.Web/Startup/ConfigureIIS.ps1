@@ -6,7 +6,8 @@ try
 	Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\WebManagement\Server -Name EnableRemoteManagement -Value 1
 	Set-Service -name WMSVC -StartupType Automatic
 
-	Webpicmd.exe /Install /Products:WDeployPS /log:webpi.log /AcceptEula
+	Add-WindowsFeature -Name Net-Framework-Core
+	.\Webpicmd.exe /Install /Products:WDeployPS /log:webpi.log /AcceptEula
 	Set-Service -name MSDEPSVC -StartupType Automatic
 
 	Start-service WMSVC
