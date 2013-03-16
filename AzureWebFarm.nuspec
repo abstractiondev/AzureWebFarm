@@ -34,7 +34,7 @@
     <dependencies>
       <dependency id="WindowsAzure.Storage" version="1.7" />
       <dependency id="AzureToolkit" version="2.4.10" />
-      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.7.0.3" />
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.8" />
       <dependency id="Castle.Core" version="3.2" />
     </dependencies>
     <frameworkAssemblies>
