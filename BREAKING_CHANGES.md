@@ -6,9 +6,21 @@ Version 1.9.2.X
 
 You need to add a new configuration setting to your `.cscfg` file:
 
-	<Setting name="SyncEnabled" value="true" />
+    <Setting name="SyncEnabled" value="true" />
 
 This is to allow for the ability to selectively disable syncing while the role is running. You might want to do this if there is a problem with Azure Storage or you want to rotate your keys etc.
+
+You also need to change the Startup section of your `.csdef` file to:
+
+    <Startup>
+      <Task commandLine="Startup\ConfigureIIS.cmd" executionContext="elevated" taskType="simple">
+        <Environment>
+          <Variable name="EMULATED">
+            <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+          </Variable>
+        </Environment>
+      </Task>
+    </Startup>
 
 You also need to update your `web.config` and `app.config` files in your web project to redirect `Microsoft.WindowsAzure.Diagnostics` to 1.8.0.0.
 
