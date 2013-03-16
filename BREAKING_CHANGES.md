@@ -27,3 +27,5 @@ You also need to update your `web.config` and `app.config` files in your web pro
 You also need to upgrade to the Azure 1.8 SDK - this gives you a faster deployment time and support for Windows Server 2012.
 
 You also need to upgrade to Windows Server 2012; you can do this by simply changing the `osversion` attribute to the value `3` in your `.cscfg` file and read the following [http://blogs.msdn.com/b/avkashchauhan/archive/2012/10/29/using-windows-server-2012-os-with-windows-azure-cloud-services-and-net-4-5.aspx](http://blogs.msdn.com/b/avkashchauhan/archive/2012/10/29/using-windows-server-2012-os-with-windows-azure-cloud-services-and-net-4-5.aspx).
+
+todo: document the other breaking changes from the startup tasks change
