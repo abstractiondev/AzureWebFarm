@@ -106,15 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
-    <None Include="Startup\ConfigureIIS.ps1">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Startup\Microsoft.Web.PlatformInstaller.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Startup\WebpiCmd.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -125,12 +116,6 @@
     <Content Include="App.config">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Startup\ConfigureIIS.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Startup\license.rtf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AzureWebFarm\AzureWebFarm.csproj">
