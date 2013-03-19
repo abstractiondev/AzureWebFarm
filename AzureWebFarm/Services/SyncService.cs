@@ -96,7 +96,7 @@ namespace AzureWebFarm.Services
                     lastHeartbeat = currentTime;
                 }
 
-                if (!_syncEnabled())
+                if (_syncEnabled())
                 {
                     SyncOnce();
                 }
