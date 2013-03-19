@@ -92,7 +92,7 @@ namespace AzureWebFarm.Services
                 var currentTime = DateTime.Now;
                 if ((currentTime - lastHeartbeat).Minutes > 15)
                 {
-                    _logger.DebugFormat("*heartbeat*; synchronization is {0}.", _syncEnabled() ? "paused" : "active");
+                    _logger.DebugFormat("*heartbeat*; synchronization is {0}.", _syncEnabled() ? "active" : "paused");
                     lastHeartbeat = currentTime;
                 }
 
