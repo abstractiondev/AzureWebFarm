@@ -148,7 +148,6 @@ namespace AzureWebFarm.Services
 
         public bool Exists()
         {
-            Trace.WriteLine(string.Format("Exe check at {0} returned {1}", GetOriginalExePath(), File.Exists(GetOriginalExePath())));
             return File.Exists(GetOriginalExePath());
         }
 
