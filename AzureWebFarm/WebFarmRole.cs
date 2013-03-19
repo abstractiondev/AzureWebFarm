@@ -130,7 +130,7 @@ namespace AzureWebFarm
             while (true)
             {
                 var rc = pcrc.NextValue();
-                _logger.InfoFormat("ASP.NET Requests Current = {0}", rc);
+                _logger.InfoFormat("ASP.NET Requests Current = {0}, permitting role exit.", rc);
                 if (rc <= 0)
                     break;
                 Thread.Sleep(TimeSpan.FromSeconds(1));
