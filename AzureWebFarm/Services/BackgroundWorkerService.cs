@@ -16,12 +16,12 @@ namespace AzureWebFarm.Services
         private readonly ExecutableFinder _executableFinder;
         private ILogger _logger;
 
-        public BackgroundWorkerService(string sitesPath, string executablePath, ILoggerFactory loggerFactory)
+        public BackgroundWorkerService(string sitesPath, string executablePath, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
             _executablePath = executablePath;
             _executables = new Dictionary<string, List<Executable>>();
             _executableFinder = new ExecutableFinder(sitesPath);
-            _logger = loggerFactory.Create(GetType(), LoggerLevel.Debug);
+            _logger = loggerFactory.Create(GetType(), logLevel);
         }
 
         public void Update(string siteName)

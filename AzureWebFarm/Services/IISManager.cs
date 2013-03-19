@@ -22,12 +22,12 @@ namespace AzureWebFarm.Services
         private readonly string _tempSitesPath;
         private readonly ILogger _logger;
 
-        public IISManager(string localSitesPath, string tempSitesPath, ISyncStatusRepository syncStatusRepository, ILoggerFactory loggerFactory)
+        public IISManager(string localSitesPath, string tempSitesPath, ISyncStatusRepository syncStatusRepository, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
             _syncStatusRepository = syncStatusRepository;
             _localSitesPath = localSitesPath;
             _tempSitesPath = tempSitesPath;
-            _logger = loggerFactory.Create(GetType());
+            _logger = loggerFactory.Create(GetType(), logLevel);
         }
 
         public void UpdateSites(IEnumerable<WebSite> sites, List<string> sitesToIgnore = null)

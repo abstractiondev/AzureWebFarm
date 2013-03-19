@@ -38,7 +38,7 @@ namespace AzureWebFarm.Services
         public static int SyncWait = 30;
         private readonly ILogger _logger;
 
-        public SyncService(IWebSiteRepository sitesRepository, ISyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled, IISManager iisManager, ILoggerFactory loggerFactory)
+        public SyncService(IWebSiteRepository sitesRepository, ISyncStatusRepository syncStatusRepository, CloudStorageAccount storageAccount, string localSitesPath, string localTempPath, IEnumerable<string> directoriesToExclude, IEnumerable<string> sitesToExclude, Func<bool> syncEnabled, IISManager iisManager, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
             _sitesRepository = sitesRepository;
             _syncStatusRepository = syncStatusRepository;
@@ -51,7 +51,7 @@ namespace AzureWebFarm.Services
             _iisManager = iisManager;
             _entries = new Dictionary<string, FileEntry>();
             _siteDeployTimes = new Dictionary<string, DateTime>();
-            _logger = loggerFactory.Create(GetType());
+            _logger = loggerFactory.Create(GetType(), logLevel);
 
             var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployPackagesBlobContainerName).ToLowerInvariant();
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);

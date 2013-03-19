@@ -22,15 +22,17 @@ namespace AzureWebFarm
         private readonly ILoggerFactory _logFactory;
         private SyncService _syncService;
         private BackgroundWorkerService _backgroundWorker;
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private readonly LoggerLevel _logLevel;
 
-        public WebFarmRole(ILoggerFactory logFactory = null)
+        public WebFarmRole(ILoggerFactory logFactory = null, LoggerLevel? loggerLevel = null)
         {
             // If a log factory isn't specified use Trace, which will end up in diagnostics
             if (logFactory == null)
                 logFactory = new TraceLoggerFactory();
             _logFactory = logFactory;
-            _logger = logFactory.Create(GetType());
+            _logLevel = loggerLevel ?? LoggerLevel.Debug;
+            _logger = logFactory.Create(GetType(), _logLevel);
         }
 
         public void OnStart()
@@ -83,9 +85,9 @@ namespace AzureWebFarm
                 var storageFactory = new AzureStorageFactory(storageAccount);
                 var websiteRepository = new WebSiteRepository(storageFactory);
                 var syncStatusRepository = new SyncStatusRepository(storageFactory);
-                var iisManager = new IISManager(localSitesPath, localTempPath, syncStatusRepository, _logFactory);
-                _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[]{}, () => Constants.IsSyncEnabled, iisManager, _logFactory);
-                _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath, _logFactory);
+                var iisManager = new IISManager(localSitesPath, localTempPath, syncStatusRepository, _logFactory, _logLevel);
+                _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[] { }, () => Constants.IsSyncEnabled, iisManager, _logFactory, _logLevel);
+                _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath, _logFactory, _logLevel);
 
                 // Subscribe the background worker to relevant events in the sync service
                 _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
