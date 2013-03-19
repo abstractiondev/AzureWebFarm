@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Castle.Core.Logging;
 
 namespace AzureWebFarm.Services
 {
@@ -13,12 +14,14 @@ namespace AzureWebFarm.Services
         private readonly string _executablePath;
         private readonly Dictionary<string, List<Executable>> _executables;
         private readonly ExecutableFinder _executableFinder;
+        private ILogger _logger;
 
-        public BackgroundWorkerService(string sitesPath, string executablePath)
+        public BackgroundWorkerService(string sitesPath, string executablePath, ILoggerFactory loggerFactory)
         {
             _executablePath = executablePath;
             _executables = new Dictionary<string, List<Executable>>();
             _executableFinder = new ExecutableFinder(sitesPath);
+            _logger = loggerFactory.Create(GetType(), LoggerLevel.Debug);
         }
 
         public void Update(string siteName)
@@ -31,12 +34,22 @@ namespace AzureWebFarm.Services
                 DisposeSite(siteName);
                 _executables[siteName] = new List<Executable>();
 
-                _executables[siteName].AddRange(_executableFinder.FindExecutables(siteName));
+                var findExecutables = _executableFinder.FindExecutables(siteName).ToList();
+
+                _logger.DebugFormat("{0} background workers found on {1}", findExecutables.Count(), siteName);
+
+                _executables[siteName].AddRange(findExecutables);
 
                 foreach (var e in _executables[siteName])
                 {
-                    e.Copy(Path.Combine(_executablePath, siteName));
+                    var targetPath = Path.Combine(_executablePath, siteName);
+
+                    _logger.DebugFormat("Executing background worker at {0} for {1}", _executablePath, siteName);
+
+                    e.Copy(targetPath);
                     e.Execute();
+
+                    _logger.DebugFormat("Worker Executed at {0}", targetPath);
                 }
             }
         }
@@ -135,6 +148,7 @@ namespace AzureWebFarm.Services
 
         public bool Exists()
         {
+            Trace.WriteLine(string.Format("Exe check at {0} returned {1}", GetOriginalExePath(), File.Exists(GetOriginalExePath())));
             return File.Exists(GetOriginalExePath());
         }
 
