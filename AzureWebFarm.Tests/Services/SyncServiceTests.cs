@@ -90,8 +90,9 @@ namespace AzureWebFarm.Tests.Services
                 new string[] { },
                 _excludedSites,
                 () => true,
-                new IISManager(_sitePath, _tempPath, new SyncStatusRepository(factory), new NullLogFactory()),
-                new NullLogFactory()
+                new IISManager(_sitePath, _tempPath, new SyncStatusRepository(factory), new NullLogFactory(), LoggerLevel.Debug),
+                new NullLogFactory(),
+                LoggerLevel.Debug
             );
         }
 

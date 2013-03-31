@@ -152,7 +152,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -225,7 +225,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -293,7 +293,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -352,7 +352,7 @@ namespace AzureWebFarm.Tests.Services
                 }
             };
 
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory());
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, null, new NullLogFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);

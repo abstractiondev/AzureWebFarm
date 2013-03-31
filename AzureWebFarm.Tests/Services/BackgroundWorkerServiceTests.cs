@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using AzureWebFarm.Services;
+using Castle.Core.Logging;
 using NUnit.Framework;
 
 namespace AzureWebFarm.Tests.Services
@@ -41,7 +42,7 @@ namespace AzureWebFarm.Tests.Services
             File.WriteAllText(Path.Combine(SitesPath, SiteName, "web.config"), WebConfigContents);
             File.WriteAllText(Path.Combine(SitesPath, SiteName2, "web.config"), WebConfig2Contents);
 
-            _service = new BackgroundWorkerService(SitesPath, ExePath);
+            _service = new BackgroundWorkerService(SitesPath, ExePath, new NullLogFactory(), LoggerLevel.Debug);
         }
 
         [TearDown]
