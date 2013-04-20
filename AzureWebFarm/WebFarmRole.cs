@@ -24,6 +24,7 @@ namespace AzureWebFarm
         private BackgroundWorkerService _backgroundWorker;
         private readonly ILogger _logger;
         private readonly LoggerLevel _logLevel;
+        private WebDeployService _webDeployService;
 
         public WebFarmRole(ILoggerFactory logFactory = null, LoggerLevel? loggerLevel = null)
         {
@@ -88,6 +89,7 @@ namespace AzureWebFarm
                 var iisManager = new IISManager(localSitesPath, localTempPath, syncStatusRepository, _logFactory, _logLevel);
                 _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[] { }, () => Constants.IsSyncEnabled, iisManager, _logFactory, _logLevel);
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath, _logFactory, _logLevel);
+                _webDeployService = new WebDeployService(storageAccount, _logFactory, _logLevel);
 
                 // Subscribe the background worker to relevant events in the sync service
                 _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
@@ -96,6 +98,9 @@ namespace AzureWebFarm
 
                 // Update the sites with initial state
                 _syncService.Start();
+                
+                // Ensure that only one instance at a time handles web deploy connections behind the load balancer
+                _webDeployService.Start();
             }
             catch (Exception e)
             {
@@ -123,6 +128,8 @@ namespace AzureWebFarm
         public void OnStop()
         {
             _logger.Info("WebRole.OnStop called");
+
+            _webDeployService.Stop();
 
             // Set the sites as not synced for this instance
             _syncService.UpdateAllSitesSyncStatus(AzureRoleEnvironment.CurrentRoleInstanceId(), false);

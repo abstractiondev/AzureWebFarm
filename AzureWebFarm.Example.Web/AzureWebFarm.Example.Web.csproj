@@ -105,6 +105,11 @@
     <Compile Include="WebRole.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Probe.aspx.cs">
+      <DependentUpon>Probe.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Content Include="Probe.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>

@@ -9,6 +9,7 @@ using AzureWebFarm.Entities;
 using AzureWebFarm.Helpers;
 using AzureWebFarm.Services;
 using AzureWebFarm.Storage;
+using AzureWebFarm.Tests.Services.Base;
 using Castle.Core.Logging;
 using Microsoft.Web.Administration;
 using Microsoft.WindowsAzure;
@@ -19,7 +20,7 @@ using Binding = AzureWebFarm.Entities.Binding;
 namespace AzureWebFarm.Tests.Services
 {
     [TestFixture]
-    public class SyncServiceShould
+    public class SyncServiceShould : ServiceTestBase
     {
         #region Setup
 
@@ -34,25 +35,16 @@ namespace AzureWebFarm.Tests.Services
         private IAzureTable<WebSiteRow> _webSiteTable;
         private IAzureTable<BindingRow> _bindingTable;
         private List<string> _excludedSites;
-
-        public string GetConfigValue(string setting)
-        {
-            switch (setting)
-            {
-                case "SitesContainerName":
-                    return "sites";
-            }
-            return string.Empty;
-        }
-
+        
         [TestFixtureSetUp]
-        public void FixtureSetup()
+        public override void FixtureSetup()
         {
+            base.FixtureSetup();
+
             // RoleEnvironment
             AzureRoleEnvironment.DeploymentId = () => "DEPLOYMENTID";
             AzureRoleEnvironment.CurrentRoleInstanceId = () => "ROLEINSTANCEID";
-            AzureRoleEnvironment.GetConfigurationSettingValue = GetConfigValue;
-
+            
             // File Resource Paths
             var basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase.Replace("file:///", ""));
             _sitePath = Path.Combine(basePath, "Sites");
