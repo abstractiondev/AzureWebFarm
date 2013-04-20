@@ -84,7 +84,7 @@ If you do this then you probably should modify the `AddBackgroundWorker` task ab
 Note: If you include a `web.config` file in the background worker folder within the web deploy package then it will not be overwritten by the `web.config` file deployed to the website.
 
 ## Contributions ##
-If you would like to contribute to this project then feel free to communicate with myself via Twitter [@robdmoore](http://twitter.com/robdmoore) or alternatively send a pull request.
+If you would like to contribute to this project then feel free to communicate with us via Twitter [@robdmoore](http://twitter.com/robdmoore) / [@mdaviesnet](http://twitter.com/mdaviesnet) or alternatively send a pull request.
 
 ## Changelog ##
 
@@ -100,6 +100,7 @@ If you would like to contribute to this project then feel free to communicate wi
 * Added configurable logging via Castle.Core
 * Removed dependency on Azure Storage within uncaught code called from OnRun() - this means that the web farm should not go down if there is an Azure Storage outage
 * Added configuration setting to allow for syncing to be disabled without needing to redeploy the farm
+* Added a configuration setting and functionality to ensure all web deploy connections get funneled to a single role instance. This resolves an issue when using MsDeploy v3+ on the server (different connections in a deployment go to different instances, causing a Root Element is Missing XML error)
 * Changed the example config files to use Windows Server 2012 - if you want to change your existing farm to use this too then check out the `BREAKING_CHANGES.md` file
 
 ### Version 0.9.1.2 ###
