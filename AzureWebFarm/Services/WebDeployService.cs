@@ -40,11 +40,14 @@ namespace AzureWebFarm.Services
 
                             while (lease.HasLease)
                             {
-                                leaseId = lease.LeaseId;
-                                _logger.DebugFormat("This instance ({0}) has the lease, updating blob with the instance ID.", AzureRoleEnvironment.CurrentRoleInstanceId());
-
-                                blob.Metadata["InstanceId"] = AzureRoleEnvironment.CurrentRoleInstanceId();
-                                blob.SetMetadata(lease.LeaseId);
+                                if (leaseId != AzureRoleEnvironment.CurrentRoleInstanceId())
+                                {
+                                    _logger.DebugFormat("This instance ({0}) has the lease, updating blob with the instance ID.", AzureRoleEnvironment.CurrentRoleInstanceId());
+                                    leaseId = lease.LeaseId;
+                                    blob.Metadata["InstanceId"] = AzureRoleEnvironment.CurrentRoleInstanceId();
+                                    blob.SetMetadata(lease.LeaseId);
+                                }
+                                
                                 Thread.Sleep(TimeSpan.FromSeconds(10));
                             }
                             leaseId = null;

@@ -388,6 +388,7 @@ namespace AzureWebFarm.Services
                                 }
 
                                 UpdateSyncStatus(site, SyncInstanceStatus.Deployed);
+                                _logger.DebugFormat(string.Format("Calling OnSiteUpdated event for {0}...", site));
                                 OnSiteUpdated(site);
                                 _siteDeployTimes[site] = DateTime.UtcNow;
                             }
@@ -454,6 +455,7 @@ namespace AzureWebFarm.Services
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.Package, packageFile, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }
 
+                                _logger.DebugFormat(string.Format("Calling OnSiteUpdated event for {0}...", siteName));
                                 OnSiteUpdated(siteName);
                                 _siteDeployTimes[siteName] = DateTime.UtcNow;
                             }
