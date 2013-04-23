@@ -79,6 +79,9 @@
     <Compile Include="Entities\FileEntry.cs" />
     <Compile Include="Entities\SyncStatus.cs" />
     <Compile Include="Entities\WebSite.cs" />
+    <Compile Include="Helpers\AutoRenewLease.cs" />
+    <Compile Include="Helpers\LeaseBlobExtensions.cs" />
+    <Compile Include="Services\WebDeployService.cs" />
     <Compile Include="Storage\ModelExtensions.cs" />
     <Compile Include="Helpers\AzureRoleEnvironment.cs" />
     <Compile Include="Helpers\Constants.cs" />

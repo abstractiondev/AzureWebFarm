@@ -37,7 +37,7 @@ namespace AzureWebFarm.Tests.Services
         private List<string> _excludedSites;
         
         [TestFixtureSetUp]
-        public override void FixtureSetup()
+        protected override void FixtureSetup()
         {
             base.FixtureSetup();
 
