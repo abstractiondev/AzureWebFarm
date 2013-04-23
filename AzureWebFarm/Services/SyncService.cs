@@ -454,6 +454,7 @@ namespace AzureWebFarm.Services
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.Package, packageFile, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }
 
+                                OnSiteUpdated(siteName);
                                 _siteDeployTimes[siteName] = DateTime.UtcNow;
                             }
                             catch (Exception ex)
