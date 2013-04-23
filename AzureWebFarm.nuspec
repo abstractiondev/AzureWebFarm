@@ -54,9 +54,6 @@
     <file src="AzureWebFarm.Example.Web\Probe.aspx" target="content" />
     <file src="AzureWebFarm.Example.Web\Default.aspx" target="content" />
     <file src="AzureWebFarm.Example.Web\WebRole.cs" target="content" />
-    <file src="AzureWebFarm.Example.Web\Global.asax.cs" target="content" />
-    <file src="AzureWebFarm.Example.Web\Global.asax" target="content" />
-    <file src="AzureWebFarm.Example.Web\Startup\*.*" target="content\Startup" />
     <file src="AzureWebFarm.Example.Cloud\ServiceConfiguration.Cloud.cscfg" target="tools\ExampleConfigs" />
     <file src="AzureWebFarm.Example.Cloud\ServiceDefinition.csdef" target="tools\ExampleConfigs" />
     <file src="AzureWebFarm.AdminConsole\bin\Release\*.*" target="tools\AdminConsole" />
