@@ -25,16 +25,8 @@ namespace AzureWebFarm.Helpers
     /// </summary>
     public class AzureDiagnosticsLogger : LevelFilteredLogger
     {
-        private readonly TraceSource _traceSource;
-        public AzureDiagnosticsLogger(string name) : base(name)
-        {
-            _traceSource = new TraceSource("Default", MapSourceLevels(Level));
-        }
-
-        public AzureDiagnosticsLogger(string name, LoggerLevel level) : base(name, level)
-        {
-            _traceSource = new TraceSource("Default", MapSourceLevels(Level));
-        }
+        public AzureDiagnosticsLogger(string name) : base(name) {}
+        public AzureDiagnosticsLogger(string name, LoggerLevel level) : base(name, level) {}
 
         public override ILogger CreateChildLogger(string loggerName)
         {
@@ -43,46 +35,24 @@ namespace AzureWebFarm.Helpers
 
         protected override void Log(LoggerLevel loggerLevel, string loggerName, string message, Exception exception)
         {
-            if (exception == null)
-                _traceSource.TraceEvent(MapTraceEventType(loggerLevel), 0, "[{0}] {1}", loggerName, message);
-            else
-                _traceSource.TraceData(MapTraceEventType(loggerLevel), 0, (object) string.Format("[{0}] {1}", loggerName, message), exception);
-        }
-
-        private static SourceLevels MapSourceLevels(LoggerLevel level)
-        {
-            switch (level)
+            var logMessage = string.Format("[{0}] {1} {2}", loggerName, message, exception);
+            switch (loggerLevel)
             {
                 case LoggerLevel.Debug:
-                    return SourceLevels.Verbose;
+                    Trace.Write(logMessage);
+                    break;
                 case LoggerLevel.Info:
-                    return SourceLevels.Information;
+                    Trace.TraceInformation(logMessage);
+                    break;
                 case LoggerLevel.Warn:
-                    return SourceLevels.Warning;
+                    Trace.TraceWarning(logMessage);
+                    break;
                 case LoggerLevel.Error:
-                    return SourceLevels.Error;
+                    Trace.TraceError(logMessage);
+                    break;
                 case LoggerLevel.Fatal:
-                    return SourceLevels.Critical;
-            }
-            return SourceLevels.Off;
-        }
-
-        private static TraceEventType MapTraceEventType(LoggerLevel level)
-        {
-            switch (level)
-            {
-                case LoggerLevel.Fatal:
-                    return TraceEventType.Critical;
-                case LoggerLevel.Error:
-                    return TraceEventType.Error;
-                case LoggerLevel.Warn:
-                    return TraceEventType.Warning;
-                case LoggerLevel.Info:
-                    return TraceEventType.Information;
-                case LoggerLevel.Debug:
-                    return TraceEventType.Verbose;
-                default:
-                    return TraceEventType.Verbose;
+                    Trace.TraceError("Fatal: " + logMessage);
+                    break;
             }
         }
     }
