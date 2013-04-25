@@ -38,7 +38,7 @@ namespace AzureWebFarm.Helpers
             var containerReference = CloudStorageAccount.Parse(GetConfigurationSettingValue(Constants.StorageConnectionStringKey))
                 .CreateCloudBlobClient()
                 .GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
-            var blob = containerReference.GetBlockBlobReference("webdeploy-lease.blob");
+            var blob = containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
             blob.FetchAttributes();
             return blob.Metadata["InstanceId"];
         }

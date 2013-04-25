@@ -9,6 +9,7 @@ namespace AzureWebFarm.Helpers
         public const string StorageConnectionStringKey = "DataConnectionString";
         public const string WebDeployPackagesBlobContainerKey = "SitesContainerName";
         public const string WebDeployLeaseBlobContainerName = "webdeploylease";
+        public const string WebDeployBlobName = "webdeploy-lease.blob";
 
         public static bool IsSyncEnabled { get { return Convert.ToBoolean(Get("SyncEnabled")); } }
         public static IEnumerable<string> DirectoriesToExclude { get { return Get("DirectoriesToExclude").Split(';'); } }

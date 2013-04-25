@@ -19,7 +19,7 @@ namespace AzureWebFarm.Tests.Helpers
             var container = storageAccount.CreateCloudBlobClient().GetContainerReference("webdeploylease");
             container.CreateIfNotExist();
 
-            _blob = container.GetBlockBlobReference("webdeploy-lease.blob");
+            _blob = container.GetBlockBlobReference(Constants.WebDeployBlobName);
         }
 
         [Test]

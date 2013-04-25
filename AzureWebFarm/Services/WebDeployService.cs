@@ -33,7 +33,7 @@ namespace AzureWebFarm.Services
                 {
                     try
                     {
-                        var blob = _container.GetBlockBlobReference("webdeploy-lease.blob");
+                        var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
                         using (var lease = new AutoRenewLease(blob))
                         {
                             _logger.DebugFormat("Leasing thread checking...HasLease: {0}", lease.HasLease);
@@ -82,7 +82,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                var blob = _container.GetBlockBlobReference("webdeploy-lease.blob");
+                var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
                 blob.TryReleaseLease(leaseId);
                 blob.Metadata.Remove("InstanceId");
                 blob.SetMetadata();
