@@ -47,7 +47,11 @@ namespace AzureWebFarm.Helpers
             }
             catch (Exception ex)
             {
-                DiagnosticsHelper.WriteExceptionToBlobStorage(ex);
+                try
+                {
+                    DiagnosticsHelper.WriteExceptionToBlobStorage(ex);
+                }
+                catch(Exception) {}
 
                 var master = CurrentRoleInstanceId().EndsWith("_0") || CurrentRoleInstanceId().EndsWith(".0");
                 if (master)
