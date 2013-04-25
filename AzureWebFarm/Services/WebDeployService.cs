@@ -68,15 +68,29 @@ namespace AzureWebFarm.Services
         {
             if (_leaseThread != null)
             {
-                _leaseThread.Abort();
+                try
+                {
+                    _leaseThread.Abort();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("An error occured aborting the web deploy lease thread.", ex);
+                }
                 _leaseThread = null;
             }
             if (leaseId == null) return;
 
-            var blob = _container.GetBlockBlobReference("webdeploy-lease.blob");
-            blob.TryReleaseLease(leaseId);
-            blob.Metadata.Remove("InstanceId");
-            blob.SetMetadata();
+            try
+            {
+                var blob = _container.GetBlockBlobReference("webdeploy-lease.blob");
+                blob.TryReleaseLease(leaseId);
+                blob.Metadata.Remove("InstanceId");
+                blob.SetMetadata();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("An exception occured when attempting to clear the InstanceId from the web deploy lease metadata.", ex);
+            }
         }
     }
 }
