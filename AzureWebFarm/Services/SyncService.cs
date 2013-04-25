@@ -375,7 +375,7 @@ namespace AzureWebFarm.Services
                             {
                                 using (var deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.Package, packageFile))
                                 {
-                                    deploymentObject.SyncTo(DeploymentWellKnownProvider.DirPath, sitePath, new DeploymentBaseOptions(), new DeploymentSyncOptions());
+                                    deploymentObject.SyncTo(DeploymentWellKnownProvider.DirPath, sitePath, new DeploymentBaseOptions(), new DeploymentSyncOptions {UseChecksum = true});
                                 }
 
                                 UpdateSyncStatus(site, SyncInstanceStatus.Deployed);
