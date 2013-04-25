@@ -11,7 +11,7 @@ namespace AzureWebFarm.Example.Web
         {
             Response.StatusCode = AzureRoleEnvironment.HasWebDeployLease()
                 ? (int) HttpStatusCode.OK
-                : (int) HttpStatusCode.MethodNotAllowed;
+                : (int) HttpStatusCode.ServiceUnavailable;
         }
     }
 }
