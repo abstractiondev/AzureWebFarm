@@ -60,19 +60,12 @@ namespace AzureWebFarm.Services
         #endregion
 
         #region Public methods
-        public void UpdateAllSitesSyncStatus(string roleInstanceId, bool isOnline)
+        public void SetCurrentInstanceSitesOffline()
         {
-            foreach (var syncStatus in _syncStatusRepository.RetrieveSyncStatusByInstanceId(roleInstanceId))
+            foreach (var syncStatus in _syncStatusRepository.RetrieveSyncStatusByInstanceId(AzureRoleEnvironment.CurrentRoleInstanceId()))
             {
-                var newSyncStatus = new SyncStatus
-                {
-                    SiteName = syncStatus.SiteName,
-                    RoleInstanceId = roleInstanceId,
-                    Status = syncStatus.Status,
-                    IsOnline = isOnline
-                };
-
-                _syncStatusRepository.UpdateStatus(newSyncStatus);
+                syncStatus.IsOnline = false;
+                _syncStatusRepository.Update(syncStatus);
             }
         }
 
@@ -540,18 +533,9 @@ namespace AzureWebFarm.Services
 
         private void UpdateSyncStatus(string webSiteName, SyncInstanceStatus status, Exception lastError = null)
         {
-            var syncStatus = new SyncStatus
-            {
-                SiteName = webSiteName,
-                RoleInstanceId = AzureRoleEnvironment.CurrentRoleInstanceId(),
-                Status = status,
-                IsOnline = true,
-                LastError = lastError == null ? null : lastError.TraceInformation()
-            };
-
             try
             {
-                _syncStatusRepository.UpdateStatus(syncStatus);
+                _syncStatusRepository.UpdateStatus(webSiteName, status, lastError);
             }
             catch (Exception e)
             {

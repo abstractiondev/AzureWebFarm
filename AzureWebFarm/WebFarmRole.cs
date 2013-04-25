@@ -131,7 +131,7 @@ namespace AzureWebFarm
             _webDeployService.Stop();
 
             // Set the sites as not synced for this instance
-            _syncService.UpdateAllSitesSyncStatus(AzureRoleEnvironment.CurrentRoleInstanceId(), false);
+            _syncService.SetCurrentInstanceSitesOffline();
 
             // http://blogs.msdn.com/b/windowsazure/archive/2013/01/14/the-right-way-to-handle-azure-onstop-events.aspx
             var pcrc = new PerformanceCounter("ASP.NET", "Requests Current", "");
