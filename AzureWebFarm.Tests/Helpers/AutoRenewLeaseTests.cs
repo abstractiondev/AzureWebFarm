@@ -10,36 +10,54 @@ namespace AzureWebFarm.Tests.Helpers
     [TestFixture]
     public class AutoRenewLeaseShould
     {
-        private CloudBlobContainer _container;
+        private CloudBlockBlob _blob;
 
         [SetUp]
         public void Setup()
         {
             var storageAccount = CloudStorageAccount.DevelopmentStorageAccount;
-            _container = storageAccount.CreateCloudBlobClient().GetContainerReference("webdeploylease");
-            _container.CreateIfNotExist();
+            var container = storageAccount.CreateCloudBlobClient().GetContainerReference("webdeploylease");
+            container.CreateIfNotExist();
+
+            _blob = container.GetBlockBlobReference("webdeploy-lease.blob");
         }
 
         [Test]
-        public void Hold_lease_while_in_using_block()
+        public void Prevent_write_operations_without_lease_id()
         {
-            var blob = _container.GetBlockBlobReference("webdeploy-lease.blob");
-
-            using (var lease = new AutoRenewLease(blob, renewLeaseSeconds: 1, leaseLengthSeconds: 2))
+            using (new AutoRenewLease(_blob))
             {
-                // Inside a lease we cannot perform operations without the lease ID
-                Assert.Throws<StorageClientException>(blob.SetMetadata);
-                
-                // We should be able to perform this operation with the lease ID
-                blob.SetMetadata(lease.LeaseId);
-                
-                // Should still be leased 4 seconds later
-                Thread.Sleep(TimeSpan.FromSeconds(4));
-                Assert.Throws<StorageClientException>(blob.SetMetadata);
+                Assert.Throws<StorageClientException>(_blob.SetMetadata);
             }
+        }
 
-            // Should no longer be a lease on this blob
-            blob.SetMetadata();
+        [Test]
+        public void Allow_lease_operations_when_lease_id_provided()
+        {
+            using (var lease = new AutoRenewLease(_blob))
+            {
+                _blob.SetMetadata(lease.LeaseId);
+            }
+        }
+
+        [Test]
+        public void Renew_lease_past_initial_lease_length()
+        {
+            using (new AutoRenewLease(_blob, renewLeaseSeconds: 1, leaseLengthSeconds: 2))
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(4));
+                Assert.Throws<StorageClientException>(_blob.SetMetadata);
+            }
+        }
+
+        [Test]
+        public void Release_lease_automatically_after_using_block()
+        {
+            using (new AutoRenewLease(_blob))
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(3));
+            }
+            _blob.SetMetadata();
         }
     }
 }
