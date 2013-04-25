@@ -176,5 +176,13 @@ namespace AzureWebFarm.Tests.Services
             AssertAppWasRun(SiteName, 3, "2");
             AssertAppWasRun(SiteName2, 3, "2");
         }
+
+        [Test]
+        public void Do_nothing_if_no_bin_folder_present()
+        {
+            Directory.CreateDirectory(Path.Combine(SitesPath, "test"));
+
+            _service.Update("test");
+        }
     }
 }
