@@ -74,6 +74,7 @@ namespace AzureWebFarm.Helpers
             config.PerformanceCounters.BufferQuotaInMB = bufferQuotaInMb;
 
             DiagnosticMonitor.Start(Constants.DiagnosticsConnectionStringKey, config);
+            Trace.TraceInformation("Diagnostics configured.");
         }
     }
 }
