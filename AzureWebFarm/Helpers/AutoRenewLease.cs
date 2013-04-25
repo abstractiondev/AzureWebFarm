@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
+using Castle.Core.Logging;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Helpers
@@ -26,8 +27,9 @@ namespace AzureWebFarm.Helpers
             private set;
         }
 
-        public AutoRenewLease(CloudBlob blob, int renewLeaseSeconds = 40, int leaseLengthSeconds = 90)
+        public AutoRenewLease(ILoggerFactory loggerFactory, CloudBlob blob, int renewLeaseSeconds = 40, int leaseLengthSeconds = 90)
         {
+            var logger = loggerFactory.Create(GetType());
             var autoRenewLease = this;
             _blob = blob;
             blob.Container.CreateIfNotExist();
@@ -48,10 +50,18 @@ namespace AzureWebFarm.Helpers
                 return;
             _renewalThread = new Thread(() =>
             {
-                while (true)
+                try
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds(renewLeaseSeconds));
-                    blob.RenewLease(autoRenewLease.LeaseId);
+                    while (true)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(renewLeaseSeconds));
+                        blob.RenewLease(autoRenewLease.LeaseId);
+                    }
+                }
+                catch (Exception e)
+                {
+                    LeaseId = null; // Release the lease
+                    logger.Error("Error renewing blob lease", e);
                 }
             });
             _renewalThread.Start();
