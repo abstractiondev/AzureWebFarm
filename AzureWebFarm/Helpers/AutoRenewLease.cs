@@ -58,6 +58,7 @@ namespace AzureWebFarm.Helpers
                         blob.RenewLease(autoRenewLease.LeaseId);
                     }
                 }
+                catch(ThreadAbortException) {}
                 catch (Exception e)
                 {
                     LeaseId = null; // Release the lease
