@@ -184,6 +184,10 @@ namespace AzureWebFarm.Tests.Services
 
                 try
                 {
+                    // Arrange
+                    _syncService.PackageSitesToLocal(); // First time package sites to local is called it stored the modified date of the site
+                    File.WriteAllText(Path.Combine(_sitePath, website.Name, "synced_file.txt"), "synced");
+
                     // Act
                     _syncService.PackageSitesToLocal();
 

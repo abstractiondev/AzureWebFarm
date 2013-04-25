@@ -418,7 +418,7 @@ namespace AzureWebFarm.Services
 
                         if (!_siteDeployTimes.ContainsKey(siteName))
                         {
-                            _siteDeployTimes.Add(siteName, DateTime.MinValue);
+                            _siteDeployTimes.Add(siteName, siteLastModifiedTime);
                         }
 
                         _logger.DebugFormat("[IIS => Local Storage] - Site last modified time: '{0}'", siteLastModifiedTime);
