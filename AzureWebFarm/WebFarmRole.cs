@@ -41,8 +41,7 @@ namespace AzureWebFarm
             try
             {
                 // Set-up diagnostics
-                if (!AzureRoleEnvironment.IsEmulated())
-                    DiagnosticsHelper.ConfigureDiagnosticMonitor();
+                DiagnosticsHelper.ConfigureDiagnosticMonitor();
                 _logger.Info("WebRole.OnStart called");
 
                 ServicePointManager.DefaultConnectionLimit = 12;
