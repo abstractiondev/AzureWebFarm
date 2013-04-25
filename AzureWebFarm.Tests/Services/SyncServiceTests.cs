@@ -170,6 +170,33 @@ namespace AzureWebFarm.Tests.Services
         }
 
         [Test]
+        public void Update_iis_sites_from_table_storage_but_dont_sync_package_if_site_was_new()
+        {
+            using (var serverManager = new ServerManager())
+            {
+                // Arrange
+                var website = SetupWebsiteTest(serverManager);
+
+                try
+                {
+                    // Act
+                    _syncService.UpdateIISSitesFromTableStorage();
+                    _syncService.PackageSitesToLocal();
+                    _syncService.PackageSitesToLocal();
+
+                    // Assert
+                    Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "index.html")), "index.html should be in site");
+                    Assert.That(File.Exists(Path.Combine(_tempPath, website.Name, string.Format("{0}.zip", website.Name))), Is.False, "test.zip shouldn't be there");
+                }
+                finally
+                {
+                    // Cleanup
+                    CleanupWebsiteTest(serverManager);
+                }
+            }
+        }
+
+        [Test]
         public void Update_temp_storage_from_iis()
         {
             using (var serverManager = new ServerManager())
