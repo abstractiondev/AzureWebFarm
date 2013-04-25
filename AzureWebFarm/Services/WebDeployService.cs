@@ -13,7 +13,7 @@ namespace AzureWebFarm.Services
         private readonly CloudBlobContainer _container;
         private readonly ILogger _logger;
         private Thread _leaseThread;
-        private string leaseId;
+        private string _leaseId;
 
         public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
@@ -40,17 +40,17 @@ namespace AzureWebFarm.Services
 
                             while (lease.HasLease)
                             {
-                                if (leaseId != AzureRoleEnvironment.CurrentRoleInstanceId())
+                                if (_leaseId != lease.LeaseId)
                                 {
                                     _logger.DebugFormat("This instance ({0}) has the lease, updating blob with the instance ID.", AzureRoleEnvironment.CurrentRoleInstanceId());
-                                    leaseId = lease.LeaseId;
                                     blob.Metadata["InstanceId"] = AzureRoleEnvironment.CurrentRoleInstanceId();
                                     blob.SetMetadata(lease.LeaseId);
+                                    _leaseId = lease.LeaseId;
                                 }
                                 
                                 Thread.Sleep(TimeSpan.FromSeconds(10));
                             }
-                            leaseId = null;
+                            _leaseId = null;
                         }
                         Thread.Sleep(TimeSpan.FromSeconds(30));
                     }
@@ -78,12 +78,12 @@ namespace AzureWebFarm.Services
                 }
                 _leaseThread = null;
             }
-            if (leaseId == null) return;
+            if (_leaseId == null) return;
 
             try
             {
                 var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
-                blob.TryReleaseLease(leaseId);
+                blob.TryReleaseLease(_leaseId);
                 blob.Metadata.Remove("InstanceId");
                 blob.SetMetadata();
             }
