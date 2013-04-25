@@ -102,7 +102,7 @@ namespace AzureWebFarm.Services
 
         #region Sync Once
 
-        private void SyncOnce()
+        public void SyncOnce()
         {
             _logger.Debug("Synchronizing role instances.");
 
@@ -373,7 +373,7 @@ namespace AzureWebFarm.Services
 
                             try
                             {
-                                using (DeploymentObject deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.Package, packageFile))
+                                using (var deploymentObject = DeploymentManager.CreateObject(DeploymentWellKnownProvider.Package, packageFile))
                                 {
                                     deploymentObject.SyncTo(DeploymentWellKnownProvider.DirPath, sitePath, new DeploymentBaseOptions(), new DeploymentSyncOptions());
                                 }

@@ -180,13 +180,38 @@ namespace AzureWebFarm.Tests.Services
                 try
                 {
                     // Act
-                    _syncService.UpdateIISSitesFromTableStorage();
-                    _syncService.PackageSitesToLocal();
-                    _syncService.PackageSitesToLocal();
+                    _syncService.SyncOnce();
 
                     // Assert
                     Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "index.html")), "index.html should be in site");
                     Assert.That(File.Exists(Path.Combine(_tempPath, website.Name, string.Format("{0}.zip", website.Name))), Is.False, "test.zip shouldn't be there");
+                }
+                finally
+                {
+                    // Cleanup
+                    CleanupWebsiteTest(serverManager);
+                }
+            }
+        }
+
+        [Test]
+        public void Sync_new_site_to_iis()
+        {
+            using (var serverManager = new ServerManager())
+            {
+                // Arrange
+                var website = SetupWebsiteTest(serverManager);
+                UploadZipToBlob(website.Name, Path.Combine(_resourcesPath, "Package.zip"));
+
+                try
+                {
+                    // Act
+                    _syncService.SyncOnce();
+
+                    //Assert
+                    Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "index.html")), Is.False, "index.html shouldn't be in site");
+                    Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "iisstart.htm")), "iisstart.html wasn't synced");
+                    Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "welcome.png")), "welcome.png wasn't synced");
                 }
                 finally
                 {
@@ -288,6 +313,7 @@ namespace AzureWebFarm.Tests.Services
                     Directory.CreateDirectory(Path.Combine(_tempPath, website.Name));
                     var tempPath = Path.Combine(_tempPath, website.Name, string.Format("{0}.zip", website.Name));
                     var deployFile = File.ReadAllBytes(Path.Combine(_resourcesPath, "Package.zip"));
+                    File.WriteAllText(Path.Combine(_sitePath, "test2.txt"), "test");
                     File.WriteAllBytes(tempPath, deployFile);
                     if (localFilesAreNewer)
                     {
@@ -301,6 +327,7 @@ namespace AzureWebFarm.Tests.Services
                     _syncService.DeploySitesFromLocal();
 
                     // Assert
+                    Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "test2.txt")), Is.False, "text2.txt should have been removed by the sync");
                     if (localFilesAreNewer)
                     {
                         Assert.That(File.Exists(Path.Combine(_sitePath, website.Name, "iisstart.htm")), Is.False, "iisstart.html was synced when it shouldn't have been");
