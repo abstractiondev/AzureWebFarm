@@ -551,9 +551,16 @@ namespace AzureWebFarm.Services
 
         protected virtual void OnPing()
         {
-            var handler = Ping;
-            if (handler != null)
-                handler(this, EventArgs.Empty);
+            try
+            {
+                var handler = Ping;
+                if (handler != null)
+                    handler(this, EventArgs.Empty);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error executing OnPing event", e);
+            }
         }
 
         public delegate void SiteUpdatedEventHandler(object sender, EventArgs e, string siteName);
@@ -561,18 +568,32 @@ namespace AzureWebFarm.Services
 
         protected virtual void OnSiteUpdated(string siteName)
         {
-            var handler = SiteUpdated;
-            if (handler != null)
-                handler(this, EventArgs.Empty, siteName);
+            try
+            {
+                var handler = SiteUpdated;
+                if (handler != null)
+                    handler(this, EventArgs.Empty, siteName);
+            }
+            catch (Exception e)
+            {
+                _logger.ErrorFormat(e, "Error executing OnSiteUpdated event for site {0}", siteName);
+            }
         }
 
         public event SiteUpdatedEventHandler SiteDeleted;
 
         protected virtual void OnSiteDeleted(string siteName)
         {
-            var handler = SiteDeleted;
-            if (handler != null)
-                handler(this, EventArgs.Empty, siteName);
+            try
+            {
+                var handler = SiteDeleted;
+                if (handler != null)
+                    handler(this, EventArgs.Empty, siteName);
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error executing OnSiteDeleted event", e);
+            }
         }
         #endregion
     }
