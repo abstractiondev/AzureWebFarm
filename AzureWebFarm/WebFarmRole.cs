@@ -30,7 +30,7 @@ namespace AzureWebFarm
         {
             // If a log factory isn't specified use Trace, which will end up in diagnostics
             if (logFactory == null)
-                logFactory = new TraceLoggerFactory();
+                logFactory = new AzureDiagnosticsTraceListenerFactory();
             _logFactory = logFactory;
             _logLevel = loggerLevel ?? LoggerLevel.Debug;
             _logger = logFactory.Create(GetType(), _logLevel);
