@@ -19,7 +19,7 @@ namespace AzureWebFarm.Services
         {
             _logger = loggerFactory.Create(GetType(), logLevel);
 
-            _container = storageAccount.CreateCloudBlobClient().GetContainerReference(AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployLeaseBlobContainerName));
+            _container = storageAccount.CreateCloudBlobClient().GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
             _container.CreateIfNotExist();
         }
 
