@@ -13,17 +13,17 @@ Also, if you want to support the execution of background tasks (via console appl
 ## Documentation ##
 
 ### Web Farm Installation and Setup ###
-Ensure you have Azure SDK 1.8 installed. The web farm will likely work with 1.7, and possibly 1.6 as well, but it's built against 1.8. It's also worth using 1.8 just for the huge deployment speed improvements anyway.
+Ensure you have Azure SDK 1.8 installed. The web farm will likely work with 1.7 (not 1.6), but it's built against 1.8 and it's also worth using 1.8 just for the huge deployment speed improvements and the Windows Server 2012 / .NET 4.5 support.
 
-The following instructions are for installing from scratch. It is possible to install AzureWebFarm into an existing website. If you require assistance with this then feel free to ask for help via Twitter via @robdmoore.
+The following instructions are the easiest way for creating a web farm from scratch. It is possible to install Azure Web Farm into an existing website. If you require assistance with this then feel free to ask for help via Twitter using @robdmoore or @mdaviesnet and #AzureWebFarm.
 
 1. Create a new Web project in Visual Studio using the `ASP.NET Empty Web Application` template and delete the `Web.config`, `Web.Test.config` and `Web.Release.config` files
-2. `Install-Package AzureWebFarm`
+2. Use NuGet to: `Install-Package AzureWebFarm`
 3. Ensure the `App.config` file got copied to your web project directory. If it didn't then use the "Add Existing Item" dialog to find the `App.config` file in `../packages/AzureWebFarm.X.X.X.X/content/App.config`
 4. (optional) Remove the `Web.Debug.config` and `Web.Release.config` files that got created
 5. (optional) Change the namespaces in `WebRole.cs` to match your assembly namespace
 7. Create a cloud project with no roles attached to it and then add the web application you created in step 1 as a web role (Right-click on Roles in the cloud project and select Add > Web Role Project in solution)
-8. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like this in your `.ccproj` file (change the WebProjectName to the name of your web project):
+8. Ensure App.config gets copied to bin/ProjectName.dll.config before the Azure package is created using something like this in your `.ccproj` file (change the WebProjectName to the name of your web project). This is to ensure the binding redirects for the Azure dlls are present for the Worker Role component of the farm:
 
           <PropertyGroup>
             <WebProjectName>AzureWebFarm.Example.Web</WebProjectName>
@@ -32,18 +32,29 @@ The following instructions are for installing from scratch. It is possible to in
             <Copy SourceFiles="$(ProjectDir)..\$(WebProjectName)\App.config" DestinationFiles="$(ProjectDir)obj\$(Configuration)\$(WebProjectName)\bin\$(WebProjectName).dll.config" />
           </Target>
 
-9. Look in the packages/AzureWebFarm.X.X.X.X/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work. You will need to add proper values for the `Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString` and `DataConnectionString` settings, the certificate thumbprints and configure RDP.
-10. Look in the packages/AzureWebFarm.X.X.X.X/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings
-11. If you are migrating to AzureWebFarm from Accelerator for Azure Web Roles then you will need to transfer the data from the Bindings table to the BindingRow table and the WebSites table to the WebSiteRow table - this is a breaking change from Accelerator for Azure Web Roles, but should be the only one
-12. Check that the App.config file gets correctly copied to the package by opening the `CloudProjectDir/bin/Release/app.publish/CloudProject.cspkg` file in a zip program, further opening the `.cssx` file in that zip file within the zip program and then checking that `approot/bin/WebProject.dll.config` exists - if this isn't there then you will likely get a System.IO.FileLoadException when the role is started
-
-// todo: web.config <location>, package creation and deployment, better instructions for the .csdef and .cscfg, upgrade instructions for latest version
+9. Look in the packages/AzureWebFarm.X.X.X.X/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work. You will need to add proper values for the `Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString` and `DataConnectionString` settings, the certificate thumbprints and configure RDP (and note the RDP credentials since this is what you will use for msdeploy).
+10. Look in the packages/AzureWebFarm.X.X.X.X/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings.
+11. If you are migrating to AzureWebFarm from Accelerator for Azure Web Roles then you will need to transfer the data from the Bindings table to the BindingRow table and the WebSites table to the WebSiteRow table - this is a breaking change from Accelerator for Azure Web Roles, but should be the only one.
+12. Use Visual Studio or MSBuild to publish the Cloud Project (this should generate `.cspkg` and `.cscfg` files at `bin\Release\app.publish\`)
+13. Double check that the App.config file gets correctly copied into the package (via the MSBuild snippet above) by opening the `.cspkg` file in a zip program, further opening the `.cssx` file in that zip file within the zip program and then checking that `approot/bin/WebProject.dll.config` (for the expected value of "WebProject") exists - if this isn't there then you will likely get a `System.IO.FileLoadException` when the role is started.
+14. Deploy the .cspkg and .csdef files to a Hosted Service in Azure via the Portal or using the API
 
 If you get lost check out the `AzureWebFarm.Example.Web` and `AzureWebFarm.Example.Cloud` projects for guidance.
 
+### Updating to Azure Web Farm 0.9.2.X ###
+There are a number of breaking changes in the latest version of Azure Web Farm. Please see [the breaking changes document](BREAKING_CHANGES.md) to see upgrade instructions.
+
+### Web.config configuration ###
+
+If you are planning on putting more than just Azure Web Farm in the main website of your web farm and you plan on using the test site feature of Azure Web Farm (you can reference the website from /test/*sitename* as well as the domain name you configure) then you need to be careful to put all of your web.config settings in a `<location>` tag to restrict the application of the settings to that site only, e.g.:
+
+      <location path="." inheritInChildApplications="false">
+        <!-- Your settings -->
+      </location>
+
 ### Logging ###
 
-By default the web farm will log a range of diagnostics data using Windows Azure Diagnostics. If there are any errors on startup of the role then they will be placed in the exceptions blob container in the storage account configured for diagnostics. If there are any errors during the operation of the farm then they will appear in the `WADLogs` table - note: there is a lot of noise in there due to the debugging logging.
+By default the web farm will log a range of diagnostics data using Windows Azure Diagnostics. If there are any errors on startup of the role then they will be placed in the `exceptions` blob container in the storage account configured for diagnostics. If there are any errors during the operation of the farm then they will appear in the `WADLogs` table - note: there is a lot of noise in there due to the debugging logging.
 
 If you would like more fine-grained control over logging then simply pass in an `ILoggerFactory` ([from Castle.Core](http://docs.castleproject.org/Windsor.Logging-Facility.ashx)) to the constructor of `WebFarmRole` in your `WebRole` class.
 
