@@ -53,7 +53,7 @@ namespace AzureWebFarm.Services
             _siteDeployTimes = new Dictionary<string, DateTime>();
             _logger = loggerFactory.Create(GetType(), logLevel);
 
-            var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployPackagesBlobContainerName).ToLowerInvariant();
+            var sitesContainerName = AzureRoleEnvironment.GetConfigurationSettingValue(Constants.WebDeployPackagesBlobContainerKey).ToLowerInvariant();
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(sitesContainerName);
             _container.CreateIfNotExist();
         }

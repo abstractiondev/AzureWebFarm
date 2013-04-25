@@ -16,7 +16,7 @@ namespace AzureWebFarm.Tests.Services.Base
         {
             switch (setting)
             {
-                case Constants.WebDeployPackagesBlobContainerName:
+                case Constants.WebDeployPackagesBlobContainerKey:
                     return "sites";
                 case Constants.WebDeployLeaseBlobContainerName:
                     return "webdeploylease";
