@@ -37,6 +37,8 @@ The following instructions are for installing from scratch. It is possible to in
 11. If you are migrating to AzureWebFarm from Accelerator for Azure Web Roles then you will need to transfer the data from the Bindings table to the BindingRow table and the WebSites table to the WebSiteRow table - this is a breaking change from Accelerator for Azure Web Roles, but should be the only one
 12. Check that the App.config file gets correctly copied to the package by opening the `CloudProjectDir/bin/Release/app.publish/CloudProject.cspkg` file in a zip program, further opening the `.cssx` file in that zip file within the zip program and then checking that `approot/bin/WebProject.dll.config` exists - if this isn't there then you will likely get a System.IO.FileLoadException when the role is started
 
+// todo: web.config <location>, package creation and deployment, better instructions for the .csdef and .cscfg, upgrade instructions for latest version
+
 If you get lost check out the `AzureWebFarm.Example.Web` and `AzureWebFarm.Example.Cloud` projects for guidance.
 
 ### Logging ###
