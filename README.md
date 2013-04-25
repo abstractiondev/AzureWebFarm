@@ -61,6 +61,20 @@ By default the web farm will log a range of diagnostics data using Windows Azure
 
 If you would like more fine-grained control over logging then simply pass in an `ILoggerFactory` ([from Castle.Core](http://docs.castleproject.org/Windsor.Logging-Facility.ashx)) to the constructor of `WebFarmRole` in your `WebRole` class.
 
+### Diagnosing Problems ###
+
+There are a number of places that you can look to get diagnostics information (plus you can extend this by using the logging functionality mentioned above):
+
+* `exceptions` blob container - Any errors when starting up the farm will be posted here (this is the firts place to look if your role is constantly recycling after deploying)
+* `SyncStatusRow` - This shows the time that the sync status of each site / instance combination was updated:
+	* `NotCreated` means the site is currently being created
+	* `Created` means the site has been created and currently has the dummy instructions page
+	* `Deployed` means you have made at least one deployment for that site and the Timestamp for that record gives an indication of when that instance last synced that site
+	* `Error` means there was an exception thrown while trying to deploy the site and the `LastError` property should contain the exception message that occurred
+* `sites` blob container - This contains the latest web deploy package for each site
+* `WADLogsTable` - By default all logging information is sent here via the Windows Azure Diagnostics Trace Listener including exceptions that are caught (to look for just exceptions search with the criteria `Level eq 2`)
+* `WADWindowsEventLogs` table - All `Application` event logs will be put here (there is a 1 minute latency) so any uncaught exceptions will show up here; this generally won't have useful information, but sometimes it's worth checking it out
+
 ### Background Worker Setup ###
 If there is a subfolder within the bin directory of your website that contains a `.exe` file of the same name as the subfolder, e.g. `MySiteRoot\bin\SubFolder\SubFolder.exe` then the contents of the sub folder will be copied to an isolated folder and the executable file will be run.
 
