@@ -74,7 +74,12 @@ namespace AzureWebFarm.Services
                     catch (Exception ex)
                     {
                         _logger.ErrorFormat(ex, "Failed to manage lease on {0}", AzureRoleEnvironment.CurrentRoleInstanceId());
-                        Thread.Sleep(TimeSpan.FromSeconds(30));
+                        lock (_lock)
+                        {
+                            Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
+                            if (_cancellationToken.IsCancellationRequested)
+                                break;
+                        }
                     }
                 }
             }, _cancellationToken.Token);
