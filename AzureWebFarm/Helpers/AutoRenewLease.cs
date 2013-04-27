@@ -18,6 +18,7 @@ namespace AzureWebFarm.Helpers
         private bool _disposed;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly object _lock = new object();
+        private ILogger _logger;
 
         public bool HasLease
         {
@@ -32,7 +33,7 @@ namespace AzureWebFarm.Helpers
 
         public AutoRenewLease(ILoggerFactory loggerFactory, LoggerLevel logLevel, CloudBlob blob, int renewLeaseSeconds = 40, int leaseLengthSeconds = 90)
         {
-            var logger = loggerFactory.Create(GetType(), logLevel);
+            _logger = loggerFactory.Create(GetType(), logLevel);
             var autoRenewLease = this;
             _blob = blob;
             blob.Container.CreateIfNotExist();
@@ -71,7 +72,7 @@ namespace AzureWebFarm.Helpers
                 catch (Exception e)
                 {
                     LeaseId = null; // Release the lease
-                    logger.Error("Error renewing blob lease", e);
+                    _logger.Error("Error renewing blob lease", e);
                 }
             }, _cancellationTokenSource.Token);
         }
@@ -98,7 +99,14 @@ namespace AzureWebFarm.Helpers
                     _cancellationTokenSource.Cancel();
                     Monitor.Pulse(_lock);
                 }
-                _blob.TryReleaseLease(LeaseId);
+                try
+                {
+                    _blob.TryReleaseLease(LeaseId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("An error occured aborting the web deploy lease thread.", ex);
+                }
             }
             _disposed = true;
         }
