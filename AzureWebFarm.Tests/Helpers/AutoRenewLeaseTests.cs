@@ -26,7 +26,7 @@ namespace AzureWebFarm.Tests.Helpers
         [Test]
         public void Prevent_write_operations_without_lease_id()
         {
-            using (new AutoRenewLease(new ConsoleFactory(), _blob))
+            using (new AutoRenewLease(new ConsoleFactory(), LoggerLevel.Debug, _blob))
             {
                 Assert.Throws<StorageClientException>(_blob.SetMetadata);
             }
@@ -35,7 +35,7 @@ namespace AzureWebFarm.Tests.Helpers
         [Test]
         public void Allow_lease_operations_when_lease_id_provided()
         {
-            using (var lease = new AutoRenewLease(new ConsoleFactory(), _blob))
+            using (var lease = new AutoRenewLease(new ConsoleFactory(), LoggerLevel.Debug, _blob))
             {
                 _blob.SetMetadata(lease.LeaseId);
             }
@@ -44,7 +44,7 @@ namespace AzureWebFarm.Tests.Helpers
         [Test]
         public void Renew_lease_past_initial_lease_length()
         {
-            using (new AutoRenewLease(new ConsoleFactory(), _blob, renewLeaseSeconds: 1, leaseLengthSeconds: 2))
+            using (new AutoRenewLease(new ConsoleFactory(), LoggerLevel.Debug, _blob, renewLeaseSeconds: 1, leaseLengthSeconds: 2))
             {
                 Thread.Sleep(TimeSpan.FromSeconds(4));
                 Assert.Throws<StorageClientException>(_blob.SetMetadata);
@@ -54,7 +54,7 @@ namespace AzureWebFarm.Tests.Helpers
         [Test]
         public void Release_lease_automatically_after_using_block()
         {
-            using (new AutoRenewLease(new ConsoleFactory(), _blob))
+            using (new AutoRenewLease(new ConsoleFactory(), LoggerLevel.Debug, _blob))
             {
                 Thread.Sleep(TimeSpan.FromSeconds(3));
             }

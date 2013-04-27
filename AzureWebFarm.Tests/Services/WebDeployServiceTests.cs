@@ -20,7 +20,7 @@ namespace AzureWebFarm.Tests.Services
         {
             _service = new WebDeployService(
                 CloudStorageAccount.DevelopmentStorageAccount, 
-                new NullLogFactory(),
+                new ConsoleFactory(),
                 LoggerLevel.Debug
             );
         }

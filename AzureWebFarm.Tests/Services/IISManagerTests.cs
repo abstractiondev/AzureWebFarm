@@ -160,7 +160,7 @@ namespace AzureWebFarm.Tests.Services
             };
 
             var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new NullLogFactory(), LoggerLevel.Debug);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new ConsoleFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -234,7 +234,7 @@ namespace AzureWebFarm.Tests.Services
             };
 
             var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new NullLogFactory(), LoggerLevel.Debug);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new ConsoleFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -303,7 +303,7 @@ namespace AzureWebFarm.Tests.Services
             };
 
             var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new NullLogFactory(), LoggerLevel.Debug);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new ConsoleFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);
@@ -363,7 +363,7 @@ namespace AzureWebFarm.Tests.Services
             };
 
             var factory = new AzureStorageFactory(CloudStorageAccount.DevelopmentStorageAccount);
-            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new NullLogFactory(), LoggerLevel.Debug);
+            var iisManager = new IISManager(LocalSitesPath, TempSitesPath, new SyncStatusRepository(factory), new ConsoleFactory(), LoggerLevel.Debug);
             var sites = new List<WebSite> {contosoWebSite, fabrikamWebSite};
 
             iisManager.UpdateSites(sites, _excludedSites);

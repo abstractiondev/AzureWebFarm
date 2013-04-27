@@ -42,7 +42,7 @@ namespace AzureWebFarm.Tests.Services
             File.WriteAllText(Path.Combine(SitesPath, SiteName, "web.config"), WebConfigContents);
             File.WriteAllText(Path.Combine(SitesPath, SiteName2, "web.config"), WebConfig2Contents);
 
-            _service = new BackgroundWorkerService(SitesPath, ExePath, new NullLogFactory(), LoggerLevel.Debug);
+            _service = new BackgroundWorkerService(SitesPath, ExePath, new ConsoleFactory(), LoggerLevel.Debug);
         }
 
         [TearDown]
