@@ -98,7 +98,7 @@ namespace AzureWebFarm.Helpers
                     _cancellationTokenSource.Cancel();
                     Monitor.Pulse(_lock);
                 }
-                _blob.ReleaseLease(LeaseId);
+                _blob.TryReleaseLease(LeaseId);
             }
             _disposed = true;
         }
