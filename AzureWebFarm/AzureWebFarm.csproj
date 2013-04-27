@@ -80,6 +80,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\AzureConfig.cs" />
     <Compile Include="Entities\Binding.cs" />
     <Compile Include="Entities\Enums.cs" />
     <Compile Include="Entities\FileEntry.cs" />
