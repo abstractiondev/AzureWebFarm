@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AzureWebFarm.Helpers;
 using Castle.Core.Logging;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureWebFarm.Services
 {
     public class WebDeployService
     {
         private readonly ILogger _logger;
-        private Task _leaseTask;
         private string _leaseId;
-        private ILoggerFactory _loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly LoggerLevel _logLevel;
         private CancellationTokenSource _cancellationToken;
         private readonly object _lock = new object();
@@ -30,7 +26,7 @@ namespace AzureWebFarm.Services
         {
             _cancellationToken = new CancellationTokenSource();
 
-            _leaseTask = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 _logger.Debug("Starting web deploy leasing thread...");
 

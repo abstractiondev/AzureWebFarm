@@ -14,11 +14,10 @@ namespace AzureWebFarm.Helpers
     internal class AutoRenewLease : IDisposable
     {
         private readonly CloudBlob _blob;
-        private Task _renewalTask;
         private bool _disposed;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly object _lock = new object();
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public bool HasLease
         {
@@ -53,7 +52,7 @@ namespace AzureWebFarm.Helpers
             if (!HasLease)
                 return;
             _cancellationTokenSource = new CancellationTokenSource();
-            _renewalTask = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(() =>
             {
                 try
                 {
