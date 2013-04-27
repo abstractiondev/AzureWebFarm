@@ -57,7 +57,7 @@ namespace AzureWebFarm.Services
                                 {
                                     Monitor.Wait(_lock, TimeSpan.FromSeconds(10));
                                     if (_cancellationToken.IsCancellationRequested)
-                                        break;
+                                        return;
                                 }
                             }
                             if (!_cancellationToken.IsCancellationRequested)
@@ -68,7 +68,7 @@ namespace AzureWebFarm.Services
                         {
                             Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
                             if (_cancellationToken.IsCancellationRequested)
-                                break;
+                                return;
                         }
                     }
                     catch (Exception ex)
@@ -78,7 +78,7 @@ namespace AzureWebFarm.Services
                         {
                             Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
                             if (_cancellationToken.IsCancellationRequested)
-                                break;
+                                return;
                         }
                     }
                 }
