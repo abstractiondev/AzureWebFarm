@@ -23,11 +23,11 @@ namespace AzureWebFarm.Config
                     c.Resolve<ILoggerFactory>(),
                     c.Resolve<LoggerLevel>()
                 ))
-                .AsSelf()
+                .AsImplementedInterfaces()
                 .SingleInstance()
                 .OnActivated(a =>
                     {
-                        var syncService = a.Context.Resolve<SyncService>();
+                        var syncService = a.Context.Resolve<ISyncService>();
                         // Subscribe the background worker to relevant events in the sync service
                         syncService.Ping += (sender, args) => a.Instance.Ping();
                         syncService.SiteUpdated += (sender, args, siteName) => a.Instance.Update(siteName);

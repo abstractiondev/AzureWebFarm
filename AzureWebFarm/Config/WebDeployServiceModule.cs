@@ -17,7 +17,7 @@ namespace AzureWebFarm.Config
         {
             builder.RegisterType<WebDeployService>()
                 .WithParameter(new TypedParameter(typeof(CloudStorageAccount), _storageAccount))
-                .AsSelf()
+                .AsImplementedInterfaces()
                 .SingleInstance();
         }
     }

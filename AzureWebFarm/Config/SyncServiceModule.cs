@@ -45,7 +45,7 @@ namespace AzureWebFarm.Config
                     c.Resolve<ILoggerFactory>(),
                     c.Resolve<LoggerLevel>()
                 ))
-                .AsSelf()
+                .AsImplementedInterfaces()
                 .SingleInstance();
         }
     }

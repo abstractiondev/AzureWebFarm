@@ -11,9 +11,7 @@ namespace AzureWebFarm
 {
     public class WebFarmRole
     {
-        private SyncService _syncService;
-        private WebDeployService _webDeployService;
-        private IContainer _container;
+        protected IContainer Container;
         private readonly ILoggerFactory _logFactory;
         private readonly ILogger _logger;
         private readonly LoggerLevel _logLevel;
@@ -33,24 +31,28 @@ namespace AzureWebFarm
             _diagnosticsLogLevel = diagnosticsLogLevel ?? LogLevel.Information;
         }
 
+        protected virtual void Configure()
+        {
+            DiagnosticsHelper.ConfigureDiagnosticMonitor(_diagnosticsLogLevel);
+            _logger.Info("WebRole.OnStart called");
+            AzureConfig.ConfigureRole();
+
+            var storageAccount = CloudStorageAccount.FromConfigurationSetting(Constants.StorageConnectionStringKey);
+            Container = AutofacConfig.BuildContainer(storageAccount, _logFactory, _logLevel);
+        }
+
         public void OnStart()
         {
             try
             {
-                DiagnosticsHelper.ConfigureDiagnosticMonitor(_diagnosticsLogLevel);
-                _logger.Info("WebRole.OnStart called");
-                AzureConfig.ConfigureRole();
+                Configure();
 
-                var storageAccount = CloudStorageAccount.FromConfigurationSetting(Constants.StorageConnectionStringKey);
-                _container = AutofacConfig.BuildContainer(storageAccount, _logFactory, _logLevel);
+                var syncService = Container.Resolve<ISyncService>();
+                var webDeployService = Container.Resolve<IWebDeployService>();
+                Container.Resolve<IBackgroundWorkerService>(); // This registers event handlers after activation - resolving is enough
 
-                // todo: Change these to interfaces and unit test the WebFarmRole class
-                _syncService = _container.Resolve<SyncService>();
-                _webDeployService = _container.Resolve<WebDeployService>();
-                _container.Resolve<BackgroundWorkerService>(); // This registers event handlers after activation - resolving is enough
-
-                _syncService.SyncOnce();
-                _webDeployService.Start();
+                syncService.SyncOnce();
+                webDeployService.Start();
             }
             catch (Exception e)
             {
@@ -59,13 +61,13 @@ namespace AzureWebFarm
                 throw;
             }
         }
-
+        
         public void Run()
         {
             try
             {
                 _logger.Info("WebRole.Run called");
-                _syncService.SyncForever(() => Constants.SyncInterval);
+                Container.Resolve<ISyncService>().SyncForever(() => Constants.SyncInterval);
             }
             catch (Exception e)
             {
@@ -78,10 +80,7 @@ namespace AzureWebFarm
         public void OnStop()
         {
             _logger.Info("WebRole.OnStop called");
-            // todo: Change next two lines to IDisposable?
-            _webDeployService.Stop();
-            _syncService.SetCurrentInstanceSitesOffline();
-            _container.Dispose();
+            Container.Dispose();
             DiagnosticsHelper.WaitForAllHttpRequestsToEnd(_logger);
         }
     }
