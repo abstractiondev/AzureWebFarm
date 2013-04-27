@@ -17,6 +17,7 @@ namespace AzureWebFarm.Helpers
         private Task _renewalTask;
         private bool _disposed;
         private CancellationTokenSource _cancellationTokenSource;
+        private object _lock;
 
         public bool HasLease
         {
@@ -57,10 +58,10 @@ namespace AzureWebFarm.Helpers
                 {
                     while (true)
                     {
+                        Monitor.Wait(_lock, TimeSpan.FromSeconds(renewLeaseSeconds));
                         if (_cancellationTokenSource.IsCancellationRequested)
                             break;
 
-                        Thread.Sleep(TimeSpan.FromSeconds(renewLeaseSeconds));
                         blob.RenewLease(autoRenewLease.LeaseId);
                     }
                 }
@@ -90,6 +91,7 @@ namespace AzureWebFarm.Helpers
             if (disposing && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
+                Monitor.Pulse(_lock);
                 _blob.ReleaseLease(LeaseId);
             }
             _disposed = true;

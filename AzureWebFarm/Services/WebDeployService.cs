@@ -18,6 +18,7 @@ namespace AzureWebFarm.Services
         private ILoggerFactory _loggerFactory;
         private readonly LoggerLevel _logLevel;
         private CancellationTokenSource _cancellationToken;
+        private object _lock;
 
         public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
@@ -55,17 +56,17 @@ namespace AzureWebFarm.Services
                                     blob.SetMetadata(lease.LeaseId);
                                     _leaseId = lease.LeaseId;
                                 }
+
+                                Monitor.Wait(_lock, TimeSpan.FromSeconds(10));
                                 if (_cancellationToken.IsCancellationRequested)
                                     break;
-
-                                Thread.Sleep(TimeSpan.FromSeconds(10));
                             }
                             _leaseId = null;
                         }
+
+                        Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
                         if (_cancellationToken.IsCancellationRequested)
                             break;
-
-                        Thread.Sleep(TimeSpan.FromSeconds(30));
                     }
                     catch (Exception ex)
                     {
@@ -83,6 +84,7 @@ namespace AzureWebFarm.Services
                 try
                 {
                     _cancellationToken.Cancel();
+                    Monitor.Pulse(_lock);
                 }
                 catch (Exception ex)
                 {
