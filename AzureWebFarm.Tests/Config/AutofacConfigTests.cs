@@ -23,25 +23,25 @@ namespace AzureWebFarm.Tests.Config
         [Test]
         public void AllowSyncServiceToBeResolved()
         {
-            var syncService = _container.Resolve<SyncService>();
+            var syncService = _container.Resolve<ISyncService>();
 
-            Assert.That(syncService, Is.Not.Null);
+            Assert.That(syncService, Is.TypeOf<SyncService>());
         }
 
         [Test]
         public void AllowWebDeployServiceToBeResolved()
         {
-            var webDeployService = _container.Resolve<WebDeployService>();
+            var webDeployService = _container.Resolve<IWebDeployService>();
 
-            Assert.That(webDeployService, Is.Not.Null);
+            Assert.That(webDeployService, Is.TypeOf<WebDeployService>());
         }
 
         [Test]
         public void AllowBackgroundWorkerServiceToBeResolved()
         {
-            var backgroundWorkerService = _container.Resolve<BackgroundWorkerService>();
+            var backgroundWorkerService = _container.Resolve<IBackgroundWorkerService>();
 
-            Assert.That(backgroundWorkerService, Is.Not.Null);
+            Assert.That(backgroundWorkerService, Is.TypeOf<BackgroundWorkerService>());
         }
     }
 }
