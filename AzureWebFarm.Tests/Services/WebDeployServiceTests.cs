@@ -35,7 +35,7 @@ namespace AzureWebFarm.Tests.Services
         public void Lease_this_instance_for_webdeploy()
         {
             _service.Start();
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Thread.Sleep(TimeSpan.FromSeconds(2));
 
             var hasWebDeployLease = AzureRoleEnvironment.HasWebDeployLease();
 
@@ -46,7 +46,7 @@ namespace AzureWebFarm.Tests.Services
         public void Release_lease_when_requested()
         {
             _service.Start();
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Thread.Sleep(TimeSpan.FromSeconds(2));
             _service.Stop();
             
             var hasWebDeployLease = AzureRoleEnvironment.HasWebDeployLease();
