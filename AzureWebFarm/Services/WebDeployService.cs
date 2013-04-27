@@ -94,7 +94,7 @@ namespace AzureWebFarm.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("An error occured aborting the web deploy lease thread.", ex);
+                    _logger.Error("An error occured cancelling the web deploy lease thread.", ex);
                 }
             }
             if (_leaseId == null) return;
