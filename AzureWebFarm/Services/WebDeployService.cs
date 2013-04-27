@@ -18,7 +18,7 @@ namespace AzureWebFarm.Services
         private ILoggerFactory _loggerFactory;
         private readonly LoggerLevel _logLevel;
         private CancellationTokenSource _cancellationToken;
-        private object _lock;
+        private readonly object _lock = new object();
 
         public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
@@ -57,16 +57,22 @@ namespace AzureWebFarm.Services
                                     _leaseId = lease.LeaseId;
                                 }
 
-                                Monitor.Wait(_lock, TimeSpan.FromSeconds(10));
-                                if (_cancellationToken.IsCancellationRequested)
-                                    break;
+                                lock (_lock)
+                                {
+                                    Monitor.Wait(_lock, TimeSpan.FromSeconds(10));
+                                    if (_cancellationToken.IsCancellationRequested)
+                                        break;
+                                }
                             }
                             _leaseId = null;
                         }
 
-                        Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
-                        if (_cancellationToken.IsCancellationRequested)
-                            break;
+                        lock (_lock)
+                        {
+                            Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
+                            if (_cancellationToken.IsCancellationRequested)
+                                break;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -83,8 +89,11 @@ namespace AzureWebFarm.Services
             {
                 try
                 {
-                    _cancellationToken.Cancel();
-                    Monitor.Pulse(_lock);
+                    lock (_lock)
+                    {
+                        _cancellationToken.Cancel();
+                        Monitor.Pulse(_lock);
+                    }
                 }
                 catch (Exception ex)
                 {
