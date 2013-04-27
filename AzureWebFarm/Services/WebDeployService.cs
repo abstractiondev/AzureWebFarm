@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using AzureWebFarm.Helpers;
 using Castle.Core.Logging;
 using Microsoft.WindowsAzure;
@@ -12,10 +13,11 @@ namespace AzureWebFarm.Services
     {
         private readonly CloudBlobContainer _container;
         private readonly ILogger _logger;
-        private Thread _leaseThread;
+        private Task _leaseTask;
         private string _leaseId;
         private ILoggerFactory _loggerFactory;
         private readonly LoggerLevel _logLevel;
+        private CancellationTokenSource _cancellationToken;
 
         public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
@@ -29,7 +31,9 @@ namespace AzureWebFarm.Services
 
         public void Start()
         {
-            _leaseThread = new Thread(() =>
+            _cancellationToken = new CancellationTokenSource();
+
+            _leaseTask = Task.Factory.StartNew(() =>
             {
                 _logger.Debug("Starting web deploy leasing thread...");
 
@@ -51,11 +55,16 @@ namespace AzureWebFarm.Services
                                     blob.SetMetadata(lease.LeaseId);
                                     _leaseId = lease.LeaseId;
                                 }
-                                
+                                if (_cancellationToken.IsCancellationRequested)
+                                    break;
+
                                 Thread.Sleep(TimeSpan.FromSeconds(10));
                             }
                             _leaseId = null;
                         }
+                        if (_cancellationToken.IsCancellationRequested)
+                            break;
+
                         Thread.Sleep(TimeSpan.FromSeconds(30));
                     }
                     catch (Exception ex)
@@ -64,23 +73,22 @@ namespace AzureWebFarm.Services
                         Thread.Sleep(TimeSpan.FromSeconds(30));
                     }
                 }
-            });
-            _leaseThread.Start();
+            }, _cancellationToken.Token);
         }
 
         public void Stop()
         {
-            if (_leaseThread != null)
+            if (_leaseTask != null)
             {
                 try
                 {
-                    _leaseThread.Abort();
+                    _cancellationToken.Cancel();
                 }
                 catch (Exception ex)
                 {
                     _logger.Error("An error occured aborting the web deploy lease thread.", ex);
                 }
-                _leaseThread = null;
+                _leaseTask = null;
             }
             if (_leaseId == null) return;
 
