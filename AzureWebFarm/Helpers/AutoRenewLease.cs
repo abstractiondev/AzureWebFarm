@@ -27,9 +27,9 @@ namespace AzureWebFarm.Helpers
             private set;
         }
 
-        public AutoRenewLease(ILoggerFactory loggerFactory, CloudBlob blob, int renewLeaseSeconds = 40, int leaseLengthSeconds = 90)
+        public AutoRenewLease(ILoggerFactory loggerFactory, LoggerLevel logLevel, CloudBlob blob, int renewLeaseSeconds = 40, int leaseLengthSeconds = 90)
         {
-            var logger = loggerFactory.Create(GetType());
+            var logger = loggerFactory.Create(GetType(), logLevel);
             var autoRenewLease = this;
             _blob = blob;
             blob.Container.CreateIfNotExist();

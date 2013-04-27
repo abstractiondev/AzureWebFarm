@@ -15,10 +15,12 @@ namespace AzureWebFarm.Services
         private Thread _leaseThread;
         private string _leaseId;
         private ILoggerFactory _loggerFactory;
+        private readonly LoggerLevel _logLevel;
 
         public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
             _loggerFactory = loggerFactory;
+            _logLevel = logLevel;
             _logger = loggerFactory.Create(GetType(), logLevel);
 
             _container = storageAccount.CreateCloudBlobClient().GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
@@ -36,7 +38,7 @@ namespace AzureWebFarm.Services
                     try
                     {
                         var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
-                        using (var lease = new AutoRenewLease(_loggerFactory, blob))
+                        using (var lease = new AutoRenewLease(_loggerFactory, _logLevel, blob))
                         {
                             _logger.DebugFormat("Leasing thread checking...HasLease: {0}", lease.HasLease);
 
