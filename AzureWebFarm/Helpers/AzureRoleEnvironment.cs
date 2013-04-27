@@ -33,17 +33,28 @@ namespace AzureWebFarm.Helpers
                 handler(caller, args);
         }
 
+        public static CloudBlob WebDeployLeaseBlob()
+        {
+            var blob = CachedWebDeployLeaseBlob ?? GetWebDeployLeaseBlob();
+            blob.FetchAttributes();
+            return blob;
+        }
+
+        private static readonly CloudBlob CachedWebDeployLeaseBlob = null;
+        private static CloudBlob GetWebDeployLeaseBlob()
+        {
+            var containerReference = CloudStorageAccount.Parse(
+                    GetConfigurationSettingValue(Constants.StorageConnectionStringKey))
+                    .CreateCloudBlobClient()
+                    .GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
+            return containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
+        }
+
         private static bool CheckHasWebDeployLease()
         {
             try
             {
-                var containerReference = CloudStorageAccount.Parse(
-                    GetConfigurationSettingValue(Constants.StorageConnectionStringKey))
-                    .CreateCloudBlobClient()
-                    .GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
-                var blob = containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
-                blob.FetchAttributes();
-                return CurrentRoleInstanceId() == blob.Metadata["InstanceId"];
+                return CurrentRoleInstanceId() == WebDeployLeaseBlob().Metadata["InstanceId"];
             }
             catch (Exception ex)
             {

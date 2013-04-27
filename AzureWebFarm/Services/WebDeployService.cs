@@ -11,7 +11,6 @@ namespace AzureWebFarm.Services
 {
     public class WebDeployService
     {
-        private readonly CloudBlobContainer _container;
         private readonly ILogger _logger;
         private Task _leaseTask;
         private string _leaseId;
@@ -20,14 +19,11 @@ namespace AzureWebFarm.Services
         private CancellationTokenSource _cancellationToken;
         private readonly object _lock = new object();
 
-        public WebDeployService(CloudStorageAccount storageAccount, ILoggerFactory loggerFactory, LoggerLevel logLevel)
+        public WebDeployService(ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
             _loggerFactory = loggerFactory;
             _logLevel = logLevel;
             _logger = loggerFactory.Create(GetType(), logLevel);
-
-            _container = storageAccount.CreateCloudBlobClient().GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
-            _container.CreateIfNotExist();
         }
 
         public void Start()
@@ -42,7 +38,7 @@ namespace AzureWebFarm.Services
                 {
                     try
                     {
-                        var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
+                        var blob = AzureRoleEnvironment.WebDeployLeaseBlob();
                         using (var lease = new AutoRenewLease(_loggerFactory, _logLevel, blob))
                         {
                             _logger.DebugFormat("Leasing thread checking...HasLease: {0}", lease.HasLease);
@@ -64,7 +60,8 @@ namespace AzureWebFarm.Services
                                         break;
                                 }
                             }
-                            _leaseId = null;
+                            if (!_cancellationToken.IsCancellationRequested)
+                                _leaseId = null;
                         }
 
                         lock (_lock)
@@ -104,7 +101,7 @@ namespace AzureWebFarm.Services
 
             try
             {
-                var blob = _container.GetBlockBlobReference(Constants.WebDeployBlobName);
+                var blob = AzureRoleEnvironment.WebDeployLeaseBlob();
                 blob.TryReleaseLease(_leaseId);
                 blob.Metadata.Remove("InstanceId");
                 blob.SetMetadata();

@@ -19,7 +19,6 @@ namespace AzureWebFarm.Tests.Services
         public void Setup()
         {
             _service = new WebDeployService(
-                CloudStorageAccount.DevelopmentStorageAccount, 
                 new ConsoleFactory(),
                 LoggerLevel.Debug
             );
@@ -35,7 +34,7 @@ namespace AzureWebFarm.Tests.Services
         public void Lease_this_instance_for_webdeploy()
         {
             _service.Start();
-            Thread.Sleep(TimeSpan.FromSeconds(2));
+            Thread.Sleep(TimeSpan.FromSeconds(4));
 
             var hasWebDeployLease = AzureRoleEnvironment.HasWebDeployLease();
 
@@ -46,12 +45,14 @@ namespace AzureWebFarm.Tests.Services
         public void Release_lease_when_requested()
         {
             _service.Start();
-            Thread.Sleep(TimeSpan.FromSeconds(2));
+            Thread.Sleep(TimeSpan.FromSeconds(4));
             _service.Stop();
+            Thread.Sleep(TimeSpan.FromSeconds(2));
             
             var hasWebDeployLease = AzureRoleEnvironment.HasWebDeployLease();
-
+            
             Assert.That(hasWebDeployLease, Is.False);
+            Assert.That(AzureRoleEnvironment.WebDeployLeaseBlob().Metadata["InstanceId"], Is.Null);
         }
 
         [TearDown]

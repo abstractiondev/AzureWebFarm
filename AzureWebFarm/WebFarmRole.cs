@@ -97,7 +97,7 @@ namespace AzureWebFarm
                 var iisManager = new IISManager(localSitesPath, localTempPath, syncStatusRepository, _logFactory, _logLevel);
                 _syncService = new SyncService(websiteRepository, syncStatusRepository, storageAccount, localSitesPath, localTempPath, Constants.DirectoriesToExclude, new string[] { }, () => Constants.IsSyncEnabled, iisManager, _logFactory, _logLevel);
                 _backgroundWorker = new BackgroundWorkerService(localSitesPath, localExecutionPath, _logFactory, _logLevel);
-                _webDeployService = new WebDeployService(storageAccount, _logFactory, _logLevel);
+                _webDeployService = new WebDeployService(_logFactory, _logLevel);
 
                 // Subscribe the background worker to relevant events in the sync service
                 _syncService.Ping += (sender, args) => _backgroundWorker.Ping();
