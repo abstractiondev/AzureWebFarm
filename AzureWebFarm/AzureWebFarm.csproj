@@ -80,7 +80,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\AutofacConfig.cs" />
     <Compile Include="Config\AzureConfig.cs" />
+    <Compile Include="Config\BackgroundWorkerModule.cs" />
+    <Compile Include="Config\LoggerModule.cs" />
+    <Compile Include="Config\RepositoryModule.cs" />
+    <Compile Include="Config\StorageFactoryModule.cs" />
+    <Compile Include="Config\SyncServiceModule.cs" />
+    <Compile Include="Config\WebDeployServiceModule.cs" />
     <Compile Include="Entities\Binding.cs" />
     <Compile Include="Entities\Enums.cs" />
     <Compile Include="Entities\FileEntry.cs" />

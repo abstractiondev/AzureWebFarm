@@ -58,27 +58,22 @@ namespace AzureWebFarm.Config
 
         public static string GetTempLocalResourcePath()
         {
-            return GetLocalResourcePath(TempLocalResource);
+            return AzureRoleEnvironment.GetLocalResourcePath(TempLocalResource);
         }
 
         public static string GetSitesLocalResourcePath()
         {
-            return GetLocalResourcePath(SitesLocalResource);
+            return AzureRoleEnvironment.GetLocalResourcePath(SitesLocalResource);
         }
 
         public static string GetExecutionLocalResourcePath()
         {
-            return GetLocalResourcePath(ExecutionLocalResource);
-        }
-
-        private static string GetLocalResourcePath(string localResourceName)
-        {
-            return AzureRoleEnvironment.GetLocalResource(localResourceName).RootPath.TrimEnd('\\');
+            return AzureRoleEnvironment.GetLocalResourcePath(ExecutionLocalResource);
         }
 
         private static string GetLocalResourcePathAndSetAccess(string localResourceName)
         {
-            var resourcePath = GetLocalResourcePath(localResourceName);
+            var resourcePath = AzureRoleEnvironment.GetLocalResourcePath(localResourceName);
 
             var localDataSec = Directory.GetAccessControl(resourcePath);
             localDataSec.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));

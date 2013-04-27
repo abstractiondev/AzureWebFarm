@@ -67,12 +67,6 @@ namespace AzureWebFarm.Services
             }
         }
 
-        public void Start()
-        {
-            // Always sync once in case the role has been reimaged.
-            SyncOnce();
-        }
-
         // ReSharper disable FunctionNeverReturns
         public void SyncForever(Func<TimeSpan> interval)
         {
