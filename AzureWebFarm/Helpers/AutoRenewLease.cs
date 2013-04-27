@@ -87,11 +87,10 @@ namespace AzureWebFarm.Helpers
         {
             if (_disposed)
                 return;
-            if (disposing && _renewalTask != null)
+            if (disposing && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
                 _blob.ReleaseLease(LeaseId);
-                _renewalTask = null;
             }
             _disposed = true;
         }

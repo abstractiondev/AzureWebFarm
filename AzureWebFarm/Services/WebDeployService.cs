@@ -78,7 +78,7 @@ namespace AzureWebFarm.Services
 
         public void Stop()
         {
-            if (_leaseTask != null)
+            if (_cancellationToken != null && !_cancellationToken.IsCancellationRequested)
             {
                 try
                 {
@@ -88,7 +88,6 @@ namespace AzureWebFarm.Services
                 {
                     _logger.Error("An error occured aborting the web deploy lease thread.", ex);
                 }
-                _leaseTask = null;
             }
             if (_leaseId == null) return;
 
@@ -98,6 +97,7 @@ namespace AzureWebFarm.Services
                 blob.TryReleaseLease(_leaseId);
                 blob.Metadata.Remove("InstanceId");
                 blob.SetMetadata();
+                _leaseId = null;
             }
             catch (Exception ex)
             {
