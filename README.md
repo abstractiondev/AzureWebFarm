@@ -65,7 +65,7 @@ If you would like more fine-grained control over logging then simply pass in an 
 
 There are a number of places that you can look to get diagnostics information (plus you can extend this by using the logging functionality mentioned above):
 
-* `exceptions` blob container - Any errors when starting up the farm will be posted here (this is the firts place to look if your role is constantly recycling after deploying)
+* `exceptions` blob container - Any errors when starting up the farm will be posted here (this is the first place to look if your role is constantly recycling after deploying)
 * `SyncStatusRow` - This shows the time that the sync status of each site / instance combination was updated:
 	* `NotCreated` means the site is currently being created
 	* `Created` means the site has been created and currently has the dummy instructions page
