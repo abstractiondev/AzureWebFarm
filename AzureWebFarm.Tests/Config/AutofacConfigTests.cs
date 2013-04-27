@@ -31,9 +31,17 @@ namespace AzureWebFarm.Tests.Config
         [Test]
         public void AllowWebDeployServiceToBeResolved()
         {
-            var syncService = _container.Resolve<WebDeployService>();
+            var webDeployService = _container.Resolve<WebDeployService>();
 
-            Assert.That(syncService, Is.Not.Null);
+            Assert.That(webDeployService, Is.Not.Null);
+        }
+
+        [Test]
+        public void AllowBackgroundWorkerServiceToBeResolved()
+        {
+            var backgroundWorkerService = _container.Resolve<BackgroundWorkerService>();
+
+            Assert.That(backgroundWorkerService, Is.Not.Null);
         }
     }
 }

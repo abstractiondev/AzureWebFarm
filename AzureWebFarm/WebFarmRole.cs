@@ -47,6 +47,7 @@ namespace AzureWebFarm
                 // todo: Change these to interfaces and unit test the WebFarmRole class
                 _syncService = _container.Resolve<SyncService>();
                 _webDeployService = _container.Resolve<WebDeployService>();
+                _container.Resolve<BackgroundWorkerService>(); // This registers event handlers after activation - resolving is enough
 
                 _syncService.SyncOnce();
                 _webDeployService.Start();
