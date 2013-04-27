@@ -16,8 +16,8 @@ namespace AzureWebFarm.Helpers
         private readonly CloudBlob _blob;
         private bool _disposed;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private readonly object _lock = new object();
         private readonly ILogger _logger;
+        private readonly ManualResetEvent _resetEvent;
 
         public bool HasLease
         {
@@ -52,18 +52,16 @@ namespace AzureWebFarm.Helpers
             if (!HasLease)
                 return;
             _cancellationTokenSource = new CancellationTokenSource();
+            _resetEvent = new ManualResetEvent(false);
             Task.Factory.StartNew(() =>
             {
                 try
                 {
                     while (true)
                     {
-                        lock (_lock)
-                        {
-                            Monitor.Wait(_lock, TimeSpan.FromSeconds(renewLeaseSeconds));
-                            if (_cancellationTokenSource.IsCancellationRequested)
-                                break;
-                        }
+                        _resetEvent.WaitOne(TimeSpan.FromSeconds(renewLeaseSeconds));
+                        if (_cancellationTokenSource.IsCancellationRequested)
+                            break;
 
                         blob.RenewLease(autoRenewLease.LeaseId);
                     }
@@ -93,11 +91,9 @@ namespace AzureWebFarm.Helpers
                 return;
             if (disposing && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
-                lock (_lock)
-                {
-                    _cancellationTokenSource.Cancel();
-                    Monitor.Pulse(_lock);
-                }
+                _cancellationTokenSource.Cancel();
+                _resetEvent.Set();
+
                 try
                 {
                     _blob.TryReleaseLease(LeaseId);

@@ -13,7 +13,7 @@ namespace AzureWebFarm.Services
         private readonly ILoggerFactory _loggerFactory;
         private readonly LoggerLevel _logLevel;
         private CancellationTokenSource _cancellationToken;
-        private readonly object _lock = new object();
+        private ManualResetEvent _resetEvent;
 
         public WebDeployService(ILoggerFactory loggerFactory, LoggerLevel logLevel)
         {
@@ -25,6 +25,7 @@ namespace AzureWebFarm.Services
         public void Start()
         {
             _cancellationToken = new CancellationTokenSource();
+            _resetEvent = new ManualResetEvent(false);
 
             Task.Factory.StartNew(() =>
             {
@@ -49,33 +50,24 @@ namespace AzureWebFarm.Services
                                     _leaseId = lease.LeaseId;
                                 }
 
-                                lock (_lock)
-                                {
-                                    Monitor.Wait(_lock, TimeSpan.FromSeconds(10));
-                                    if (_cancellationToken.IsCancellationRequested)
-                                        return;
-                                }
+                                _resetEvent.WaitOne(TimeSpan.FromSeconds(10));
+                                if (_cancellationToken.IsCancellationRequested)
+                                    return;
                             }
                             if (!_cancellationToken.IsCancellationRequested)
                                 _leaseId = null;
                         }
 
-                        lock (_lock)
-                        {
-                            Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
-                            if (_cancellationToken.IsCancellationRequested)
-                                return;
-                        }
+                        _resetEvent.WaitOne(TimeSpan.FromSeconds(30));
+                        if (_cancellationToken.IsCancellationRequested)
+                            return;
                     }
                     catch (Exception ex)
                     {
                         _logger.ErrorFormat(ex, "Failed to manage lease on {0}", AzureRoleEnvironment.CurrentRoleInstanceId());
-                        lock (_lock)
-                        {
-                            Monitor.Wait(_lock, TimeSpan.FromSeconds(30));
-                            if (_cancellationToken.IsCancellationRequested)
-                                return;
-                        }
+                        _resetEvent.WaitOne(TimeSpan.FromSeconds(30));
+                        if (_cancellationToken.IsCancellationRequested)
+                            return;
                     }
                 }
             }, _cancellationToken.Token);
@@ -87,11 +79,8 @@ namespace AzureWebFarm.Services
             {
                 try
                 {
-                    lock (_lock)
-                    {
-                        _cancellationToken.Cancel();
-                        Monitor.Pulse(_lock);
-                    }
+                    _cancellationToken.Cancel();
+                    _resetEvent.Set();
                 }
                 catch (Exception ex)
                 {
