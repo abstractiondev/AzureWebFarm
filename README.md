@@ -120,7 +120,7 @@ If you would like to contribute to this project then feel free to communicate wi
 
 ### Version 0.9.2.X ###
 * Note: Breaking changes are noted in the `BREAKING_CHANGES.md` file
-* If a `web.config` file is included with a background worker application then it will no longer cause an exception in the web farm and in fact will not be overwitten
+* If a `web.config` file is included with a background worker application then it will no longer cause an exception in the web farm and in fact will not be overwritten
 * Upgraded to Azure SDK 1.8
 * Added missing HTTP certificate config in the example cloud project config files
 * Set a bunch of internally used classes to `internal` from `public`
