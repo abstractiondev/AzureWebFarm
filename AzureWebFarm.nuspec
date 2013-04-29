@@ -44,6 +44,7 @@
     </frameworkAssemblies>
   </metadata>
   <files>
+    <file src="readme.txt" />
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.dll" target="lib\NET40" />
     <file src="AzureWebFarm\bin\Release\AzureWebFarm.pdb" target="lib\NET40" />
     <file src="AzureWebFarm\bin\Release\Microsoft.Web.Administration.dll" target="lib\NET40" />

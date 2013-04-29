@@ -1,12 +1,14 @@
 Breaking Changes
 ----------------
 
-Version 1.9.2.X
+Version 0.9.2.X
 ===============
+
+There are a number of breaking changes that have been introduced in this version of AzureWebFarm since v0.9.1.3. Following are the instructions to upgrade.
 
 ### Upgrade AzureWebFarm NuGet package
 
-	Update-Package AzureWebFarm
+    Update-Package AzureWebFarm
 
 Check that `Probe.aspx` and `Probe.aspx.cs` got copied to your web project.
 
