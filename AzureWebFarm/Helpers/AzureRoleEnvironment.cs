@@ -47,6 +47,7 @@ namespace AzureWebFarm.Helpers
                     GetConfigurationSettingValue(Constants.StorageConnectionStringKey))
                     .CreateCloudBlobClient()
                     .GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
+            containerReference.CreateIfNotExist();
             return containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
         }
 
