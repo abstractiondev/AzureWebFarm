@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Net;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.StorageClient;
@@ -48,7 +49,22 @@ namespace AzureWebFarm.Helpers
                     .CreateCloudBlobClient()
                     .GetContainerReference(Constants.WebDeployLeaseBlobContainerName);
             containerReference.CreateIfNotExist();
-            return containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
+            var blob = containerReference.GetBlockBlobReference(Constants.WebDeployBlobName);
+            blob.CreateIfNotExist();
+            return blob;
+        }
+
+        private static void CreateIfNotExist(this CloudBlob blob)
+        {
+            try
+            {
+                blob.UploadByteArray(new byte[0], new BlobRequestOptions {AccessCondition = AccessCondition.IfNoneMatch("*")});
+            }
+            catch (StorageClientException ex)
+            {
+                if (ex.ErrorCode != StorageErrorCode.BlobAlreadyExists && ex.StatusCode != HttpStatusCode.PreconditionFailed)
+                    throw;
+            }
         }
 
         private static bool CheckHasWebDeployLease()
