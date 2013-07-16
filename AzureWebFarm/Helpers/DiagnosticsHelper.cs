@@ -86,7 +86,7 @@ namespace AzureWebFarm.Helpers
             while (true)
             {
                 var rc = pcrc.NextValue();
-                logger.InfoFormat("ASP.NET Requests Current = {0}, permitting role exit.", rc);
+                logger.InfoFormat("ASP.NET Requests Current = {0}, {1}.", rc, rc <= 0 ? "permitting role exit" : "blocking role exit");
                 if (rc <= 0)
                     break;
                 Thread.Sleep(TimeSpan.FromSeconds(1));
