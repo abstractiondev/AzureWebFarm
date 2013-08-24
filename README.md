@@ -149,10 +149,12 @@ If you would like to contribute to this project then feel free to communicate wi
 * Initial release - slightly refactored from last version of Windows Azure Accelerator for Web Roles
 
 ## Roadmap ##
+
 ### Features for 1.0 release ###
 * Create a Web Front End to manage the farm and deprecate the admin console (but possibly create a dll that the WFE uses that other people could use to programmatically interact with the farm) and view the status of each role / site
 * Improving syncing speed and reliability
 * Make debugging background workers easier by logging console output and any exceptions to table storage
+
 ### Post 1.0 nice to haves ###
 * Surfacing diagnostic information in the web front end
 * Logging the output of WebDeploy sync commands for each deployment across the farm (to debug weird problems that single roles have)
