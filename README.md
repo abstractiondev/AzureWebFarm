@@ -130,8 +130,9 @@ If you would like to contribute to this project then feel free to communicate wi
 * Added configurable logging via Castle.Core
 * Removed dependency on Azure Storage within uncaught code called from OnRun() - this means that the web farm should not go down if there is an Azure Storage outage
 * Added configuration setting to allow for syncing to be disabled without needing to redeploy the farm
-* Added a configuration setting and functionality to ensure all web deploy connections get funneled to a single role instance. This resolves an issue when using MsDeploy v3+ on the server (different connections in a deployment go to different instances, causing a Root Element is Missing XML error)
+* Added functionality to ensure all web deploy connections get funnelled to a single role instance at a time (with robust failover if that role instance fails). This resolves an issue when using MsDeploy v3+ on the server (different connections in a deployment go to different instances, causing a Root Element is Missing XML error)
 * Changed the example config files to use Windows Server 2012 - if you want to change your existing farm to use this too then check out the `BREAKING_CHANGES.md` file
+* Opened up a readme.txt file when you install the NuGet package to outline any breaking changes
 
 ### Version 0.9.1.2 ###
 * Logged the last error that occurred when updating sync status to error
@@ -148,16 +149,12 @@ If you would like to contribute to this project then feel free to communicate wi
 * Initial release - slightly refactored from last version of Windows Azure Accelerator for Web Roles
 
 ## Roadmap ##
-* [In progress] Manage setup and maintenance of application via NuGet package
-* [In progress] Provide unit test coverage across most of the code
-* Allow pre- and/or post-sync MsDeploy commands to manage IIS instead of using console app?
-* Add the concept of a version of the site rather than scanning for last modified date across the site files
-* Add status reporting and a dashboard for all roles in operation and the version they currently have
-* If possible, upload the Web Deploy log when syncing a package so it can be inspected via the dashboard
-* Investigate putting Kudu in
-* Update the WPI exe in Startup and ensure the Web Deploy packages being used are the latest (use Chocolatey instead?)
-* Install .NET 4.5 / support Azure 2.0 libs / support Windows Server 2012 Web Roles
-* IL-merge Microsoft.Web.Deployment and Microsoft.Web.Administration (maybe just leave them as-is though...)?
-* Support environment-based config transforms out of the box for web.config, app.config, servicedefinition.csdef and serviceconfiguration.cscfg
+### Features for 1.0 release ###
+* Create a Web Front End to manage the farm and deprecate the admin console (but possibly create a dll that the WFE uses that other people could use to programmatically interact with the farm) and view the status of each role / site
+* Improving syncing speed and reliability
 * Make debugging background workers easier by logging console output and any exceptions to table storage
-* Use checksum comparison for syncing the package and capture the trace output so it can be logged somewhere for inspection
+### Post 1.0 nice to haves ###
+* Surfacing diagnostic information in the web front end
+* Logging the output of WebDeploy sync commands for each deployment across the farm (to debug weird problems that single roles have)
+* Investigate adding Kudu and/or OctopusDeploy as add-on deployment options
+* Environment based transforms for web.config, app.config, servicedefinition.csdef and serviceconfiguration.cscfg out of the box or via PowerShell command
