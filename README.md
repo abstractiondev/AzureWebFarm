@@ -160,3 +160,4 @@ If you would like to contribute to this project then feel free to communicate wi
 * Logging the output of WebDeploy sync commands for each deployment across the farm (to debug weird problems that single roles have)
 * Investigate adding Kudu and/or OctopusDeploy as add-on deployment options
 * Environment based transforms for web.config, app.config, servicedefinition.csdef and serviceconfiguration.cscfg out of the box or via PowerShell command
+* Investigate adding [SSL Hardening](http://www.dotnetnoob.com/2013/10/hardening-windows-server-20082012-and.html) by default
