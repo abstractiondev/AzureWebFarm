@@ -20,7 +20,7 @@ The following instructions are the easiest way for creating a web farm from scra
 1. Create a new Web project in Visual Studio using the `ASP.NET Empty Web Application` template and delete the `Web.config`, `Web.Test.config` and `Web.Release.config` files (and `Global.asax.cs`, `Global.asax`, `Views`, `Controllers` and `App_Start` if they are there - you can leave them, but they aren't needed and just serve to clutter the project)
 2. Use NuGet to: `Install-Package AzureWebFarm`
 3. Ensure the `App.config` file got copied to your web project directory. If it didn't then use the "Add Existing Item" dialog to find the `App.config` file in `../packages/AzureWebFarm.X.X.X.X/content/App.config`
-4. Check that the `Microsoft.WindowsAzure.Diagnostics` dll is `1.8.0.0` and copy local and the `Microsoft.WindowsAzure.ServiceRuntime` dll is `1.8.0.0` and *not* copy local.
+4. Check that the `Microsoft.WindowsAzure.Diagnostics` dll is `1.8.0.0` and copy local and the `Microsoft.WindowsAzure.ServiceRuntime` dll is `1.8.0.0` and *not* copy local. Also ensure that the binding redirects for those two dlls in both `Web.config` and `App.config` match the versions you have referenced (same for the `WindowsAzure.Storage` library).
 5. (optional) Remove the `Web.Debug.config` and `Web.Release.config` files that got created
 6. (optional) Change the namespaces in `WebRole.cs` to match your assembly namespace
 7. Create a cloud project with no roles attached to it and then add the web application you created in step 1 as a web role (Right-click on Roles in the cloud project and select Add > Web Role Project in solution)
