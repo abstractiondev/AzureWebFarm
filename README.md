@@ -17,7 +17,7 @@ Ensure you have Azure SDK 1.8 installed. The web farm will likely work with 1.7 
 
 The following instructions are the easiest way for creating a web farm from scratch. It is possible to install Azure Web Farm into an existing website. If you require assistance with this then feel free to ask for help via Twitter using @robdmoore or @mdaviesnet and #AzureWebFarm.
 
-1. Create a new Web project in Visual Studio using the `ASP.NET Empty Web Application` template and delete the `Web.config`, `Web.Test.config` and `Web.Release.config` files
+1. Create a new Web project in Visual Studio using the `ASP.NET Empty Web Application` template and delete the `Web.config`, `Web.Test.config` and `Web.Release.config` files (and `Global.asax.cs`, `Global.asax`, `Views`, `Controllers` and `App_Start` if they are there - you can leave them, but they aren't needed and just serve to clutter the project)
 2. Use NuGet to: `Install-Package AzureWebFarm`
 3. Ensure the `App.config` file got copied to your web project directory. If it didn't then use the "Add Existing Item" dialog to find the `App.config` file in `../packages/AzureWebFarm.X.X.X.X/content/App.config`
 4. Check that the `Microsoft.WindowsAzure.Diagnostics` dll is `1.8.0.0` and copy local and the `Microsoft.WindowsAzure.ServiceRuntime` dll is `1.8.0.0` and *not* copy local.
@@ -34,7 +34,7 @@ The following instructions are the easiest way for creating a web farm from scra
           </Target>
 
 9. Configure Remote Desktop for your web role and note down the credentials since this is what you need to use as your web deploy credentials
-10. Look in the packages/AzureWebFarm.X.X.X.X/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work. You will need to add proper values for the `Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString` and `DataConnectionString` settings, the certificate thumbprints and leave your RDP configuration.
+10. Look in the packages/AzureWebFarm.X.X.X.X/tools/ExampleConfigs folder to see example values to put in the .csdef and .cscfg files for it to work. You will need to add proper values for the `Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString` and `DataConnectionString` settings, the certificate thumbprints and leave your RDP configuration. Make sure the `osFamily` attribute of the `ServiceConfiguration` element in `ServiceConfiguration.*.cscfg` is set to `3` to make use of Windows Server 2012.
 11. Look in the packages/AzureWebFarm.X.X.X.X/tools/AdminConsole folder to run the AdminConsole.exe console application to configure your web farm to add / edit / delete websites and bindings.
 12. If you are migrating to AzureWebFarm from Accelerator for Azure Web Roles then you will need to transfer the data from the Bindings table to the BindingRow table and the WebSites table to the WebSiteRow table - this is a breaking change from Accelerator for Azure Web Roles, but should be the only one.
 13. Use Visual Studio or MSBuild to create the Cloud Project package (this should generate `.cspkg` and `.cscfg` files at `bin\Release\app.publish\`)
