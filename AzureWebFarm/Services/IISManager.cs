@@ -38,6 +38,38 @@ namespace AzureWebFarm.Services
 
                 _logger.DebugFormat("Sites list from IIS: {0}", string.Join(",", iisSites.Select(s => s.Name)));
 
+                #region SNI Removing Main site SSL binding
+                var mainSite =
+                iisSites.FirstOrDefault(
+                    x => x.Name.Equals(AzureRoleEnvironment.RoleWebsiteName(), StringComparison.OrdinalIgnoreCase));
+
+                if (mainSite != null)
+                {
+                    _logger.DebugFormat("Trying to delete the https binding's from main site: {0}.", mainSite.Name);
+
+                    var sslBinding = mainSite.Bindings.FirstOrDefault(x => string.Equals(x.Protocol, "https"));
+                    if (sslBinding == null)
+                    {
+                        _logger.DebugFormat("The main site {0} doesn't have SSL Certificate set.", mainSite.Name);
+                    }
+                    else
+                    {
+                        mainSite.Bindings.Remove(sslBinding);
+                        try
+                        {
+                            _logger.DebugFormat("Committing updates to IIS for site '{0}'", mainSite.Name);
+                            serverManager.CommitChanges();
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.ErrorFormat(e, "Error committing changes for site '{0}'", mainSite.Name);
+                        }
+                    }
+                }
+
+                #endregion
+
+
                 // Find sites that need to be removed
                 foreach (var iisSite in iisSites.ToArray())
                 {
@@ -143,7 +175,7 @@ namespace AzureWebFarm.Services
                                 siteName,
                                 defaultBinding.BindingInformation,
                                 sitePath,
-                                cert.GetCertHash());
+                                cert.GetCertHash(), StoreName.My.ToString(), SslFlags.Sni);
                         }
                         else
                         {
@@ -208,7 +240,7 @@ namespace AzureWebFarm.Services
                             if (cert != null)
                             {
                                 _logger.InfoFormat("Adding Binding '{0}' for website '{1}' with Binding Information '{2}' and Certificate '{3}'", binding.Id, site.Name, binding.BindingInformation, cert.Thumbprint);
-                                iisSite.Bindings.Add(binding.BindingInformation, cert.GetCertHash(), StoreName.My.ToString());
+                                iisSite.Bindings.Add(binding.BindingInformation, cert.GetCertHash(), StoreName.My.ToString(), SslFlags.Sni);
                             }
                             else
                             {
