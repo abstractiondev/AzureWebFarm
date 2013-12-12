@@ -1,14 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Example.Web", "AzureWebFarm.Example.Web\AzureWebFarm.Example.Web.csproj", "{AB0C275A-7C67-4D5A-BFC8-52B490FF6516}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Tests", "AzureWebFarm.Tests\AzureWebFarm.Tests.csproj", "{4DBDC360-2DD4-41DB-93D0-D1E9F4A133A5}"
-EndProject
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureWebFarm.Example.Cloud", "AzureWebFarm.Example.Cloud\AzureWebFarm.Example.Cloud.ccproj", "{B0D1C2AF-47F6-46FE-BC53-EFE1231D603C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm", "AzureWebFarm\AzureWebFarm.csproj", "{188242B5-074E-4F06-A5E7-145F1D9BA8B3}"
-EndProject
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D567CDC1-E745-4E0F-A33C-A25A94EFB199}"
 	ProjectSection(SolutionItems) = preProject
 		AzureWebFarm.nuspec = AzureWebFarm.nuspec
@@ -25,9 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A402D4
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.AdminConsole", "AzureWebFarm.AdminConsole\AzureWebFarm.AdminConsole.csproj", "{E133D3EC-1DE9-4BD9-97B7-BF0CD6FFCF39}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Apps", "Test Apps", "{A80BF589-DDD7-4C9D-B34D-9743B0F6C6FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Example.Web", "AzureWebFarm.Example.Web\AzureWebFarm.Example.Web.csproj", "{AB0C275A-7C67-4D5A-BFC8-52B490FF6516}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Tests", "AzureWebFarm.Tests\AzureWebFarm.Tests.csproj", "{4DBDC360-2DD4-41DB-93D0-D1E9F4A133A5}"
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureWebFarm.Example.Cloud", "AzureWebFarm.Example.Cloud\AzureWebFarm.Example.Cloud.ccproj", "{B0D1C2AF-47F6-46FE-BC53-EFE1231D603C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm", "AzureWebFarm\AzureWebFarm.csproj", "{188242B5-074E-4F06-A5E7-145F1D9BA8B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.AdminConsole", "AzureWebFarm.AdminConsole\AzureWebFarm.AdminConsole.csproj", "{E133D3EC-1DE9-4BD9-97B7-BF0CD6FFCF39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp1", "TestApp1\TestApp1.csproj", "{1783C20E-0ACB-449A-980A-8F47BF19C923}"
 EndProject
