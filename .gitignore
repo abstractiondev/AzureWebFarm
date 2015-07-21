@@ -13,3 +13,4 @@ _ReSharper*
 *.nupkg
 *.Cache
 *.DotSettings
+.vs/config/applicationhost.config

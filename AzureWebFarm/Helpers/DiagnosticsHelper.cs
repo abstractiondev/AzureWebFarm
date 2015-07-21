@@ -34,7 +34,7 @@ namespace AzureWebFarm.Helpers
             const int bufferQuotaInMb = 100;
 
             // Add Windows Azure Trace Listener
-            Trace.Listeners.Add(new DiagnosticMonitorTraceListener());
+            //Trace.Listeners.Add(new DiagnosticMonitorTraceListener());
 
             // Enable Collection of Crash Dumps
             CrashDumps.EnableCollection(true);

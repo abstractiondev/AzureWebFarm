@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D567CDC1-E745-4E0F-A33C-A25A94EFB199}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Example.Web", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm.Tests", "AzureWebFarm.Tests\AzureWebFarm.Tests.csproj", "{4DBDC360-2DD4-41DB-93D0-D1E9F4A133A5}"
 EndProject
-Project("{E0F39400-C313-37A7-853B-CAE74DFB31B1}") = "AzureWebFarm.Example.Cloud", "AzureWebFarm.Example.Cloud\AzureWebFarm.Example.Cloud.ccproj", "{B0D1C2AF-47F6-46FE-BC53-EFE1231D603C}"
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureWebFarm.Example.Cloud", "AzureWebFarm.Example.Cloud\AzureWebFarm.Example.Cloud.ccproj", "{B0D1C2AF-47F6-46FE-BC53-EFE1231D603C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureWebFarm", "AzureWebFarm\AzureWebFarm.csproj", "{188242B5-074E-4F06-A5E7-145F1D9BA8B3}"
 EndProject

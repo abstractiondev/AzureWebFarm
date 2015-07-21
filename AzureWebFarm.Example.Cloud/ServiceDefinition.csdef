@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ServiceDefinition name="AzureWebFarm.Example.Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-06.2.4">
+<ServiceDefinition name="AzureWebFarm.Example.Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2015-04.2.6">
   <LoadBalancerProbes>
     <LoadBalancerProbe name="WebDeploy" protocol="http" port="80" path="Probe.aspx" intervalInSeconds="5" timeoutInSeconds="100" />
   </LoadBalancerProbes>
@@ -21,7 +21,6 @@
       <InternalEndpoint name="UnusedInternal" protocol="http" port="88" />
     </Endpoints>
     <Imports>
-      <Import moduleName="Diagnostics" />
       <Import moduleName="RemoteAccess" />
       <Import moduleName="RemoteForwarder" />
       <Import moduleName="WebDeploy" />
@@ -38,6 +37,7 @@
       <Setting name="SitesContainerName" />
       <Setting name="DirectoriesToExclude" />
       <Setting name="SyncIntervalInSeconds" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="HTTPS" storeLocation="LocalMachine" storeName="My" />
