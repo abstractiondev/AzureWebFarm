@@ -33,7 +33,8 @@ namespace AzureWebFarm
 
         protected virtual void Configure()
         {
-            DiagnosticsHelper.ConfigureDiagnosticMonitor(_diagnosticsLogLevel);
+            // Breaking change as-of 2.5 SDK, Diagnostic configuration in code no longer supported
+            //DiagnosticsHelper.ConfigureDiagnosticMonitor(_diagnosticsLogLevel);
             _logger.Info("WebRole.OnStart called");
             AzureConfig.ConfigureRole();
 
